@@ -1,0 +1,100 @@
+"The specification should demonstrate that the project is well-conceived, contains an appropriate level of challenge and is feasible for successful completion within the time available."
+
+# Title: The project title
+# Problem statement/gap identified
+  - Give some background:
+    - On definition of Synthetic Biology (SB) and its aims
+    - One area of focus is GRN
+    - Within GRN, one important aim is getting desired protein/mRNA (or just product in general) levels, or make it oscillate etc.
+    - Compare and contrast using lab experiments with computer simulations (costly, inconvenient etc.)
+  - Talk a bit about current software:
+    - GenoCAD: Can design circuits, can simulate them, has many parts, etc.
+    - COPASI: Mostly concerned with simulation, you provide reactions, and initial values, simulates for you, but no circuit design
+    - TinkerCell: Similar to GenoCAD, circuit design + simulation
+  - Now talk about what's new with yours:
+    - Will design and simulate as others do.
+    - However, the good part is that it can work backwards: You can give the values you require (in a way describe the results of the simulation) and let the software build a circuit to achieve this -> No other software does that!
+      - (Extra constraints could include: Do it in this organism, do it using only these parts, do it using so many parts, etc.)
+      - *Talk about how this is important and will be useful for the researchers*
+    - (Some possible extensions:
+      - IDE functionality
+      - Calculation of values from sequences)
+
+# Objectives
+	- Start with a general explanation of the project:
+		- Allows user to design GRNs
+		- Has a database of parts, fetched from SynBio databases
+		- Can simulate the designed circuit to see the changes of values of species over time
+		- Given a set of constraints, such as a species concentration must always be higher than a certain amount, can reverse engineer the values to create a gene circuit capable of satisfying the given constraints.
+
+	- Now the specific objectives: - These might require subtasks as well!
+
+
+	
+
+		- Can access public SynBio databases to allow importing of parts (such as promoters, coding regions, etc.) and models (such as the repressilator from the BioModels database) -> I've got this idea from iBioSim
+			- Needs to either scrape these websites,
+			- Or download machine-readable files and parse them
+		- Allows importing from various popular SynBio formats, and exporting to them
+			- Needs to be able to parse these formats
+			- Needs to be able to generate these formats using the internal representation used by the software
+		- Allows the user to combine parts to create complete networks, as well as define reactions, values, global parameters, the mathematical connection between parts, etc.
+			- Need to create an internal representation for each part, holding their values and so on
+			- Need a way of relating each part to mean they directly regulate each other
+		
+		- Allows the created network to be simulated to observe concentrations of species as time progresses
+			- Need to convert the internal representation and the relations between them into a mathematical representation which can be fed into a mathematics library
+			- Need to solve the created mathematical equations to get results
+			- Need to be able to visualise the results
+			- (Maybe also offer an enhanced results viewer feature? You can change the values of parameters and see the new results right away?)
+		- Allows the user to specify a set of constraints, after which the software will create a network capable of obeying the constraints
+			- Needs to be able to convert values entered by the user into a set of mathematical constraints that the internal logic can work with
+			- Needs to do a search through all possible combinations to find the right combination(s)
+			- Needs to show all valid models and let the user choose one of them
+		- (Can calculate promoter strength from the promoter sequence)
+		(Maybe non-functional?)
+		- UI design (Little tricky to define?)
+			- Can visualise the parts of the circuit on the screen
+			- Allows drag and drop kind of interaction to add parts and define relations between them
+			- Intuitive and user friendly controls allows user to enter required values easily
+
+
+
+	- Sub-objectives - less important?
+
+# Methods
+	## Software Methodology
+		- I will go with agile -> Implement each subtask in each iteration
+		- Maybe need to detail how to achieve each objective
+
+	## Version Management
+		- I will be using Git locally, and pushing my changes to GitHub
+		
+
+	## Evaluation/Testing
+		- Unit tests written for each subtask (subtasks inside each objective) -> Possibly before development (maybe spend some only focusing on writing tests?)
+		- It also helps to compare my software's results with publicly available results, e.g.
+			- Design repressilator using my software, then simulate it. Do I get the same results as the ones in the paper, given the same initial conditions?
+		- To test the reverse engineering feature, take the output circuit and simulate it in COPASI or a similar software - Do the results obey the constraints?
+
+	## Planning and MVP - Gantt Charts and Timetables
+	
+
+
+# Resources 
+	- Software written in Python
+	- Simulation requires maths libraries: NumPy and SciPy
+	- Visualisation will require some external graph plotting libraries
+	- Git and GitHub for version control and backup
+	- Data is fetched from open source databases: BioModels, parts.igem, etc.
+
+# Risks
+	- IT failure: I have backups on GitHub, go to DCS and work there or go to IT services and get a temporary laptop
+	- Underestimation of difficulty: Choose essential and good to have features, if things don't go as expected, deliver the MVP
+	- Unexpected events causing wasted time: "Leave some slack"
+ 
+
+# Ethical Considerations
+	- All the software (except GitHub) used are open source and their licences do not restrict usage for a university dissertation
+	- I have a student account on GitHub which lets me use its private repository services for university projects
+	- The data required is publicly available on their respective websites.

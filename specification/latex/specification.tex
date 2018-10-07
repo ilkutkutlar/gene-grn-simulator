@@ -21,89 +21,59 @@
 	%TODO: Why is this feature so useful? Elaborate more on this
 	% (Extra constraints could include: Do it in this organism, do it using only these parts, do it using so many parts, etc.)
 	
-	- Can access public SynBio databases to allow importing of parts (such as promoters, coding regions, etc.) and models (such as the repressilator from the BioModels database) -> I've got this idea from iBioSim
-	- Needs to either scrape these websites,
-	- Or download machine-readable files and parse them
-	
-	- Allows importing from various popular SynBio formats, and exporting to them
-	- Needs to be able to parse these formats
-	- Needs to be able to generate these formats using the internal representation used by the software
-	- Allows the user to combine parts to create complete networks, as well as define reactions, values, global parameters, the mathematical connection between parts, etc.
-	- Need to create an internal representation for each part, holding their values and so on
-	- Need a way of relating each part to mean they directly regulate each other
-	
-	- Allows the created network to be simulated to observe concentrations of species as time progresses
-	- Need to convert the internal representation and the relations between them into a mathematical representation which can be fed into a mathematics library
-	- Need to solve the created mathematical equations to get results
-	- Need to be able to visualise the results
-	- (Maybe also offer an enhanced results viewer feature? You can change the values of parameters and see the new results right away?)
-	- Allows the user to specify a set of constraints, after which the software will create a network capable of obeying the constraints
-	- Needs to be able to convert values entered by the user into a set of mathematical constraints that the internal logic can work with
-	- Needs to do a search through all possible combinations to find the right combination(s)
-	- Needs to show all valid models and let the user choose one of them
-	- (Can calculate promoter strength from the promoter sequence)
-	(Maybe non-functional?)
-	- UI design (Little tricky to define?)
-	- Can visualise the parts of the circuit on the screen
-	- Allows drag and drop kind of interaction to add parts and define relations between them
-	- Intuitive and user friendly controls allows user to enter required values easily
-	
 	\section{Objectives}
 		\par The software will let the user choose biological parts from a catalogue fetched from a host of public databases and combine these parts (similar to building an electric circuit) and set relations between these parts, such as the equations describing their regulatory relation. Software will then be able to simulate the circuit to observe the concentration of products over time. The key feature will allow the user to state the desired amount of products and let the software reverse engineer a circuit capable of producing them. These can be expressed more specifically as a list of objectives:
 		
-		
-		
-		\begin{itemize}
-			\item It must be able to fetch biological parts (such as promoters, coding regions, etc.) and models (such as the Repressilator) from public databases (such as BioModels[CITE], Registry of Standard Biological Parts[CITE]).
-				\begin{itemize}
-					\item For some databases, needs to be able to scrape websites.
-					\item For some databases, needs to download machine-readable files and parse them.
-				\end{itemize}
-			
-			\item Can import parts and models from a host of popular formats (such as SMBL) and import to them.
-				\begin{itemize}
-					\item Needs to be able to parse these formats.
-					\item Needs to be able to convert the internal representation used by the software to popular formats.
-				\end{itemize}
-			
-			% Also say that the user can add parts
-			
-			- Allows the user to combine parts to create complete networks, as well as define reactions, values, global parameters, the mathematical connection between parts, etc.
-			- Need to create an internal representation for each part, holding their values and so on
-			- Need a way of relating each part to mean they directly regulate each other
-			
-			\item Must allow the user to combine parts to  build a complete regulatory network.
-			\begin{itemize}
+		\begin{enumerate}
+			\item Must allow adding of parts (as well as edit and delete them) to the current project, set part-specific and global values, combine parts to build a complete regulatory network and set values related to relations between parts.
+			\begin{enumerate}
 				\item Needs to keep an internal representation of each part (which will store the values for various parametets).
-				\item Needs to keep track of the relations between each part (e.g. Which gene regulates a specific gene using which equation)	
-			\end{itemize}
+				\item Needs to keep track of the relations between each part (e.g. Which gene regulates a specific gene using which equation)
+				\item Needs to keep an internal representation of the whole model, storing parts, relations and global values.	
+			\end{enumerate}
 		
 			\item Must be able to simulate the circuit.
-			\begin{itemize}
+			\begin{enumerate}
 				\item Must convert the internal representation of the network into a series of mathematical equations which can be fed into an equation solver.
 				\item Must solve the created equations and get results at given intervals over a given period of time.
 				\item Must be able to visualise the results of the simulation.
-			\end{itemize}
+			\end{enumerate}
+			
+			\item Must allow the user to specify a set of desired features and for the circuit to have (e.g. The amount produced of a certain protein) and subsequently build a network which have these features.
+			\begin{enumerate}
+				\item Must convert the constraints given by the user into a set of mathematical constraints which the internal logic can work with.
+				\item Needs to narrow down all possible circuit combinations to find the right one(s) 
+			\end{enumerate}
+	
+			\item Must offer a user friendly UI.
+			\begin{enumerate}
+				\item Must visualise the circuit and its parts on the screen.
+				\item Must allow drag-and-drop style interaction when adding and moving parts and defining relations between them.
+				\item Must offer easy and intuitive access to parameters and values (such as clicking on a gene to access its associated parameters).
+			\end{enumerate}
 		
-		\item Must allow the user to specify a set of desired  features and for the circuit to have (e.g. The amount produced of a certain protein) and subsequently build a network which have these features.
-		\begin{itemize}
-			\item Must convert the constraints given by the user into a set of mathematical constraints which the internal logic can work with.
-			\item Needs to narrow down all possible circuit combinations to find the right one(s) 
-		\end{itemize}
+			% TODO: Also say that the user can add parts manually
+			\item It must be able to fetch biological parts (such as promoters, coding regions, etc.) and models (such as the Repressilator) from public databases (such as BioModels[CITE], Registry of Standard Biological Parts[CITE]). Also needs to allow manuallly adding parts.
+			\begin{enumerate}
+				\item For some databases, needs to be able to scrape websites.
+				\item For some databases, needs to download machine-readable files and parse them.
+				\item Needs to create parts from values entered by the user.
+			\end{enumerate}
+			
+			\item Can import parts and models from a host of popular formats (such as SMBL) and export to them.
+			\begin{enumerate}
+				\item Needs to be able to parse these formats.
+				\item Needs to be able to convert the internal representation used by the software to popular formats.
+			\end{enumerate}
 	
-		\item Must offer a user friendly UI 
-		\begin{itemize}
-			\item Must visualise the circuit and its parts on the screen.
-			\item Must allow drag-and-drop style interaction when adding and moving parts and defining relations between them.
-			\item Must offer easy and intuitive access to parameters and values (such as clicking on a gene to access its associated parameters).
-		\end{itemize}
-	
-		\end{itemize}
+		\end{enumerate}
 	
 	\section{Methods}
 	
 	\subsection{Software Methodology}
-	%TODO
+	%TODO This can be expanded
+	\par I will be using a Scrum methodology, and in each sprint I will implement a new objective.
+
 		
 	\subsection{Version Management}
 	\par For version management, I will be using Git, an open source software and will be pushing my changes to a remote private repository hosted at GitHub using my student account.

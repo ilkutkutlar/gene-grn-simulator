@@ -29,9 +29,6 @@
 
 	- Now the specific objectives: - These might require subtasks as well!
 
-
-	
-
 		- Can access public SynBio databases to allow importing of parts (such as promoters, coding regions, etc.) and models (such as the repressilator from the BioModels database) -> I've got this idea from iBioSim
 			- Needs to either scrape these websites,
 			- Or download machine-readable files and parse them

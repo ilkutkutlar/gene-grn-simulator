@@ -21,6 +21,116 @@
 	%TODO: Why is this feature so useful? Elaborate more on this
 	% (Extra constraints could include: Do it in this organism, do it using only these parts, do it using so many parts, etc.)
 	
-	\section{Objectives}
+	- Can access public SynBio databases to allow importing of parts (such as promoters, coding regions, etc.) and models (such as the repressilator from the BioModels database) -> I've got this idea from iBioSim
+	- Needs to either scrape these websites,
+	- Or download machine-readable files and parse them
 	
+	- Allows importing from various popular SynBio formats, and exporting to them
+	- Needs to be able to parse these formats
+	- Needs to be able to generate these formats using the internal representation used by the software
+	- Allows the user to combine parts to create complete networks, as well as define reactions, values, global parameters, the mathematical connection between parts, etc.
+	- Need to create an internal representation for each part, holding their values and so on
+	- Need a way of relating each part to mean they directly regulate each other
+	
+	- Allows the created network to be simulated to observe concentrations of species as time progresses
+	- Need to convert the internal representation and the relations between them into a mathematical representation which can be fed into a mathematics library
+	- Need to solve the created mathematical equations to get results
+	- Need to be able to visualise the results
+	- (Maybe also offer an enhanced results viewer feature? You can change the values of parameters and see the new results right away?)
+	- Allows the user to specify a set of constraints, after which the software will create a network capable of obeying the constraints
+	- Needs to be able to convert values entered by the user into a set of mathematical constraints that the internal logic can work with
+	- Needs to do a search through all possible combinations to find the right combination(s)
+	- Needs to show all valid models and let the user choose one of them
+	- (Can calculate promoter strength from the promoter sequence)
+	(Maybe non-functional?)
+	- UI design (Little tricky to define?)
+	- Can visualise the parts of the circuit on the screen
+	- Allows drag and drop kind of interaction to add parts and define relations between them
+	- Intuitive and user friendly controls allows user to enter required values easily
+	
+	\section{Objectives}
+		\par The software will let the user choose biological parts from a catalogue fetched from a host of public databases and combine these parts (similar to building an electric circuit) and set relations between these parts, such as the equations describing their regulatory relation. Software will then be able to simulate the circuit to observe the concentration of products over time. The key feature will allow the user to state the desired amount of products and let the software reverse engineer a circuit capable of producing them. These can be expressed more specifically as a list of objectives:
+		
+		
+		
+		\begin{itemize}
+			\item It must be able to fetch biological parts (such as promoters, coding regions, etc.) and models (such as the Repressilator) from public databases (such as BioModels[CITE], Registry of Standard Biological Parts[CITE]).
+				\begin{itemize}
+					\item For some databases, needs to be able to scrape websites.
+					\item For some databases, needs to download machine-readable files and parse them.
+				\end{itemize}
+			
+			\item Can import parts and models from a host of popular formats (such as SMBL) and import to them.
+				\begin{itemize}
+					\item Needs to be able to parse these formats.
+					\item Needs to be able to convert the internal representation used by the software to popular formats.
+				\end{itemize}
+			
+			% Also say that the user can add parts
+			
+			- Allows the user to combine parts to create complete networks, as well as define reactions, values, global parameters, the mathematical connection between parts, etc.
+			- Need to create an internal representation for each part, holding their values and so on
+			- Need a way of relating each part to mean they directly regulate each other
+			
+			\item Must allow the user to combine parts to  build a complete regulatory network.
+			\begin{itemize}
+				\item Needs to keep an internal representation of each part (which will store the values for various parametets).
+				\item Needs to keep track of the relations between each part (e.g. Which gene regulates a specific gene using which equation)	
+			\end{itemize}
+		
+			\item Must be able to simulate the circuit.
+			\begin{itemize}
+				\item Must convert the internal representation of the network into a series of mathematical equations which can be fed into an equation solver.
+				\item Must solve the created equations and get results at given intervals over a given period of time.
+				\item Must be able to visualise the results of the simulation.
+			\end{itemize}
+		
+		\item Must allow the user to specify a set of desired  features and for the circuit to have (e.g. The amount produced of a certain protein) and subsequently build a network which have these features.
+		\begin{itemize}
+			\item Must convert the constraints given by the user into a set of mathematical constraints which the internal logic can work with.
+			\item Needs to narrow down all possible circuit combinations to find the right one(s) 
+		\end{itemize}
+	
+		\item Must offer a user friendly UI 
+		\begin{itemize}
+			\item Must visualise the circuit and its parts on the screen.
+			\item Must allow drag-and-drop style interaction when adding and moving parts and defining relations between them.
+			\item Must offer easy and intuitive access to parameters and values (such as clicking on a gene to access its associated parameters).
+		\end{itemize}
+	
+		\end{itemize}
+	
+	\section{Methods}
+	
+	\subsection{Software Methodology}
+	%TODO
+		
+	\subsection{Version Management}
+	\par For version management, I will be using Git, an open source software and will be pushing my changes to a remote private repository hosted at GitHub using my student account.
+	
+	\subsection{Evaluation \& Testing}
+	\par I will be writing appropriate unit tests for each of the objectives apart from the ones related to a user friendly UI, as that is a non-functional objective.
+	\par To evaluate the circuit design and simulation features as a whole, I will build a model for which simulation results have been made available by other authors. The model will be using the same initial values as these authors, and the test will check whether my software produces the same results as them. 
+	\par To evaluate the reverse engineering feature, I will input a set of constraints and let the software produce a circuit. Consequently, I will simulate the circuit in COPASI, an open source biological simulation software, and manually check whether the results obey the given constraints.
+	
+	\section{Resources}
+	\begin{enumerate}
+		\item The software will be written in Python.
+		\item The simulation feature will require libraries capable of handling mathematical operations. For that, I will be using NumPy and SciPy [CITE].
+		\item For the visualisation of the simulation results, a graph plotting library will be required.
+		\item Git and GitHub will be used for version control and backing up the software.
+		\item The data required (for biological parts and models) will be fetched from public databases such as the BioModels[CITE], Registry of Standard Biological. Parts[CITE]
+	\end{enumerate}
+
+	\section{Risks}
+	\paragraph{IT failure} I will be regularly pushing my local commits on Git to GitHub, a remote repository, therefore if my personal computer fails, I can carry on working using departmental computers.
+	\paragraph{Underestimation of the time required} In the case that I have not been able to complete some required tasks on time, leading to the project getting derailed, I will focus on the most essential features and not implement some extra features, such as having a user friendly UI.
+	\paragraph{Unexpected problem preventing me from working for a period of time} To avoid such problems, I will "leave some slack" in my timetable.
+	
+	\section{Ethical Considerations}
+	\begin{itemize}
+		\item All software and services I plan to use (except GitHub) are free and open source and their licences do not restrict usages for a university dissertation.
+		\item GitHub normally charges a monthly fee for a private repository. However, as I have a student account, I will be able to freely use a private repository.
+		\item All data required for the software is publicly available.
+	\end{itemize} 
 \end{document}

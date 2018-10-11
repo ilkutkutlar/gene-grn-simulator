@@ -16,7 +16,7 @@
 	\par Since Synthetic Biology deals with new circuits, there tends to be a design stage before the network is put together in a real organism. Computer Aided Design (CAD) can help accomplish this task.
 	\par Some existing CAD and simulation software include COPASI\cite{copasi}, a tool for simulating biologcal reactions (not only related to GRNs). Another tool, GenoCAD\cite{genocad}, is a web-based software allowing design of genetic circuits from a database of parts, export it to some popular formats (such as SBML), and simulate the design using COPASI's API. TinkerCell\cite{tinkercell} is a similar desktop-based software, allowing drag-and-drop gene circuit design and simulation.
 	\par This project will include features to design and simulate gene circuits, just as simulating tools do. One feature not offered by these software is reverse engineering of circuits, which this project will implement. This feature will allow the user to specify a collection of constraints and properties (such as the required concentration of a certain product) and create a gene circuit having all the properties and obeying all the constraints. This can save time for researchers.
-	%TODO: Why is this feature so useful? Elaborate more on this
+	%TODO: Why is this feature so useful? Elaborate more on this!
 	
 	% - (Some possible extensions:
 	% - IDE functionality
@@ -102,10 +102,17 @@
 	\par To evaluate the reverse engineering feature, I will input a set of constraints and let the software produce a circuit. Consequently, I will simulate the circuit in COPASI\cite{copasi}, an open source biological simulation software, and manually check whether the results obey the given constraints.
 	
 	\subsection{Timetable}
-	%TODO: Write something here!
-	%TODO: Final report goes on for the whole duration
-	%TODO: Also include dependencies!
-	\includegraphics[height=100pt]{timetable}
+	
+	\par I have prepared a Gantt chart to represent my plan for the project. I will be working on the final report all throughout the project, updating it as I add new features to the project. 
+	
+	\par During the "Biology Research" phase at the beginning, I will do some more reading on biology as I feel that improving my biology knowledge a little more will help with the project. The task codes on the Gantt chart correspond to the ones listed in the Objectives section. 
+	
+	\par I planned for an "Extensions \& improvements" phase at the end. In the projects that I did in the past, it usually was the case that after all the objectives were done, there would be small bugs that needed fixing, as well as room for improvement and polish the software a little. Therefore, I wanted to leave some time at the end to make sure everything is working as expected. Furthermore, if things go as expected, I will work on implementing extensions which I didn't plan for due to time constraints.
+	
+	\par I overestimated the time required for most tasks, as I know from my previous experiences that my estimates tend to be inaccurate.
+	\par Finally, as mentioned before, I plan to review my progress and revise the complexity of my biological model accordingly. I will do so on Week 9 of term 1, Week 3 of Term 2 and Week 8 of Term 2.
+	
+	\includegraphics[height=120pt]{timetable}
 	
 	\section{Resources}
 	\begin{enumerate}
@@ -120,6 +127,7 @@
 	\paragraph{IT failure} I will be regularly pushing my local commits on Git to GitHub, a remote repository. Therefore, if my personal computer fails I can carry on working using departmental computers.
 	\paragraph{Underestimation of the time required} In the case that I have not been able to complete some required tasks on time, leading to the project getting derailed, I will focus on the most essential features and not implement some non-essential features, such as having a user friendly UI.
 	\paragraph{Unexpected problem preventing me from working for a period of time} To avoid such problems, I have overestimated the time required to complete tasks in my timetable.
+	
 	
 	\section{Ethical Considerations}
 	\begin{itemize}

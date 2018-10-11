@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2018-12-03" view-index="0" gantt-divider-location="727" resource-divider-location="300" version="2.8.6" locale="en_GB">
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2019-02-25" view-index="0" gantt-divider-location="727" resource-divider-location="300" version="2.8.6" locale="en_GB">
     <description/>
     <view zooming-state="default:6" id="gantt-chart">
         <field id="tpd3" name="Name" width="469" order="0"/>
@@ -52,6 +52,7 @@
         <task id="60" name="5b - Download and parse" color="#8cb6ce" meeting="false" start="2019-02-17" duration="7" complete="0" thirdDate="2019-02-17" thirdDate-constraint="0" expand="true"/>
         <task id="41" name="6a - Parse biology formats" color="#8cb6ce" meeting="false" start="2019-02-24" duration="7" complete="0" thirdDate="2019-02-24" thirdDate-constraint="0" expand="true"/>
         <task id="61" name="6b - Export to biology formats" color="#8cb6ce" meeting="false" start="2019-03-03" duration="7" complete="0" thirdDate="2019-03-03" thirdDate-constraint="0" expand="true"/>
+        <task id="67" name="Extensions &amp; improvements" meeting="false" start="2019-03-10" duration="36" complete="0" expand="true"/>
     </tasks>
     <resources/>
     <allocations/>

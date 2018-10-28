@@ -5,4 +5,5 @@ specification/latex/specification.log
 specification/latex/specification.bbl
 specification/latex/specification.blg
 specification/latex/specification.out
-code/
+code/.idea
+code/__pycache__

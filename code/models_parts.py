@@ -30,7 +30,7 @@ class TranscriptionFactor:
 class mRNA:
     name: str
     degradation: float
-    translates_into: Protein
+    protein: Protein
 
 
 class Promoter:

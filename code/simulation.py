@@ -1,17 +1,25 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
-from models import Network, Cassette, Regulation
+from models import Network, Cassette, RegType
 
 
-class Simulation:
+class Concentration(NamedTuple):
+    mRNA: float
+    protein: float
+
+
+class Simulator:
     network: Network
 
-    def __init__(self, network: Network):
+    def __init__(self, network: Network, start, end, points):
         self.network = network
+        self.start = start
+        self.end = end
+        self.points = points
 
     # d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
     # a_m           -> transcription rate
@@ -28,64 +36,68 @@ class Simulation:
     # a_p       -> translation rate (a_p)
     # b_p       -> protein degradation rate (b_p)
     def delta_protein(self, a_p: float, b_p: float, p: float, m: float):
-        return a_p*m - b_p * p
+        return a_p * m - b_p * p
 
-    def dy_dt(self, y: List[float], t: int, n: Network, z):
+    def parse_y(self, y):
         # Identifier: (mRNA concent., Protein concent.)
-        concentrations: Dict[str, Tuple[float, float]] = dict()
+        concent: Dict[str, Concentration] = dict()
 
         # y is such that the lower half contains mRNA concentrations
-        # and the upper half contains the corresponding proteins
-        # e.g.
-        # y[0] = TetR mRNA
-        # y[1] = LacI mRNA
-        # y[2] = TetR Protein
-        # y[3] = LacI Protein
-
+        # and the upper half contains the corresponding proteins, e.g.
+        # y[0] = TetR mRNA, y[1] = LacI mRNA
+        # y[2] = TetR Protein, y[3] = LacI Protein
         # The order of mRNA/protein is the same in y as network's genes list.
         half_y: int = len(y) // 2
         for x in range(0, half_y):
-            gene: Cassette = n.genes[x]
-            concentrations[gene.identifier] = (y[x], y[x + half_y])
+            gene: Cassette = self.network.genes[x]
+            concent[gene.identifier] = Concentration(mRNA=y[x], protein=y[x + half_y])
+        return concent
 
-        genes: List[Cassette] = n.genes
+    # rps = regulated promoter strength.
+    # Given a gene, calculates the promoter strength under regulation.
+    def calculate_rps(self, concent: Dict[str, Concentration],
+                      gene: Cassette, kd: float, n: int):
+        # Identifier of the gene and the regulation
+        regulator: Tuple[str, RegType] = self.network.get_regulators(gene.identifier)[0]
+        regulator_concentration = concent[regulator[0]].protein
+
+        if regulator[1] == RegType.ACTIVATION:
+            rps: float = self.network.ps_active(regulator_concentration, kd, gene.promoter, n)
+        else:
+            rps: float = self.network.ps_repressed(regulator_concentration, kd, gene.promoter, n)
+
+        return rps
+
+    def dy_dt(self, y: List[float], t: int):
+        # Parse y to retrieve the concentrations of mRNA and Proteins in a nice
+        # and orderly format
+        concent: Dict[str, Concentration] = self.parse_y(y)
+
+        genes: List[Cassette] = self.network.genes
 
         new_mrna: List[float] = list()
         new_protein: List[float] = list()
 
-        for x in range(0, len(concentrations)):
+        for x in range(0, len(concent)):
+            # The current gene for which we are calculating mRNA and Protein delta value
             gene: Cassette = genes[x]
-
-            # Identifier of the gene and the regulation
-            regulator: Tuple[str, Regulation] = n.get_regulators(gene.identifier)[0]
-            regulator_concentration = concentrations[regulator[0]][1]
-
-            if regulator[1] == Regulation.ACTIVATION:
-                rps: float = n.promoter_strength_activated(regulator_concentration,
-                                                           40, gene.promoter, 2)
-            else:
-                rps: float = n.promoter_strength_repressed(regulator_concentration,
-                                                           40, gene.promoter, 2)
+            rps: float = self.calculate_rps(concent, gene, 40, 2)
 
             mrna_degradation: float = gene.codes_for[0].degradation
-            mrna_concentration: float = concentrations[gene.identifier][0]
+            mrna_concentration: float = concent[gene.identifier].mRNA
+            delta_mrna = self.delta_mrna(mrna_degradation, mrna_concentration, rps)
 
-            delta_mrna = self.delta_mrna(mrna_degradation,
-                                         mrna_concentration,
-                                         rps)
+            protein_degradation = gene.codes_for[0].protein.degradation
+            protein_translation_rate = gene.codes_for[0].protein.translation_rate
+            protein_concentration = concent[gene.identifier].protein
+            delta_protein = self.delta_protein(protein_degradation, protein_translation_rate,
+                                               protein_concentration, mrna_concentration)
 
-            protein_degradation = gene.codes_for[0].translates_into.degradation
-            protein_translation_rate = gene.codes_for[0].translates_into.translation_rate
-            protein_concentration = concentrations[gene.identifier][1]
-
-            delta_protein = self.delta_protein(protein_degradation,
-                                               protein_translation_rate,
-                                               protein_concentration,
-                                               mrna_concentration)
             new_mrna.append(delta_mrna)
             new_protein.append(delta_protein)
 
         new_y: List[float] = list()
+
         for x in new_mrna:
             new_y.append(x)
         for x in new_protein:
@@ -94,41 +106,38 @@ class Simulation:
         return new_y
 
     def simulate(self):
-        # Initial values for proteins and mRNAs
-        # Values taken from the original paper
-        m_lacI0 = self.network.mrna_init["laci"]
-        m_tetR0 = self.network.mrna_init["tetr"]
-        m_cl0 = self.network.mrna_init["cl"]
+        y0: list = list()
 
-        p_lacI0 = self.network.protein_init["laci"]
-        p_tetR0 = self.network.protein_init["tetr"]
-        p_cl0 = self.network.protein_init["cl"]
+        for key in self.network.mrna_init:
+            y0.append(self.network.mrna_init[key])
+        for key in self.network.protein_init:
+            y0.append(self.network.protein_init[key])
 
-
-
-        # Initial state
-        y0 = [m_lacI0, m_tetR0, m_cl0, p_lacI0, p_tetR0, p_cl0]
-
-        # time grid -> The time space for which a graph will be drawn
-        t = np.linspace(0, 40, 10000)
+        # time grid -> The time space for which the equations will be solved
+        t: list = np.linspace(self.start, self.end, self.points)
 
         # solve the ODEs
-        soln = odeint(self.dy_dt, y0, t,
-                      args=(self.network, 0))
+        solution = odeint(self.dy_dt, y0, t)
 
-        m_lacI = soln[:, 0]
-        m_tetR = soln[:, 1]
-        m_cl = soln[:, 2]
-        p_lacI = soln[:, 3]
-        p_tetR = soln[:, 4]
-        p_cl = soln[:, 5]
+        return solution
+
+    def visualise(self, solution):
+        m_lacI = solution[:, 0]
+        m_tetR = solution[:, 1]
+        m_cl = solution[:, 2]
+        p_lacI = solution[:, 3]
+        p_tetR = solution[:, 4]
+        p_cl = solution[:, 5]
 
         # plot results
         plt.figure()
 
-        plt.plot(t, m_lacI, label='mLacI')
-        plt.plot(t, m_tetR, label='mTetR')
-        plt.plot(t, m_cl, label='mCl')
+        # time grid -> The time space for which a graph will be drawn
+        timespace: list = np.linspace(self.start, self.end, self.points)
+
+        plt.plot(timespace, m_lacI, label='mLacI')
+        plt.plot(timespace, m_tetR, label='mTetR')
+        plt.plot(timespace, m_cl, label='mCl')
 
         plt.xlabel('Time')
         plt.ylabel('mRNA')

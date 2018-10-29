@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, NamedTuple
 
 from models_parts import Promoter, mRNA, Species, Signal
 
@@ -14,15 +14,21 @@ class Cassette(Species):
         self.codes_for = codes_for
 
 
-class Regulation(Enum):
+class RegType(Enum):
     ACTIVATION = 1
     REPRESSION = -1
+
+
+class Regulation(NamedTuple):
+    from_gene: str
+    to_gene: str
+    reg_type: RegType
 
 
 class Network:
     genes: List[Cassette]
     signals: List[Signal]
-    regulations: Tuple[str, str, Regulation]
+    regulations: List[Regulation]
 
     # Set the initial concentrations of mRNA, protein, and signals.
     # These will be used for the simulation.
@@ -54,17 +60,19 @@ class Network:
     Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
     '''
 
-    def promoter_strength_activated(self, tf_concentration, kd, promoter: Promoter, n=1):
+    def ps_active(self, tf_concentration, kd, promoter: Promoter, n=1) -> float:
         return promoter.promoter_strength_active * \
                (pow(tf_concentration, n) / (kd + pow(tf_concentration, n)))
 
-    def promoter_strength_repressed(self, tf_concentration, kd, promoter: Promoter, n=1):
+    def ps_repressed(self, tf_concentration, kd, promoter: Promoter, n=1) -> float:
         return promoter.promoter_strength_active * \
                (1 / (1 + (pow(tf_concentration, n) / kd)))
 
-    def get_regulators(self, ident: str) -> List[Tuple[str, Regulation]]:
-        regs: List[Tuple[str, Regulation]] = list()
+    def get_regulators(self, ident: str) -> List[Tuple[str, RegType]]:
+        regs: List[Tuple[str, RegType]] = list()
+
         for z in self.regulations:
             if z[1] == ident:
                 regs.append((z[0], z[2]))
+
         return regs

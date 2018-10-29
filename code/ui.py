@@ -5,7 +5,7 @@ import models_parts
 
 # region Constants
 # Transcription-related values
-from simulation import Simulation
+from simulation import Simulator
 
 ps_active = 0.5  # Promoter strength (active)
 ps_repr = 5 * (10 ** -4)  # Promoter strength (repressed)
@@ -44,7 +44,7 @@ protein.translation_rate = beta
 
 mrna: models.mRNA = models.mRNA()
 mrna.degradation = mRNA_decay_rate
-mrna.translates_into = protein
+mrna.protein = protein
 
 promoter: models.Promoter = models_parts.Promoter
 promoter.promoter_strength_active = alpha
@@ -63,16 +63,12 @@ network = models.Network()
 
 network.genes = [lacI, tetr, cl]
 network.regulations = [
-    ("laci", "cl", models.Regulation.REPRESSION),
-    ("cl", "tetr", models.Regulation.REPRESSION),
-    ("tetr", "laci", models.Regulation.REPRESSION)]
+    ("laci", "cl", models.RegType.REPRESSION),
+    ("cl", "tetr", models.RegType.REPRESSION),
+    ("tetr", "laci", models.RegType.REPRESSION)]
 
-network.mrna_init = {"laci": 100,
-                     "cl": 50,
-                     "tetr": 80}
-network.protein_init = {"laci": 10,
-                        "cl": 10,
-                        "tetr": 10}
+network.mrna_init = {"laci": 100, "cl": 50, "tetr": 80}
+network.protein_init = {"laci": 10, "cl": 10, "tetr": 10}
 
-s: Simulation = Simulation(network)
-s.simulate()
+s: Simulator = Simulator(network, 0, 200, 1000)
+s.visualise(s.simulate())

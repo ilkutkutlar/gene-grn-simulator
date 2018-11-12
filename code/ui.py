@@ -39,36 +39,35 @@ beta = protein_decay_rate / mRNA_decay_rate
 # endregion
 
 protein: models_parts.Protein = models_parts.Protein()
-protein.degradation = protein_decay_rate
-protein.translation_rate = beta
+protein.degradation = protein_decay_rate        # Reaction
+protein.translation_rate = beta                 # Rule
 
 mrna: models.mRNA = models.mRNA()
-mrna.degradation = mRNA_decay_rate
+mrna.degradation = mRNA_decay_rate              # Reaction
 mrna.protein = protein
 
 promoter: models.Promoter = models_parts.Promoter
-promoter.promoter_strength_active = alpha
-promoter.promoter_strength_repressed = alpha0
+promoter.promoter_strength_active = alpha       # Rule
+promoter.promoter_strength_repressed = alpha0   # Rule
 
-lacI = models.Cassette("laci",
-                       promoter, [mrna])
+lacI = models.Cassette("laci", promoter, [mrna])
 
-cl = models.Cassette("cl",
-                     promoter, [mrna])
+cl = models.Cassette("cl", promoter, [mrna])
 
-tetr = models.Cassette("tetr",
-                       promoter, [mrna])
+tetr = models.Cassette("tetr", promoter, [mrna])
 
 network = models.Network()
 
-network.genes = [lacI, tetr, cl]
+network.genome = [lacI, tetr, cl]
 network.regulations = [
     ("laci", "cl", models.RegType.REPRESSION),
     ("cl", "tetr", models.RegType.REPRESSION),
     ("tetr", "laci", models.RegType.REPRESSION)]
 
-network.mrna_init = {"laci": 100, "cl": 50, "tetr": 80}
-network.protein_init = {"laci": 10, "cl": 10, "tetr": 10}
 
-s: Simulator = Simulator(network, 0, 200, 1000)
+# Species
+s: Simulator = Simulator(network, 0, 1000, 1000,
+                         {"laci": 100, "cl": 50, "tetr": 80},
+                         {"laci": 10, "cl": 10, "tetr": 10},
+                         {})
 s.visualise(s.simulate())

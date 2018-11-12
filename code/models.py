@@ -26,18 +26,12 @@ class Regulation(NamedTuple):
 
 
 class Network:
-    genes: List[Cassette]
+    genome: List[Cassette]
     signals: List[Signal]
     regulations: List[Regulation]
 
-    # Set the initial concentrations of mRNA, protein, and signals.
-    # These will be used for the simulation.
-    mrna_init: Dict[str, float]
-    protein_init: Dict[str, float]
-    signal_init: Dict[str, float]
-
     def get_gene_by_id(self, ident: str) -> Cassette:
-        for x in self.genes:
+        for x in self.genome:
             if x.identifier == ident:
                 return x
 
@@ -67,6 +61,10 @@ class Network:
     def ps_repressed(self, tf_concentration, kd, promoter: Promoter, n=1) -> float:
         return promoter.promoter_strength_active * \
                (1 / (1 + (pow(tf_concentration, n) / kd)))
+
+    def ps_constitutitive(self):
+        # TODO
+        pass
 
     def get_regulators(self, ident: str) -> List[Tuple[str, RegType]]:
         regs: List[Tuple[str, RegType]] = list()

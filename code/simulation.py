@@ -15,11 +15,21 @@ class Concentration(NamedTuple):
 class Simulator:
     network: Network
 
-    def __init__(self, network: Network, start, end, points):
+    def __init__(self, network: Network,
+                 start, end, points,
+                 mrna_init: Dict[str, float],
+                 protein_init: Dict[str, float],
+                 signal_init: Dict[str, float]):
         self.network = network
         self.start = start
         self.end = end
         self.points = points
+
+        # Set the initial concentrations of mRNA, protein, and signals.
+        # These will be used for the simulation.
+        self.mrna_init: Dict[str, float] = mrna_init
+        self.protein_init: Dict[str, float] = protein_init
+        self.signal_init: Dict[str, float] = signal_init
 
     # d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
     # a_m           -> transcription rate
@@ -49,7 +59,7 @@ class Simulator:
         # The order of mRNA/protein is the same in y as network's genes list.
         half_y: int = len(y) // 2
         for x in range(0, half_y):
-            gene: Cassette = self.network.genes[x]
+            gene: Cassette = self.network.genome[x]
             concent[gene.identifier] = Concentration(mRNA=y[x], protein=y[x + half_y])
         return concent
 
@@ -73,7 +83,7 @@ class Simulator:
         # and orderly format
         concent: Dict[str, Concentration] = self.parse_y(y)
 
-        genes: List[Cassette] = self.network.genes
+        genes: List[Cassette] = self.network.genome
 
         new_mrna: List[float] = list()
         new_protein: List[float] = list()
@@ -108,10 +118,10 @@ class Simulator:
     def simulate(self):
         y0: list = list()
 
-        for key in self.network.mrna_init:
-            y0.append(self.network.mrna_init[key])
-        for key in self.network.protein_init:
-            y0.append(self.network.protein_init[key])
+        for key in self.mrna_init:
+            y0.append(self.mrna_init[key])
+        for key in self.protein_init:
+            y0.append(self.protein_init[key])
 
         # time grid -> The time space for which the equations will be solved
         t: list = np.linspace(self.start, self.end, self.points)

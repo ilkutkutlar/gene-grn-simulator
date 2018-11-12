@@ -76,7 +76,7 @@ m_cl0 = 50
 y0 = [m_lacI0, m_tetR0, m_cl0, p_lacI0, p_tetR0, p_cl0]
 
 # time grid -> The time space for which a graph will be drawn
-t = np.linspace(0, 40, 10000)
+t = np.linspace(0, 40, 1000)
 
 # solve the ODEs
 soln = odeint(dy_dt, y0, t)

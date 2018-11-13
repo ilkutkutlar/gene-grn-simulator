@@ -1,3 +1,27 @@
+# #
+#
+# for x in range(0, len(concent)):
+#     # The current gene for which we are calculating mRNA and Protein delta value
+#     gene: Cassette = genes[x]
+#     rps: float = self.calculate_rps(concent, gene, 40, 2)
+#
+#     mrna_degradation: float = gene.codes_for[0].degradation
+#     mrna_concentration: float = concent[gene.identifier].mRNA
+#     delta_mrna = self.delta_mrna(mrna_degradation, mrna_concentration, rps)
+#
+#     protein_degradation = gene.codes_for[0].protein.degradation
+#     protein_translation_rate = gene.codes_for[0].protein.translation_rate
+#     protein_concentration = concent[gene.identifier].protein
+#     delta_protein = self.delta_protein(protein_degradation, protein_translation_rate,
+#                                        protein_concentration, mrna_concentration)
+#
+#     new_mrna.append(delta_mrna)
+#     new_protein.append(delta_protein)
+#
+#
+# #
+
+
 from math import *
 from random import *
 from typing import Callable, List
@@ -5,56 +29,64 @@ from typing import Callable, List
 import matplotlib.pyplot as plt
 
 from models import Network
+from helper import *
 
 Vector = List[float]
-ReactionRateFunction = Callable[[Vector], float]
+# ReactionRateFunction = Callable[[Vector], float]
 ChangeVectorFunction = Callable[[Vector], Vector]
-
+DeltaMRNA = Callable[[float, float, float], float]
 
 class GillespieSimulator:
 
     # sim_time: float in seconds
     # Reaction rates: [ r(1) = 1         ]
     # Change vectors: [ v1   = [0, 1, 0] ]
-    def __init__(self,
-                 network: Network,
-                 reaction_rates: List[ReactionRateFunction],
-                 change_vectors: List[ChangeVectorFunction],
-                 sim_time: float, n0: Vector, t0: float):
+    def __init__(self, network: Network,
+                 sim_time: float, n0: Vector,
+                 t0: float):
+
+        # n = [100, 80, 50, 10, 10, 10]
+        # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
+
+        # m_lacI0 = 100
+        # m_tetR0 = 80
+        # m_cl0 = 50
+
+        # p_lacI0 = 10
+        # p_tetR0 = 10
+        # p_cl0 = 10
+
+        # Reactions (SEPARATE from the mrna and proteins, they are just reactions!):
+        # For each mRNA:
+        #   - transcription
+        #   - degradation
+        # For each protein:
+        #   - translation
+        #   - degradation
+        # Thus the exact change vectors are:
+        # 1. Consider this: d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
+        #   1.1. regulated transcription rate = a_m*H([TF])
+        #   1.2. mRNA degradation rate = - b_m * [mRNA]
+        # m_lacI_tr = []
+
+        reaction_rates: List[DeltaMRNA]
+        change_vectors: List[ChangeVectorFunction]
 
         # e.g. r1 = mrna = ...
         # r2 = protein = ...
-
-        self.r = []
+        # 1. Get mRNAs
         for gene in network.genome:
-            self.r.append(gene.promoter.promoter_strength_active)
+            # 1.1. set mRNA's reaction rate
+            reaction_rates.append(delta_mrna)
+            reaction_rates.append(delta_protein)
+
+
+
+        # self.r = []
+        # self.r.append(gene.promoter.promoter_strength_active)
 
         self.r = reaction_rates
         self.v = change_vectors
-
-
-        #
-
-        for x in range(0, len(concent)):
-            # The current gene for which we are calculating mRNA and Protein delta value
-            gene: Cassette = genes[x]
-            rps: float = self.calculate_rps(concent, gene, 40, 2)
-
-            mrna_degradation: float = gene.codes_for[0].degradation
-            mrna_concentration: float = concent[gene.identifier].mRNA
-            delta_mrna = self.delta_mrna(mrna_degradation, mrna_concentration, rps)
-
-            protein_degradation = gene.codes_for[0].protein.degradation
-            protein_translation_rate = gene.codes_for[0].protein.translation_rate
-            protein_concentration = concent[gene.identifier].protein
-            delta_protein = self.delta_protein(protein_degradation, protein_translation_rate,
-                                               protein_concentration, mrna_concentration)
-
-            new_mrna.append(delta_mrna)
-            new_protein.append(delta_protein)
-
-
-        #
         self.n0 = n0
         self.t0 = t0
         self.end_time = sim_time

@@ -1,10 +1,11 @@
-from typing import List, Tuple, Dict, NamedTuple
+from typing import List, Dict, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
-from models import Network, Cassette, RegType
+from helper import delta_mrna, delta_protein, calculate_rps
+from models import Network, Cassette
 
 
 class Concentration(NamedTuple):
@@ -31,23 +32,6 @@ class Simulator:
         self.protein_init: Dict[str, float] = protein_init
         self.signal_init: Dict[str, float] = signal_init
 
-    # d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
-    # a_m           -> transcription rate
-    # H([TF])       -> Hill equation
-    # a_m*H([TF])   -> regulated promoter strength (rps)
-    # [mRNA]        -> mRNA concentration (mrna)
-    # b_m           -> mRNA degradation rate (b_m)
-    def delta_mrna(self, b_m: float, mrna: float, rps: float):
-        return rps - b_m * mrna
-
-    # d[protein]/dt = a_p*[mRNA] - b_p * [protein]
-    # [protein] -> protein concentration (p)
-    # [mRNA]    -> mRNA concentration (m)
-    # a_p       -> translation rate (a_p)
-    # b_p       -> protein degradation rate (b_p)
-    def delta_protein(self, a_p: float, b_p: float, p: float, m: float):
-        return a_p * m - b_p * p
-
     def parse_y(self, y):
         # Identifier: (mRNA concent., Protein concent.)
         concent: Dict[str, Concentration] = dict()
@@ -63,21 +47,6 @@ class Simulator:
             concent[gene.identifier] = Concentration(mRNA=y[x], protein=y[x + half_y])
         return concent
 
-    # rps = regulated promoter strength.
-    # Given a gene, calculates the promoter strength under regulation.
-    def calculate_rps(self, concent: Dict[str, Concentration],
-                      gene: Cassette, kd: float, n: int):
-        # Identifier of the gene and the regulation
-        regulator: Tuple[str, RegType] = self.network.get_regulators(gene.identifier)[0]
-        regulator_concentration = concent[regulator[0]].protein
-
-        if regulator[1] == RegType.ACTIVATION:
-            rps: float = self.network.ps_active(regulator_concentration, kd, gene.promoter, n)
-        else:
-            rps: float = self.network.ps_repressed(regulator_concentration, kd, gene.promoter, n)
-
-        return rps
-
     def dy_dt(self, y: List[float], t: int):
         # Parse y to retrieve the concentrations of mRNA and Proteins in a nice
         # and orderly format
@@ -91,20 +60,20 @@ class Simulator:
         for x in range(0, len(concent)):
             # The current gene for which we are calculating mRNA and Protein delta value
             gene: Cassette = genes[x]
-            rps: float = self.calculate_rps(concent, gene, 40, 2)
+            rps: float = calculate_rps(self.network, concent, gene, 40, 2)
 
             mrna_degradation: float = gene.codes_for[0].degradation
             mrna_concentration: float = concent[gene.identifier].mRNA
-            delta_mrna = self.delta_mrna(mrna_degradation, mrna_concentration, rps)
+            delta_mrna_val = delta_mrna(mrna_degradation, mrna_concentration, rps)
 
             protein_degradation = gene.codes_for[0].protein.degradation
             protein_translation_rate = gene.codes_for[0].protein.translation_rate
             protein_concentration = concent[gene.identifier].protein
-            delta_protein = self.delta_protein(protein_degradation, protein_translation_rate,
-                                               protein_concentration, mrna_concentration)
+            delta_protein_val = delta_protein(protein_degradation, protein_translation_rate,
+                                              protein_concentration, mrna_concentration)
 
-            new_mrna.append(delta_mrna)
-            new_protein.append(delta_protein)
+            new_mrna.append(delta_mrna_val)
+            new_protein.append(delta_protein_val)
 
         new_y: List[float] = list()
 

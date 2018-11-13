@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import List, Dict, Tuple, NamedTuple
+from typing import List, Tuple, NamedTuple
 
-from models_parts import Promoter, mRNA, Species, Signal
+from models.parts import Promoter, mRNA, Species, Signal
 
 
 class Cassette(Species):

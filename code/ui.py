@@ -1,7 +1,7 @@
 from math import log, e
 
 import models
-import models_parts
+from models import parts
 
 # region Constants
 # Transcription-related values
@@ -38,7 +38,7 @@ alpha0 = transcription_rate_repr * translation_efficiency \
 beta = protein_decay_rate / mRNA_decay_rate
 # endregion
 
-protein: models_parts.Protein = models_parts.Protein()
+protein: parts.Protein = parts.Protein()
 protein.degradation = protein_decay_rate        # Reaction
 protein.translation_rate = beta                 # Rule
 
@@ -46,7 +46,7 @@ mrna: models.mRNA = models.mRNA()
 mrna.degradation = mRNA_decay_rate              # Reaction
 mrna.protein = protein
 
-promoter: models.Promoter = models_parts.Promoter
+promoter: models.Promoter = parts.Promoter
 promoter.promoter_strength_active = alpha       # Rule
 promoter.promoter_strength_repressed = alpha0   # Rule
 

@@ -41,8 +41,3 @@ class Promoter:
     promoter_strength_active: float
     # The promoter leakiness
     promoter_strength_repressed: float
-
-# class Reaction:
-#     name: str
-#     rate:
-#     change_vector:

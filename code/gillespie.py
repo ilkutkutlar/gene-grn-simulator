@@ -1,90 +1,26 @@
-# #
-#
-# for x in range(0, len(concent)):
-#     # The current gene for which we are calculating mRNA and Protein delta value
-#     gene: Cassette = genes[x]
-#     rps: float = self.calculate_rps(concent, gene, 40, 2)
-#
-#     mrna_degradation: float = gene.codes_for[0].degradation
-#     mrna_concentration: float = concent[gene.identifier].mRNA
-#     delta_mrna = self.delta_mrna(mrna_degradation, mrna_concentration, rps)
-#
-#     protein_degradation = gene.codes_for[0].protein.degradation
-#     protein_translation_rate = gene.codes_for[0].protein.translation_rate
-#     protein_concentration = concent[gene.identifier].protein
-#     delta_protein = self.delta_protein(protein_degradation, protein_translation_rate,
-#                                        protein_concentration, mrna_concentration)
-#
-#     new_mrna.append(delta_mrna)
-#     new_protein.append(delta_protein)
-#
-#
-# #
-
-
 from math import *
 from random import *
 from typing import Callable, List
 
 import matplotlib.pyplot as plt
 
-from models import Network
 from helper import *
 
 Vector = List[float]
-# ReactionRateFunction = Callable[[Vector], float]
+ReactionRateFunction = Callable[[Vector], float]
 ChangeVectorFunction = Callable[[Vector], Vector]
 DeltaMRNA = Callable[[float, float, float], float]
+
 
 class GillespieSimulator:
 
     # sim_time: float in seconds
     # Reaction rates: [ r(1) = 1         ]
     # Change vectors: [ v1   = [0, 1, 0] ]
-    def __init__(self, network: Network,
+    def __init__(self, reaction_rates: List[ReactionRateFunction],
+                 change_vectors: List[ChangeVectorFunction],
                  sim_time: float, n0: Vector,
                  t0: float):
-
-        # n = [100, 80, 50, 10, 10, 10]
-        # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
-
-        # m_lacI0 = 100
-        # m_tetR0 = 80
-        # m_cl0 = 50
-
-        # p_lacI0 = 10
-        # p_tetR0 = 10
-        # p_cl0 = 10
-
-        # Reactions (SEPARATE from the mrna and proteins, they are just reactions!):
-        # For each mRNA:
-        #   - transcription
-        #   - degradation
-        # For each protein:
-        #   - translation
-        #   - degradation
-        # Thus the exact change vectors are:
-        # 1. Consider this: d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
-        #   1.1. regulated transcription rate = a_m*H([TF])
-        #   1.2. mRNA degradation rate = - b_m * [mRNA]
-        # m_lacI_tr = []
-
-        reaction_rates: List[DeltaMRNA]
-        change_vectors: List[ChangeVectorFunction]
-
-        # e.g. r1 = mrna = ...
-        # r2 = protein = ...
-        # 1. Get mRNAs
-        for gene in network.genome:
-            # 1.1. set mRNA's reaction rate
-            reaction_rates.append(delta_mrna)
-            reaction_rates.append(delta_protein)
-
-
-
-        # self.r = []
-        # self.r.append(gene.promoter.promoter_strength_active)
-
         self.r = reaction_rates
         self.v = change_vectors
         self.n0 = n0
@@ -99,15 +35,34 @@ class GillespieSimulator:
         return r0
 
     def pick_reaction(self, s2, r0, n) -> ChangeVectorFunction:
-        candidates: List[int] = []
+        # candidates: List[int] = []
+        #
+        # for j in self.r:
+        #     if j(n) > s2 * r0:
+        #         candidates.append(self.r.index(j))
+        # if candidates:
+        #     return self.v[min(candidates)]
+        # else:
+        #     return self.v[0]
 
-        for j in self.r:
-            if j(n) > s2 * r0:
-                candidates.append(self.r.index(j))
-        if candidates:
-            return self.v[min(candidates)]
-        else:
-            return self.v[0]
+        range_p = []
+        for x in self.r:
+            prob = x(n) / r0
+            if range_p:
+                m_range = (range_p[len(range_p) - 1])[0] + prob
+                change = self.v[self.r.index(x)]
+                range_p.append(
+                    (m_range,
+                     change))
+            else:
+                change = self.v[self.r.index(x)]
+                range_p.append(
+                    (prob,
+                     change))
+
+        for y in range_p:
+            if s2 < y[0]:
+                return y[1]
 
     def simulate(self) -> List[Vector]:
         t: float = self.t0
@@ -117,8 +72,8 @@ class GillespieSimulator:
         while t <= self.end_time:
             r0: float = self.calculate_r0(n)
 
-            s1: float = random()        # To pick time
-            s2: float = uniform(0, r0)  # To pick reaction
+            s1: float = random()  # To pick time
+            s2: float = random()  # To pick reaction
 
             # Advance time
             theta = (1 / r0) * log(1 / s1, e)
@@ -131,15 +86,23 @@ class GillespieSimulator:
 
         return results
 
-    def visualise(self, p):
+    def visualise(self, results):
         # plot results
         plt.figure()
 
-        # time grid -> The time space for which a graph will be drawn
-        plt.plot(p)
+        mlaci = []
+
+        for x in results:
+            mlaci.append(x)
+
+        print(mlaci)
+
+        plt.plot(mlaci, label="LacI")
+        # plt.plot(results[:, 1], label="TetR")
+        # plt.plot(results[:, 2], label="Cl")
 
         plt.xlabel('Time')
-        plt.ylabel('Protein')
+        plt.ylabel('Concentration')
         plt.legend(loc=0)
 
         plt.draw()
@@ -161,8 +124,7 @@ def main():
     for x in g.simulate():
         results_float.append(x[0])
 
-    print(results_float)
+    # print(results_float)
     g.visualise(results_float)
 
-
-main()
+# main()

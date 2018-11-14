@@ -1,6 +1,6 @@
 from math import *
 from random import *
-from typing import Callable, List
+from typing import Callable, List, Dict, Tuple
 
 import matplotlib.pyplot as plt
 
@@ -64,10 +64,10 @@ class GillespieSimulator:
             if s2 < y[0]:
                 return y[1]
 
-    def simulate(self) -> List[Vector]:
+    def simulate(self) -> List[Tuple]:
         t: float = self.t0
         n: Vector = self.n0
-        results: List[Vector] = []
+        results: List[Tuple] = []
 
         while t <= self.end_time:
             r0: float = self.calculate_r0(n)
@@ -80,9 +80,10 @@ class GillespieSimulator:
             t = t + theta
 
             vj = self.pick_reaction(s2, r0, n)
-            n = vj(n)
+            if vj:
+                n = vj(n)
 
-            results.append(n)
+            results.append((t, n))
 
         return results
 
@@ -90,16 +91,20 @@ class GillespieSimulator:
         # plot results
         plt.figure()
 
+        times = []
         mlaci = []
+        mtetr = []
+        mcl = []
 
         for x in results:
-            mlaci.append(x)
+            times.append(x[0])
+            mlaci.append(x[1][3])
+            mtetr.append(x[1][4])
+            mcl.append(x[1][5])
 
-        print(mlaci)
-
-        plt.plot(mlaci, label="LacI")
-        # plt.plot(results[:, 1], label="TetR")
-        # plt.plot(results[:, 2], label="Cl")
+        plt.plot(times, mlaci)
+        plt.plot(times, mtetr)
+        plt.plot(times, mcl)
 
         plt.xlabel('Time')
         plt.ylabel('Concentration')
@@ -118,7 +123,7 @@ def main():
 
     def v1(n: Vector) -> Vector: return [n[0] + 1]
 
-    g = GillespieSimulator([r0, r1], [v0, v1], 1000, [0], 0)
+    g = GillespieSimulator([r0, r1], [v0, v1], 10, [0], 0)
 
     results_float = []
     for x in g.simulate():

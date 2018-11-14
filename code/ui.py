@@ -1,5 +1,5 @@
 from math import log, e
-from typing import Callable
+from typing import Callable, List, Dict
 
 import models
 from gillespie import Vector, GillespieSimulator
@@ -24,7 +24,7 @@ translation_efficiency = 19.97
 translation_rate = translation_efficiency * mRNA_decay_rate
 
 # Other values
-n = 2  # Hill coefficient
+hill_coeff = 2  # Hill coefficient
 Km = 40  # Activation coefficient
 
 # Derived values
@@ -76,25 +76,29 @@ network.regulations = [
 # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
 
 def tr_rate(reg_p_index: int) -> Callable[[Vector], float]:
-    def func(n: Vector): return alpha * (pow(n[reg_p_index], 2) / (40 + pow(n[reg_p_index], 2)))
+    def func(n: Vector):
+        return alpha * (1 / (1 + (pow(n[reg_p_index], 2) / 40)))
 
     return func
 
 
-def mrna_deg_rate(reg_p_index: int, m_index: int) -> Callable[[Vector], float]:
-    def func(n: Vector): return n[reg_p_index] * n[m_index]
+def mrna_deg_rate(m_index: int) -> Callable[[Vector], float]:
+    def func(n: Vector):
+        return mRNA_decay_rate * n[m_index]
 
     return func
 
 
-def prot_translation_rate():
-    def func(n: Vector): return beta
+def prot_translation_rate(m_index: int):
+    def func(n: Vector):
+        return beta * n[m_index]
 
     return func
 
 
-def prot_deg_rate():
-    def func(n: Vector): return protein_decay_rate
+def prot_deg_rate(p_index: int):
+    def func(n: Vector):
+        return protein_decay_rate * n[p_index]
 
     return func
 
@@ -128,81 +132,75 @@ def regulation():
     # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
     n0 = [100, 80, 50, 10, 10, 10]
     t0 = 0
-    sim_time = 10
+    sim_time = 100
 
-    # LacI mRNA reactions: Regulated repressively by cl
-
-    #  -> mRNA
-    def laci_tr_rate(n: Vector): return alpha * (pow(n[5], 2) / (40 + pow(n[5], 2)))
-
-    def laci_tr_change(n: Vector): return [n[0] + (alpha * (pow(n[5], 2) / (40 + pow(n[5], 2)))), n[1], n[2], n[3],
-                                           n[4], n[5]]
-
-    # mRNA ->
-    def laci_mrna_deg_rate(n: Vector): return n[5] * n[0]
-
-    def laci_mrna_deg_change(n: Vector): return [n[0] - (n[5] * n[0]), n[1], n[2], n[3], n[4], n[5]]
-
-    # mRNA -> Protein
-    def laci_prot_translation_rate(n: Vector): return n[0] * beta
-
-    def laci_prot_translation_change(n: Vector): return [n[0], n[1], n[2], n[3] + beta, n[4], n[5]]
-
-    # Protein ->
-    def laci_prot_degradation_rate(n: Vector): return n[3] * protein_decay_rate
-
-    def laci_prot_degradation_change(n: Vector): return [n[0], n[1], n[2], n[3] - protein_decay_rate, n[4], n[5]]
-
-    # TetR mRNA reactions: Regulated repressively by LacI
+    def tr_change(n: Vector, changes: Dict[int, Callable[[Vector], float]]) -> Vector:
+        ret: Vector = n.copy()
+        for i in changes:
+            # For -ve changes, changes is -
+            ret[i] += changes[i](n)
+        return ret
 
     #  -> mRNA
-    def tetr_tr_rate(n: Vector): return alpha * (pow(n[3], 2) / (40 + pow(n[3], 2)))
-
-    def tetr_tr_change(n: Vector): return [n[0], n[1] + (alpha * (pow(n[3], 2) / (40 + pow(n[3], 2)))), n[2], n[3],
-                                           n[4], n[5]]
+    def laci_tr_change(n: Vector):
+        return tr_change(n, {0: tr_rate(5)})
 
     # mRNA ->
-    def tetr_mrna_deg_rate(n: Vector): return n[3] * n[1]
-
-    def tetr_mrna_deg_change(n: Vector): return [n[0], n[1] - (n[3] * n[1]), n[2], n[3], n[4], n[5]]
+    def laci_mrna_deg_change(n: Vector):
+        n[0] -= mrna_deg_rate(0)(n)
+        return n
 
     # mRNA -> Protein
-    def tetr_prot_translation_rate(n: Vector): return n[1] * beta
-
-    def tetr_prot_translation_change(n: Vector): return [n[0], n[1], n[2], n[3], n[4] + beta, n[5]]
+    def laci_prot_translation_change(n: Vector):
+        n[3] += prot_translation_rate(0)(n)
+        return n
 
     # Protein ->
-    def tetr_prot_degradation_rate(n: Vector): return n[4] * protein_decay_rate
-
-    def tetr_prot_degradation_change(n: Vector): return [n[0], n[1], n[2], n[3], n[4] - protein_decay_rate, n[5]]
-
-    # cl reactions: Regulated repressively by tetR
-    # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
+    def laci_prot_degradation_change(n: Vector):
+        n[3] -= prot_deg_rate(3)(n)
+        return n
 
     #  -> mRNA
-    def cl_tr_rate(n: Vector): return alpha * (pow(n[4], 2) / (40 + pow(n[4], 2)))
-
-    def cl_tr_change(n: Vector): return [n[0], n[1], n[2] + (alpha * (pow(n[4], 2) / (40 + pow(n[4], 2)))), n[3], n[4],
-                                         n[5]]
+    def tetr_tr_change(n: Vector):
+        return tr_change(n, {1: tr_rate(3)})
 
     # mRNA ->
-    def cl_mrna_deg_rate(n: Vector): return n[4] * n[2]
-
-    def cl_mrna_deg_change(n: Vector): return [n[0], n[1], n[2] - (n[4] * n[2]), n[3], n[4], n[5]]
+    def tetr_mrna_deg_change(n: Vector):
+        n[1] -= mrna_deg_rate(1)(n)
+        return n
 
     # mRNA -> Protein
-    def cl_prot_translation_rate(n: Vector): return beta
-
-    def cl_prot_translation_change(n: Vector): return [n[0], n[1], n[2], n[3], n[4], n[5] + beta]
+    def tetr_prot_translation_change(n: Vector):
+        n[4] += prot_translation_rate(1)(n)
+        return n
 
     # Protein ->
-    def cl_prot_degradation_rate(n: Vector): return protein_decay_rate
+    def tetr_prot_degradation_change(n: Vector):
+        n[4] -= prot_deg_rate(4)(n)
+        return n
 
-    def cl_prot_degradation_change(n: Vector): return [n[0], n[1], n[2], n[3], n[4], n[5] - protein_decay_rate]
+    #  -> mRNA
+    def cl_tr_change(n: Vector):
+        return tr_change(n, {2: tr_rate(4)})
 
-    r = [laci_tr_rate, laci_mrna_deg_rate, laci_prot_translation_rate, laci_prot_degradation_rate,
-         tetr_tr_rate, tetr_mrna_deg_rate, tetr_prot_translation_rate, tetr_prot_degradation_rate,
-         cl_tr_rate, cl_mrna_deg_rate, cl_prot_translation_rate, cl_prot_degradation_rate]
+    # mRNA ->
+    def cl_mrna_deg_change(n: Vector):
+        n[2] -= mrna_deg_rate(2)(n)
+        return n
+
+    # mRNA -> Protein
+    def cl_prot_translation_change(n: Vector):
+        n[5] += prot_translation_rate(2)(n)
+        return n
+
+    # Protein ->
+    def cl_prot_degradation_change(n: Vector):
+        n[5] -= prot_deg_rate(5)(n)
+        return n
+
+    r = [tr_rate(5), mrna_deg_rate(0), prot_translation_rate(0), prot_deg_rate(3),
+         tr_rate(3), mrna_deg_rate(1), prot_translation_rate(1), prot_deg_rate(4),
+         tr_rate(4), mrna_deg_rate(2), prot_translation_rate(2), prot_deg_rate(5)]
 
     v = [laci_tr_change, laci_mrna_deg_change, laci_prot_translation_change, laci_prot_degradation_change,
          tetr_tr_change, tetr_mrna_deg_change, tetr_prot_translation_change, tetr_prot_degradation_change,

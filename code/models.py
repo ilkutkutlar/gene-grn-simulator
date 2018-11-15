@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import List, Callable, Dict
+from typing import List, Dict, Tuple
 
 Vector = List[float]
 NamedVector = Dict[str, float]
-RateFunction = Callable[[NamedVector], float]
 
 
 class Network:
@@ -12,9 +11,6 @@ class Network:
 
 
 class Reaction(ABC):
-    left: str
-    right: str
-
     def __init__(self, left: str, right: str):
         self.left = left
         self.right = right
@@ -30,7 +26,7 @@ class TranscriptionReaction(Reaction):
     #  -> mRNA
 
     def __init__(self, trans_rate: float,
-                 km: int, hill_coeff: int,
+                 km: float, hill_coeff: float,
                  regulators: List[str],
                  left: str, right: str):
         super().__init__(left, right)
@@ -116,3 +112,15 @@ class ProteinDegradationReaction(Reaction):
             else:
                 change[x] = 0
         return change
+
+
+class SimulationSettings:
+    # Tuple[label, species_name]
+    def __init__(self, title: str, x_label: str, y_label: str, start_time: float, end_time: float,
+                 plotted_species: List[Tuple[str, str]]):
+        self.plotted_species = plotted_species
+        self.start_time = start_time
+        self.end_time = end_time
+        self.x_label = x_label
+        self.y_label = y_label
+        self.title = title

@@ -2,7 +2,7 @@ from math import log, e
 
 from gillespie import GillespieSimulator
 from models import TranscriptionReaction, Network, MrnaDegradationReaction, TranslationReaction, \
-    ProteinDegradationReaction
+    ProteinDegradationReaction, SimulationSettings
 
 # region Constants
 # Transcription-related values
@@ -61,8 +61,42 @@ def simulate_repressilator():
         ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
     ]
 
-    g = GillespieSimulator(net, 100, 0)
+    s = SimulationSettings("Results", "Time", "Concentration", 0, 100,
+                           [("LacI Protein", "laci_p"),
+                            ("TetR Protein", "tetr_p"),
+                            ("Cl Protein", "cl_p")])
+    g = GillespieSimulator(net, s)
     g.visualise(g.simulate())
 
 
-simulate_repressilator()
+def simulate_switch():
+    # Values source: http://www.ebi.ac.uk/biomodels-main/BIOMD0000000507
+
+    net = Network()
+    net.species = {"mrna_one": 10, "mrna_two": 100,
+                   "p_one": 0, "p_two": 100}
+
+    net.reactions = [
+        TranscriptionReaction(200, 1, 1, ["p_two"], "", "one_mrna"),
+        TranscriptionReaction(200, 1, 2.5, ["p_one"], "", "two_mrna"),
+
+        MrnaDegradationReaction(0.3, "mrna_one", ""),
+        MrnaDegradationReaction(0.3, "mrna_two", ""),
+
+        TranslationReaction(156.25, "mrna_one", "p_one"),
+        TranslationReaction(15.6, "mrna_two", "p_two"),
+
+        ProteinDegradationReaction(1, "p_one", ""),
+        ProteinDegradationReaction(1, "p_two", ""),
+    ]
+
+    s = SimulationSettings("Results", "Time", "Concentration",
+                           0, 10,
+                           [("Protein One", "p_one"),
+                            ("Protein Two", "p_two")])
+    g = GillespieSimulator(net, s)
+    g.visualise(g.simulate())
+
+
+# simulate_repressilator()
+simulate_switch()

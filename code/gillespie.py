@@ -1,19 +1,17 @@
 from math import *
 from random import *
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 import matplotlib.pyplot as plt
 
 from helper import apply_change_vector
-from models import NamedVector, Network
+from models import NamedVector, Network, SimulationSettings
 
 
 class GillespieSimulator:
-    def __init__(self, net: Network,
-                 sim_time: float, t0: float):
+    def __init__(self, net: Network, sim: SimulationSettings):
         self.net = net
-        self.t0 = t0
-        self.end_time = sim_time
+        self.sim = sim
 
     def calculate_r0(self, net: Network):
         r0: float = 0
@@ -53,10 +51,10 @@ class GillespieSimulator:
                 return y[1]
 
     def simulate(self) -> List[Tuple]:
-        t: float = self.t0
+        t: float = self.sim.start_time
         results: List[Tuple] = []
 
-        while t <= self.end_time:
+        while t <= self.sim.end_time:
             r0: float = self.calculate_r0(self.net)
             s1: float = random()  # To pick time
             s2: float = random()  # To pick reaction
@@ -78,24 +76,25 @@ class GillespieSimulator:
         # plot results
         plt.figure()
 
-        times = []
-        mlaci = []
-        mtetr = []
-        mcl = []
+        times: List[float] = []
+        plottings: Dict[str, List[float]] = {}
+
+        for species in self.sim.plotted_species:
+            plottings[species[1]] = []
 
         for x in results:
             times.append(x[0])
-            mlaci.append(x[1]["laci_p"])
-            mtetr.append(x[1]["tetr_p"])
-            mcl.append(x[1]["cl_p"])
 
-        plt.plot(times, mlaci)
-        plt.plot(times, mtetr)
-        plt.plot(times, mcl)
+            for species in self.sim.plotted_species:
+                plottings[species[1]].append(x[1][species[1]])
 
-        plt.xlabel('Time')
-        plt.ylabel('Concentration')
+        for species in self.sim.plotted_species:
+            plt.plot(times, plottings[species[1]], label=species[0])
+
+        plt.xlabel(self.sim.x_label)
+        plt.ylabel(self.sim.y_label)
         plt.legend(loc=0)
+        plt.title(self.sim.title)
 
         plt.draw()
         plt.show()

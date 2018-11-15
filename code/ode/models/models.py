@@ -3,6 +3,7 @@ from typing import List, Tuple, NamedTuple
 
 from ode.models.parts import Promoter, mRNA, Species, Signal
 
+
 class Cassette(Species):
     promoter: Promoter
     codes_for: List[mRNA]

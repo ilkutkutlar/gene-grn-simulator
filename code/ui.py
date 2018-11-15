@@ -2,7 +2,7 @@ from math import log, e
 
 from gillespie import GillespieSimulator
 from models import TranscriptionReaction, Network, MrnaDegradationReaction, TranslationReaction, \
-    ProteinDegradationReaction, SimulationSettings
+    ProteinDegradationReaction, SimulationSettings, Regulation, RegType
 
 # region Constants
 # Transcription-related values
@@ -42,14 +42,15 @@ beta = protein_decay_rate / mRNA_decay_rate
 
 
 def simulate_repressilator():
-    net = Network()
-    net.species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
+    species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
                    "laci_p": 10, "tetr_p": 10, "cl_p": 10}
-
-    net.reactions = [
-        TranscriptionReaction(alpha, 40, 2, ["cl_p"], "", "laci_mrna"),
-        TranscriptionReaction(alpha, 40, 2, ["laci_p"], "", "tetr_mrna"),
-        TranscriptionReaction(alpha, 40, 2, ["tetr_p"], "", "cl_mrna"),
+    regulations = [Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION),
+                       Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
+                       Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]
+    reactions = [
+        TranscriptionReaction(alpha, 40, 2, "", "laci_mrna"),
+        TranscriptionReaction(alpha, 40, 2, "", "tetr_mrna"),
+        TranscriptionReaction(alpha, 40, 2, "", "cl_mrna"),
         MrnaDegradationReaction(mRNA_decay_rate, "laci_mrna", ""),
         MrnaDegradationReaction(mRNA_decay_rate, "tetr_mrna", ""),
         MrnaDegradationReaction(mRNA_decay_rate, "cl_mrna", ""),
@@ -61,7 +62,9 @@ def simulate_repressilator():
         ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
     ]
 
-    s = SimulationSettings("Results", "Time", "Concentration", 0, 100,
+    net = Network(species, reactions, regulations)
+
+    s = SimulationSettings("Results", "Time", "Concentration", 0, 10,
                            [("LacI Protein", "laci_p"),
                             ("TetR Protein", "tetr_p"),
                             ("Cl Protein", "cl_p")])
@@ -77,8 +80,8 @@ def simulate_switch():
                    "p_one": 0, "p_two": 100}
 
     net.reactions = [
-        TranscriptionReaction(200, 1, 1, ["p_two"], "", "one_mrna"),
-        TranscriptionReaction(200, 1, 2.5, ["p_one"], "", "two_mrna"),
+        TranscriptionReaction(200, 1, 1, "", "one_mrna"),
+        TranscriptionReaction(200, 1, 2.5, "", "two_mrna"),
 
         MrnaDegradationReaction(0.3, "mrna_one", ""),
         MrnaDegradationReaction(0.3, "mrna_two", ""),
@@ -98,5 +101,5 @@ def simulate_switch():
     g.visualise(g.simulate())
 
 
-# simulate_repressilator()
-simulate_switch()
+simulate_repressilator()
+# simulate_switch()

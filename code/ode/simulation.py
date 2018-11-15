@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
-from models import Network, Cassette, RegType
+from ode.models import Network, Cassette, RegType
 
 
 class Concentration(NamedTuple):

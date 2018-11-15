@@ -4,7 +4,6 @@ from typing import List, Callable, Dict
 Vector = List[float]
 NamedVector = Dict[str, float]
 RateFunction = Callable[[NamedVector], float]
-ChangeVectorFunction = Callable[[NamedVector], NamedVector]
 
 
 class Network:

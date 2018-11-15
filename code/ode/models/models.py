@@ -1,7 +1,7 @@
 from enum import Enum
-from typing import List, Tuple, NamedTuple, Callable
+from typing import List, Tuple, NamedTuple
 
-from models.parts import Promoter, mRNA, Species, Signal
+from ode.models.parts import Promoter, mRNA, Species, Signal
 
 class Cassette(Species):
     promoter: Promoter

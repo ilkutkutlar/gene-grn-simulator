@@ -3,8 +3,8 @@ from typing import List, Callable, Dict
 
 Vector = List[float]
 NamedVector = Dict[str, float]
-RateFunction = Callable[[Vector], float]
-ChangeVectorFunction = Callable[[Vector], Vector]
+RateFunction = Callable[[NamedVector], float]
+ChangeVectorFunction = Callable[[NamedVector], NamedVector]
 
 
 class Network:
@@ -46,7 +46,7 @@ class TranscriptionReaction(Reaction):
                                                 self.hill_coeff) / self.km)))
 
     def change_vector(self, n: Network) -> NamedVector:
-        change: Dict[str, float]
+        change: Dict[str, float] = dict()
         for x in n.species:
             if x == self.right:
                 change[x] = self.rate_function(n)
@@ -67,7 +67,7 @@ class TranslationReaction(Reaction):
         return self.translation_rate * n.species[self.left]
 
     def change_vector(self, n: Network) -> NamedVector:
-        change: Dict[str, float]
+        change: Dict[str, float] = dict()
         for x in n.species:
             if x == self.right:
                 change[x] = self.rate_function(n)
@@ -88,7 +88,8 @@ class MrnaDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left]
 
     def change_vector(self, n: Network) -> NamedVector:
-        change: Dict[str, float]
+        change: Dict[str, float] = dict()
+
         for x in n.species:
             if x == self.left:
                 change[x] = -self.rate_function(n)
@@ -109,7 +110,7 @@ class ProteinDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left]
 
     def change_vector(self, n: Network) -> NamedVector:
-        change: Dict[str, float]
+        change: Dict[str, float] = dict()
         for x in n.species:
             if x == self.left:
                 change[x] = -self.rate_function(n)

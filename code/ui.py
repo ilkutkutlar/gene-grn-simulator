@@ -1,10 +1,10 @@
 from math import log, e
 from typing import Callable, Dict
-from functools import partial
 
 import models
-from gillespie import GillespieSimulator
-from gillespie_models import Vector
+from gillespie import GillespieSimulator, GillespieSimulator2
+from gillespie_models import Vector, TranscriptionReaction, Network, MrnaDegradationReaction, TranslationReaction, \
+    ProteinDegradationReaction
 from models import parts
 
 # region Constants
@@ -173,9 +173,35 @@ def regulation():
          lambda n: change(n, {5: prot_translation_rate(2)}),
          lambda n: neg_change(n, {5: prot_deg_rate(5)})]
 
-    g = GillespieSimulator(r, v, sim_time, n0, t0)
-    results = g.simulate()
-    g.visualise(results)
+    # g = GillespieSimulator(r, v, sim_time, n0, t0)
+    # results = g.simulate()
+    # g.visualise(results)
+
+    net = Network()
+    net.species = {"laci_mrna": 100,
+                   "tetr_mrna": 80,
+                   "cl_mrna": 50,
+                   "laci_p": 10,
+                   "tetr_p": 10,
+                   "cl_p": 10}
+
+    net.reactions = [
+        TranscriptionReaction(alpha, 40, 2, ["cl_p"], "", "laci_mrna"),
+        TranscriptionReaction(alpha, 40, 2, ["laci_p"], "", "tetr_mrna"),
+        TranscriptionReaction(alpha, 40, 2, ["tetr_p"], "", "cl_mrna"),
+        MrnaDegradationReaction(mRNA_decay_rate, "laci_mrna", ""),
+        MrnaDegradationReaction(mRNA_decay_rate, "tetr_mrna", ""),
+        MrnaDegradationReaction(mRNA_decay_rate, "cl_mrna", ""),
+        TranslationReaction(beta, "laci_mrna", "laci_p"),
+        TranslationReaction(beta, "tetr_mrna", "tetr_p"),
+        TranslationReaction(beta, "cl_mrna", "cl_p"),
+        ProteinDegradationReaction(protein_decay_rate, "laci_p", ""),
+        ProteinDegradationReaction(protein_decay_rate, "tetr_p", ""),
+        ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
+    ]
+
+    g2 = GillespieSimulator2(net, 100, 0)
+    g2.visualise(g2.simulate())
 
 
 regulation()

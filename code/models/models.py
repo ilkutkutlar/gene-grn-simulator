@@ -3,12 +3,6 @@ from typing import List, Tuple, NamedTuple, Callable
 
 from models.parts import Promoter, mRNA, Species, Signal
 
-
-class Reaction:
-    rate: float
-    change_vector: Callable[[float], float]
-
-
 class Cassette(Species):
     promoter: Promoter
     codes_for: List[mRNA]

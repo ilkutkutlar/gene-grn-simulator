@@ -1,12 +1,14 @@
 from math import log, e
-from typing import Callable, List, Dict
+from typing import Callable, Dict
+from functools import partial
 
 import models
-from gillespie import Vector, GillespieSimulator
+from gillespie import GillespieSimulator
+from gillespie_models import Vector
 from models import parts
+
 # region Constants
 # Transcription-related values
-from simulation import Simulator
 
 ps_active = 0.5  # Promoter strength (active)
 ps_repr = 5 * (10 ** -4)  # Promoter strength (repressed)
@@ -75,6 +77,7 @@ network.regulations = [
 
 # n = [m_lacI, m_tetR, m_cl, p_lacI, p_tetR, p_cl]
 
+#  -> mRNA
 def tr_rate(reg_p_index: int) -> Callable[[Vector], float]:
     def func(n: Vector):
         return alpha * (1 / (1 + (pow(n[reg_p_index], 2) / 40)))
@@ -82,6 +85,7 @@ def tr_rate(reg_p_index: int) -> Callable[[Vector], float]:
     return func
 
 
+# mRNA ->
 def mrna_deg_rate(m_index: int) -> Callable[[Vector], float]:
     def func(n: Vector):
         return mRNA_decay_rate * n[m_index]
@@ -89,6 +93,7 @@ def mrna_deg_rate(m_index: int) -> Callable[[Vector], float]:
     return func
 
 
+# mRNA -> Protein
 def prot_translation_rate(m_index: int):
     def func(n: Vector):
         return beta * n[m_index]
@@ -96,6 +101,7 @@ def prot_translation_rate(m_index: int):
     return func
 
 
+# Protein ->
 def prot_deg_rate(p_index: int):
     def func(n: Vector):
         return protein_decay_rate * n[p_index]
@@ -134,77 +140,38 @@ def regulation():
     t0 = 0
     sim_time = 100
 
-    def tr_change(n: Vector, changes: Dict[int, Callable[[Vector], float]]) -> Vector:
+    def change(n: Vector, changes: Dict[int, Callable[[Vector], float]]) -> Vector:
         ret: Vector = n.copy()
         for i in changes:
             # For -ve changes, changes is -
             ret[i] += changes[i](n)
         return ret
 
-    #  -> mRNA
-    def laci_tr_change(n: Vector):
-        return tr_change(n, {0: tr_rate(5)})
-
-    # mRNA ->
-    def laci_mrna_deg_change(n: Vector):
-        n[0] -= mrna_deg_rate(0)(n)
-        return n
-
-    # mRNA -> Protein
-    def laci_prot_translation_change(n: Vector):
-        n[3] += prot_translation_rate(0)(n)
-        return n
-
-    # Protein ->
-    def laci_prot_degradation_change(n: Vector):
-        n[3] -= prot_deg_rate(3)(n)
-        return n
-
-    #  -> mRNA
-    def tetr_tr_change(n: Vector):
-        return tr_change(n, {1: tr_rate(3)})
-
-    # mRNA ->
-    def tetr_mrna_deg_change(n: Vector):
-        n[1] -= mrna_deg_rate(1)(n)
-        return n
-
-    # mRNA -> Protein
-    def tetr_prot_translation_change(n: Vector):
-        n[4] += prot_translation_rate(1)(n)
-        return n
-
-    # Protein ->
-    def tetr_prot_degradation_change(n: Vector):
-        n[4] -= prot_deg_rate(4)(n)
-        return n
-
-    #  -> mRNA
-    def cl_tr_change(n: Vector):
-        return tr_change(n, {2: tr_rate(4)})
-
-    # mRNA ->
-    def cl_mrna_deg_change(n: Vector):
-        n[2] -= mrna_deg_rate(2)(n)
-        return n
-
-    # mRNA -> Protein
-    def cl_prot_translation_change(n: Vector):
-        n[5] += prot_translation_rate(2)(n)
-        return n
-
-    # Protein ->
-    def cl_prot_degradation_change(n: Vector):
-        n[5] -= prot_deg_rate(5)(n)
-        return n
+    def neg_change(n: Vector, changes: Dict[int, Callable[[Vector], float]]):
+        ret: Vector = n.copy()
+        for i in changes:
+            # For -ve changes, changes is -
+            ret[i] -= changes[i](n)
+        return ret
 
     r = [tr_rate(5), mrna_deg_rate(0), prot_translation_rate(0), prot_deg_rate(3),
          tr_rate(3), mrna_deg_rate(1), prot_translation_rate(1), prot_deg_rate(4),
          tr_rate(4), mrna_deg_rate(2), prot_translation_rate(2), prot_deg_rate(5)]
 
-    v = [laci_tr_change, laci_mrna_deg_change, laci_prot_translation_change, laci_prot_degradation_change,
-         tetr_tr_change, tetr_mrna_deg_change, tetr_prot_translation_change, tetr_prot_degradation_change,
-         cl_tr_change, cl_mrna_deg_change, cl_prot_translation_change, cl_prot_degradation_change]
+    v = [lambda n: change(n, {0: tr_rate(5)}),
+         lambda n: neg_change(n, {0: mrna_deg_rate(0)}),
+         lambda n: change(n, {3: prot_translation_rate(0)}),
+         lambda n: neg_change(n, {3: prot_deg_rate(3)}),
+
+         lambda n: change(n, {1: tr_rate(3)}),
+         lambda n: neg_change(n, {1: mrna_deg_rate(1)}),
+         lambda n: change(n, {4: prot_translation_rate(1)}),
+         lambda n: neg_change(n, {4: prot_deg_rate(4)}),
+
+         lambda n: change(n, {2: tr_rate(4)}),
+         lambda n: neg_change(n, {2: mrna_deg_rate(2)}),
+         lambda n: change(n, {5: prot_translation_rate(2)}),
+         lambda n: neg_change(n, {5: prot_deg_rate(5)})]
 
     g = GillespieSimulator(r, v, sim_time, n0, t0)
     results = g.simulate()

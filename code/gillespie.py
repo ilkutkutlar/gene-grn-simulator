@@ -1,15 +1,10 @@
 from math import *
 from random import *
-from typing import Callable, List, Dict, Tuple
+from typing import Callable, List, Tuple
 
 import matplotlib.pyplot as plt
 
-from helper import *
-
-Vector = List[float]
-ReactionRateFunction = Callable[[Vector], float]
-ChangeVectorFunction = Callable[[Vector], Vector]
-DeltaMRNA = Callable[[float, float, float], float]
+from gillespie_models import ChangeVectorFunction, Vector, RateFunction
 
 
 class GillespieSimulator:
@@ -17,7 +12,7 @@ class GillespieSimulator:
     # sim_time: float in seconds
     # Reaction rates: [ r(1) = 1         ]
     # Change vectors: [ v1   = [0, 1, 0] ]
-    def __init__(self, reaction_rates: List[ReactionRateFunction],
+    def __init__(self, reaction_rates: List[RateFunction],
                  change_vectors: List[ChangeVectorFunction],
                  sim_time: float, n0: Vector,
                  t0: float):
@@ -34,33 +29,36 @@ class GillespieSimulator:
 
         return r0
 
-    def pick_reaction(self, s2, r0, n) -> ChangeVectorFunction:
-        # candidates: List[int] = []
-        #
-        # for j in self.r:
-        #     if j(n) > s2 * r0:
-        #         candidates.append(self.r.index(j))
-        # if candidates:
-        #     return self.v[min(candidates)]
-        # else:
-        #     return self.v[0]
+    """
+    :arg s2 -> Random float [0, 1]
+    :arg r0 -> Total of reaction rates
+    :arg n  -> The network vector
+    
+    :returns a ChangeVectorFunction representing the
+    change vector of the reaction chosen randomly,
+    which will happen next
+    """
 
-        range_p = []
-        for x in self.r:
-            prob = x(n) / r0
-            if range_p:
-                m_range = (range_p[len(range_p) - 1])[0] + prob
-                change = self.v[self.r.index(x)]
-                range_p.append(
+    def pick_reaction(self, s2: float, r0: float,
+                      n: Vector) -> ChangeVectorFunction:
+        propensity_ranges = []
+
+        for reaction in self.r:
+            """Propensity of the reaction"""
+            propensity = reaction(n) / r0
+
+            if propensity_ranges:
+                m_range = (propensity_ranges[len(propensity_ranges) - 1])[0] + propensity
+                change = self.v[self.r.index(reaction)]
+                propensity_ranges.append(
                     (m_range,
                      change))
             else:
-                change = self.v[self.r.index(x)]
-                range_p.append(
-                    (prob,
-                     change))
+                change = self.v[self.r.index(reaction)]
+                propensity_ranges.append(
+                    (propensity, change))
 
-        for y in range_p:
+        for y in propensity_ranges:
             if s2 < y[0]:
                 return y[1]
 
@@ -129,7 +127,4 @@ def main():
     for x in g.simulate():
         results_float.append(x[0])
 
-    # print(results_float)
     g.visualise(results_float)
-
-# main()

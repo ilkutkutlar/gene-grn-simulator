@@ -29,7 +29,7 @@ class Network:
         self.reactions = reactions
         self.regulations = regulations
 
-    def get_regulators(self, name: str) -> List[Regulation]:
+    def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
 
 
@@ -77,10 +77,12 @@ class TranscriptionReaction(Reaction):
 
     def rate_function(self, n: Network) -> float:
         # Protein regulates mRNA
-        regulators = n.get_regulators(self.right)
-        if regulators:
-            regulator_concent = n.species[regulators[0].to_gene]
-            if regulators[0].reg_type == RegType.ACTIVATION:
+        regulations = n.get_inner_regulation(self.right)
+        the_regulation = regulations[0]
+
+        if regulations:
+            regulator_concent = n.species[the_regulation.from_gene]
+            if the_regulation.reg_type == RegType.ACTIVATION:
                 # Calculation arbitrarily broken down into separate
                 # parts to improve readability
                 a = pow(regulator_concent, self.hill_coeff)

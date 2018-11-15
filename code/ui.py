@@ -43,10 +43,10 @@ beta = protein_decay_rate / mRNA_decay_rate
 
 def simulate_repressilator():
     species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
-                   "laci_p": 10, "tetr_p": 10, "cl_p": 10}
+               "laci_p": 10, "tetr_p": 10, "cl_p": 10}
     regulations = [Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION),
-                       Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
-                       Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]
+                   Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
+                   Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]
     reactions = [
         TranscriptionReaction(alpha, 40, 2, "", "laci_mrna"),
         TranscriptionReaction(alpha, 40, 2, "", "tetr_mrna"),
@@ -64,10 +64,10 @@ def simulate_repressilator():
 
     net = Network(species, reactions, regulations)
 
-    s = SimulationSettings("Results", "Time", "Concentration", 0, 10,
-                           [("LacI Protein", "laci_p"),
-                            ("TetR Protein", "tetr_p"),
-                            ("Cl Protein", "cl_p")])
+    s = SimulationSettings("Results", "Time", "Concentration", 0, 100,
+                           [("LacI Protein", "laci_mrna"),
+                            ("TetR Protein", "tetr_mrna"),
+                            ("Cl Protein", "cl_mrna")])
     g = GillespieSimulator(net, s)
     g.visualise(g.simulate())
 

@@ -1,4 +1,3 @@
-import math
 from typing import Dict, List
 
 import libsbml
@@ -29,11 +28,6 @@ class SbmlParser:
         for species in model.getListOfSpecies():
             net.species[species.getId()] = species.getInitialAmount()
 
-        # 1. Parameters are mere constants , you can read their values
-        # 2. Rules are more complex, but still constants: Though they need to be evaluated
-        # 3. Some parameters are actually rules, those are marked with "constant = false"
-        # 4. Thus: Parameters (intersection) Rules = Rules
-
         # Evaluate and store global parameters in a symbol table
         for param in model.getListOfParameters():
             if param.getConstant():
@@ -57,7 +51,7 @@ class SbmlParser:
             left: str = reactants[0].getSpecies() if reactants else ""
             right: str = products[0].getSpecies() if products else ""
 
-            reactions.append(CustomReaction(reaction_rate_function, left, right))
+            reactions.append(CustomReaction(reaction_rate_function.deepCopy(), left, right))
         net.reactions = reactions
 
         return net
@@ -65,7 +59,7 @@ class SbmlParser:
 
 def parsing():
     p = SbmlParser("other_files/BIOMD0000000012.xml")
-    p.parse()
+    return p.parse()
 
 
-parsing()
+n = parsing()

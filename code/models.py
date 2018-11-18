@@ -203,7 +203,7 @@ class CustomReaction(Reaction):
 
     def rate_function(self, n: Network) -> float:
         return helper.evaluate_ast_node(self.rate_function_ast,
-                                        n.symbols, n.species)
+                                        n.symbols, species=n.species)
 
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()

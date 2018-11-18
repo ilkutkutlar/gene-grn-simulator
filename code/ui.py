@@ -104,6 +104,19 @@ def simulate_switch():
     g.visualise(g.simulate())
 
 
-simulate_repressilator()
-# simulate_switch()
+def simulate_parser():
+    p = SbmlParser("other_files/BIOMD0000000012.xml")
+    net: Network = p.parse()
 
+    end_time = 100
+    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+                           [("LacI Protein", "PX"),
+                            ("TetR Protein", "PY"),
+                            ("Cl Protein", "PZ")])
+    g = GillespieSimulator(net, s)
+    g.visualise(g.simulate())
+
+
+# simulate_repressilator()
+# simulate_switch()
+simulate_parser()

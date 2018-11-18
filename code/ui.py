@@ -66,10 +66,11 @@ def simulate_repressilator():
     net = Network()
     net.initialise(species, reactions, regulations)
 
-    s = SimulationSettings("Results", "Time", "Concentration", 0, 100,
-                           [("LacI Protein", "laci_mrna"),
-                            ("TetR Protein", "tetr_mrna"),
-                            ("Cl Protein", "cl_mrna")])
+    end_time = 100
+    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+                           [("LacI Protein", "laci_p"),
+                            ("TetR Protein", "tetr_p"),
+                            ("Cl Protein", "cl_p")])
     g = GillespieSimulator(net, s)
     g.visualise(g.simulate())
 

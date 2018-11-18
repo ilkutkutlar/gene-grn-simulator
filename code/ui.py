@@ -6,6 +6,7 @@ from models import TranscriptionReaction, Network, MrnaDegradationReaction, Tran
 
 # region Constants
 # Transcription-related values
+from sbml_parser import SbmlParser
 
 ps_active = 0.5  # Promoter strength (active)
 ps_repr = 5 * (10 ** -4)  # Promoter strength (repressed)
@@ -62,7 +63,8 @@ def simulate_repressilator():
         ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
     ]
 
-    net = Network(species, reactions, regulations)
+    net = Network()
+    net.initialise(species, reactions, regulations)
 
     s = SimulationSettings("Results", "Time", "Concentration", 0, 100,
                            [("LacI Protein", "laci_mrna"),
@@ -103,3 +105,4 @@ def simulate_switch():
 
 simulate_repressilator()
 # simulate_switch()
+

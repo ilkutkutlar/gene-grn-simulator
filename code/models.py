@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Dict, Tuple, NamedTuple
 
+import libsbml
+
 Vector = List[float]
 NamedVector = Dict[str, float]
 
@@ -22,9 +24,14 @@ class Network:
     reactions: List  # of Reaction
     regulations: List[Regulation]
 
-    def __init__(self, species: Dict[str, float],
-                 reactions: List,
-                 regulations: List[Regulation]) -> None:
+    def __init__(self) -> None:
+        self.species = {}
+        self.reactions = []
+        self.regulations = []
+
+    def initialise(self, species: Dict[str, float],
+                   reactions: List,
+                   regulations: List[Regulation]):
         self.species = species
         self.reactions = reactions
         self.regulations = regulations
@@ -169,6 +176,10 @@ class ProteinDegradationReaction(Reaction):
             else:
                 change[x] = 0
         return change
+
+
+class CustomReaction(Reaction):
+    pass
 
 
 class SimulationSettings:

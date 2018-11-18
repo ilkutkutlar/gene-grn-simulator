@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List, Dict, Tuple, NamedTuple
 
 import libsbml
+from libsbml._libsbml import formulaToL3String
 
 import helper
 
@@ -20,6 +21,10 @@ class Regulation(NamedTuple):
     to_gene: str
     reg_type: RegType
 
+    def __str__(self) -> str:
+        sign = " -> " if self.reg_type == RegType.ACTIVATION else " -| "
+        return "Reg: " + self.from_gene + sign + self.to_gene
+
 
 class Network:
     species: Dict[str, float]
@@ -31,18 +36,37 @@ class Network:
         self.species = {}
         self.reactions = []
         self.regulations = []
+        self.symbols = []
 
     def initialise(self, species: Dict[str, float],
                    reactions: List,
-                   regulations: List[Regulation],
-                   symbols: Dict[str, float] = None):
+                   regulations: List[Regulation]):
         self.species = species
         self.reactions = reactions
         self.regulations = regulations
-        self.symbols = symbols
+        self.symbols = []
 
     def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
+
+    def __str__(self) -> str:
+        ret = "\nGlobal Parameters: \n"
+        for x in self.symbols:
+            ret += "    " + x + ": " + str(self.symbols[x]) + "\n"
+
+        ret += "\nSpecies: \n"
+        for x in self.species:
+            ret += "    " + x + ": " + str(self.species[x]) + "\n"
+
+        ret += "\nRegulations: \n"
+        for x in self.regulations:
+            ret += "    " + str(x) + "\n"
+
+        ret += "\nReactions: \n"
+        for x in self.reactions:
+            ret += "    " + str(x) + "\n"
+
+        return ret
 
 
 class SimulationSettings:
@@ -130,6 +154,9 @@ class TranscriptionReaction(Reaction):
                 change[x] = 0
         return change
 
+    def __str__(self) -> str:
+        return "Transcription: " + self.left + " -> " + self.right
+
 
 class TranslationReaction(Reaction):
     # mRNA -> Protein
@@ -150,6 +177,9 @@ class TranslationReaction(Reaction):
             else:
                 change[x] = 0
         return change
+
+    def __str__(self) -> str:
+        return "Translation: " + self.left + " -> " + self.right
 
 
 class MrnaDegradationReaction(Reaction):
@@ -173,6 +203,9 @@ class MrnaDegradationReaction(Reaction):
                 change[x] = 0
         return change
 
+    def __str__(self) -> str:
+        return "mRNA Degradation: " + self.left + " -> " + self.right
+
 
 class ProteinDegradationReaction(Reaction):
     # Protein ->
@@ -194,6 +227,9 @@ class ProteinDegradationReaction(Reaction):
                 change[x] = 0
         return change
 
+    def __str__(self) -> str:
+        return "Protein Degradation: " + self.left + " -> " + self.right
+
 
 class CustomReaction(Reaction):
     def __init__(self, rate_function_ast: libsbml.ASTNode,
@@ -208,10 +244,13 @@ class CustomReaction(Reaction):
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
         for x in n.species:
-            if x == self.left:      # x is a reactant, so -ve effect
+            if x == self.left:  # x is a reactant, so -ve effect
                 change[x] = -self.rate_function(n)
-            elif x == self.right:   # x is a product, so +ve effect
+            elif x == self.right:  # x is a product, so +ve effect
                 change[x] = +self.rate_function(n)
             else:
                 change[x] = 0
         return change
+
+    def __str__(self) -> str:
+        return formulaToL3String(self.rate_function_ast)

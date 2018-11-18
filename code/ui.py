@@ -66,13 +66,16 @@ def simulate_repressilator():
     net = Network()
     net.initialise(species, reactions, regulations)
 
-    end_time = 100
-    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("LacI Protein", "laci_p"),
-                            ("TetR Protein", "tetr_p"),
-                            ("Cl Protein", "cl_p")])
-    g = GillespieSimulator(net, s)
-    g.visualise(g.simulate())
+    print(net)
+
+
+    # end_time = 100
+    # s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+    #                        [("LacI Protein", "laci_p"),
+    #                         ("TetR Protein", "tetr_p"),
+    #                         ("Cl Protein", "cl_p")])
+    # g = GillespieSimulator(net, s)
+    # g.visualise(g.simulate())
 
 
 def simulate_switch():
@@ -108,15 +111,16 @@ def simulate_parser():
     p = SbmlParser("other_files/BIOMD0000000012.xml")
     net: Network = p.parse()
 
-    end_time = 100
-    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("LacI Protein", "PX"),
-                            ("TetR Protein", "PY"),
-                            ("Cl Protein", "PZ")])
-    g = GillespieSimulator(net, s)
-    g.visualise(g.simulate())
+    # end_time = 500
+    # s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+    #                        [("LacI Protein", "PX"),
+    #                         ("TetR Protein", "PY"),
+    #                         ("Cl Protein", "PZ")])
+    # g = GillespieSimulator(net, s)
+    # g.visualise(g.simulate())
+    print(net)
 
 
-# simulate_repressilator()
+simulate_repressilator()
 # simulate_switch()
-simulate_parser()
+# simulate_parser()

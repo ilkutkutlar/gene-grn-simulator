@@ -1,9 +1,10 @@
 import math
-from typing import Dict
+from typing import Dict, List
 
 import libsbml
 
-from models import Network
+import helper
+from models import Network, Reaction, CustomReaction
 
 
 # 1. Core objects of libsbml:
@@ -16,49 +17,15 @@ class SbmlParser:
     def __init__(self, filename):
         self.filename = filename
 
-    """
-    Only evaluates nodes which contain constants.
-    """
-
-    def evaluate_ast_node(self, node: libsbml.ASTNode, symbols: Dict[str, float]):
-        node_type = node.getType()
-
-        if node_type == libsbml.AST_NAME:
-            return symbols[node.getName()]
-        elif node_type == libsbml.AST_INTEGER:
-            return node.getValue()
-        elif node_type == libsbml.AST_REAL:
-            return node.getValue()
-        elif node_type == libsbml.AST_FUNCTION_LN:
-            val = self.evaluate_ast_node(node.getLeftChild(), symbols)
-            return math.log(val, math.e)
-        elif node_type == libsbml.AST_PLUS:
-            left = self.evaluate_ast_node(node.getLeftChild(), symbols)
-            right = self.evaluate_ast_node(node.getRightChild(), symbols)
-            return left + right
-        elif node_type == libsbml.AST_DIVIDE:
-            left = self.evaluate_ast_node(node.getLeftChild(), symbols)
-            right = self.evaluate_ast_node(node.getRightChild(), symbols)
-            return left / right
-        elif node_type == libsbml.AST_MINUS:
-            left = self.evaluate_ast_node(node.getLeftChild(), symbols)
-            right = self.evaluate_ast_node(node.getRightChild(), symbols)
-            return left - right
-        elif node_type == libsbml.AST_TIMES:
-            left = self.evaluate_ast_node(node.getLeftChild(), symbols)
-            right = self.evaluate_ast_node(node.getRightChild(), symbols)
-            return left * right
-        else:
-            return 0
-
-    def parse(self):
+    def parse(self) -> Network:
         net: Network = Network()
-        sbml = libsbml.SBMLReader()
+        sbml: libsbml.SBMLReader = libsbml.SBMLReader()
         symbols: Dict[str, float] = {}
 
         parsed = sbml.readSBML(self.filename)
         model: libsbml.Model = parsed.getModel()
 
+        # Initialise species and their initial amounts
         for species in model.getListOfSpecies():
             net.species[species.getId()] = species.getInitialAmount()
 
@@ -67,27 +34,33 @@ class SbmlParser:
         # 3. Some parameters are actually rules, those are marked with "constant = false"
         # 4. Thus: Parameters (intersection) Rules = Rules
 
+        # Evaluate and store global parameters in a symbol table
         for param in model.getListOfParameters():
             if param.getConstant():
                 symbols[param.getId()] = param.getValue()
 
+        # Evaluate and store rules in the symbol table
         rules = model.getListOfRules()
         for r in rules:
-            val = self.evaluate_ast_node(r.getMath(), symbols)
+            val = helper.evaluate_ast_node(r.getMath(), symbols)
             symbols[r.getId()] = val
 
-        print(symbols)
+        net.symbols = symbols
 
-        # for x in model.getListOfReactions():
-        #     formula = x.getKineticLaw().getMath()
-        #     if formula.getType() == libsbml.AST_TIMES:
-        #         left = formula.getLeftChild().getName()
-        #         right = formula.getRightChild().getName()
-        #         print(left + "*" + right)
-        #     print()
-        # print(formulaToL3String(formula))
+        reactions: List[Reaction] = []
+        for x in model.getListOfReactions():
+            reaction_rate_function = x.getKineticLaw().getMath()
 
-        # print(net.species)
+            reactants = x.getListOfReactants()
+            products = x.getListOfProducts()
+
+            left: str = reactants[0].getSpecies() if reactants else ""
+            right: str = products[0].getSpecies() if products else ""
+
+            reactions.append(CustomReaction(reaction_rate_function, left, right))
+        net.reactions = reactions
+
+        return net
 
 
 def parsing():

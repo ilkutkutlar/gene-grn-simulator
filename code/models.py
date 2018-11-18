@@ -4,6 +4,8 @@ from typing import List, Dict, Tuple, NamedTuple
 
 import libsbml
 
+import helper
+
 Vector = List[float]
 NamedVector = Dict[str, float]
 
@@ -21,6 +23,7 @@ class Regulation(NamedTuple):
 
 class Network:
     species: Dict[str, float]
+    symbols: Dict[str, float]  # Used by CustomReactions, optional
     reactions: List  # of Reaction
     regulations: List[Regulation]
 
@@ -31,13 +34,27 @@ class Network:
 
     def initialise(self, species: Dict[str, float],
                    reactions: List,
-                   regulations: List[Regulation]):
+                   regulations: List[Regulation],
+                   symbols: Dict[str, float] = None):
         self.species = species
         self.reactions = reactions
         self.regulations = regulations
+        self.symbols = symbols
 
     def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
+
+
+class SimulationSettings:
+    # Tuple[label, species_name]
+    def __init__(self, title: str, x_label: str, y_label: str, start_time: float, end_time: float,
+                 plotted_species: List[Tuple[str, str]]):
+        self.plotted_species = plotted_species
+        self.start_time = start_time
+        self.end_time = end_time
+        self.x_label = x_label
+        self.y_label = y_label
+        self.title = title
 
 
 class Reaction(ABC):
@@ -179,16 +196,22 @@ class ProteinDegradationReaction(Reaction):
 
 
 class CustomReaction(Reaction):
-    pass
+    def __init__(self, rate_function_ast: libsbml.ASTNode,
+                 left: str, right: str):
+        super().__init__(left, right)
+        self.rate_function_ast = rate_function_ast
 
+    def rate_function(self, n: Network) -> float:
+        return helper.evaluate_ast_node(self.rate_function_ast,
+                                        n.symbols, n.species)
 
-class SimulationSettings:
-    # Tuple[label, species_name]
-    def __init__(self, title: str, x_label: str, y_label: str, start_time: float, end_time: float,
-                 plotted_species: List[Tuple[str, str]]):
-        self.plotted_species = plotted_species
-        self.start_time = start_time
-        self.end_time = end_time
-        self.x_label = x_label
-        self.y_label = y_label
-        self.title = title
+    def change_vector(self, n: Network) -> NamedVector:
+        change: Dict[str, float] = dict()
+        for x in n.species:
+            if x == self.left:      # x is a reactant, so -ve effect
+                change[x] = -self.rate_function(n)
+            elif x == self.right:   # x is a product, so +ve effect
+                change[x] = +self.rate_function(n)
+            else:
+                change[x] = 0
+        return change

@@ -4,7 +4,10 @@ from gillespie import GillespieSimulator
 from models import TranscriptionReaction, Network, MrnaDegradationReaction, TranslationReaction, \
     ProteinDegradationReaction, SimulationSettings, Regulation, RegType
 
+
 # region Constants
+
+
 # Transcription-related values
 from sbml_parser import SbmlParser
 
@@ -43,7 +46,7 @@ beta = protein_decay_rate / mRNA_decay_rate
 
 
 def simulate_repressilator():
-    species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
+    species = {"laci_mrna": 0, "tetr_mrna": 20, "cl_mrna": 0,
                "laci_p": 10, "tetr_p": 10, "cl_p": 10}
     regulations = [Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION),
                    Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
@@ -52,12 +55,15 @@ def simulate_repressilator():
         TranscriptionReaction(alpha, 40, 2, "", "laci_mrna"),
         TranscriptionReaction(alpha, 40, 2, "", "tetr_mrna"),
         TranscriptionReaction(alpha, 40, 2, "", "cl_mrna"),
+
         MrnaDegradationReaction(mRNA_decay_rate, "laci_mrna", ""),
         MrnaDegradationReaction(mRNA_decay_rate, "tetr_mrna", ""),
         MrnaDegradationReaction(mRNA_decay_rate, "cl_mrna", ""),
+
         TranslationReaction(beta, "laci_mrna", "laci_p"),
         TranslationReaction(beta, "tetr_mrna", "tetr_p"),
         TranslationReaction(beta, "cl_mrna", "cl_p"),
+
         ProteinDegradationReaction(protein_decay_rate, "laci_p", ""),
         ProteinDegradationReaction(protein_decay_rate, "tetr_p", ""),
         ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
@@ -68,14 +74,13 @@ def simulate_repressilator():
 
     print(net)
 
-
-    # end_time = 100
-    # s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-    #                        [("LacI Protein", "laci_p"),
-    #                         ("TetR Protein", "tetr_p"),
-    #                         ("Cl Protein", "cl_p")])
-    # g = GillespieSimulator(net, s)
-    # g.visualise(g.simulate())
+    end_time = 100
+    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+                           [("LacI Protein", "laci_p"),
+                            ("TetR Protein", "tetr_p"),
+                            ("Cl Protein", "cl_p")])
+    g = GillespieSimulator(net, s)
+    g.visualise(g.simulate())
 
 
 def simulate_switch():
@@ -111,13 +116,13 @@ def simulate_parser():
     p = SbmlParser("other_files/BIOMD0000000012.xml")
     net: Network = p.parse()
 
-    # end_time = 500
-    # s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-    #                        [("LacI Protein", "PX"),
-    #                         ("TetR Protein", "PY"),
-    #                         ("Cl Protein", "PZ")])
-    # g = GillespieSimulator(net, s)
-    # g.visualise(g.simulate())
+    end_time = 100
+    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+                           [("LacI Protein", "PX"),
+                            ("TetR Protein", "PY"),
+                            ("Cl Protein", "PZ")])
+    g = GillespieSimulator(net, s)
+    g.visualise(g.simulate())
     print(net)
 
 

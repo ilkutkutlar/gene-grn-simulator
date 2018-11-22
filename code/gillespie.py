@@ -10,6 +10,9 @@ SimulationResults = List[Tuple[float, NamedVector]]
 
 
 class GillespieSimulator:
+    """
+    Calculates the sum of all reactions rates in the given network
+    """
 
     @staticmethod
     def _calculate_r0_(net: Network):
@@ -19,10 +22,18 @@ class GillespieSimulator:
 
         return r0
 
+    """
+    Calculates the time after which the next random reaction will occur
+    """
+
     @staticmethod
     def _get_theta_(r0: float):
         s1: float = random()  # To pick time
         return (1 / r0) * log(1 / s1, e)
+
+    """
+    Adds a given change vector to the network's state vector
+    """
 
     @staticmethod
     def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]):
@@ -30,6 +41,10 @@ class GillespieSimulator:
         for x in state:
             ret[x] = state[x] + change[x]
         return ret
+
+    """
+    Returns the next state of the network after a random reaction has occurred
+    """
 
     @staticmethod
     def _get_next_state_(net: Network, r0: float):
@@ -54,6 +69,11 @@ class GillespieSimulator:
     # for y in cumilative:
     #     if s2 < y[1]:
     #         return y[0]
+
+    """
+    Given a list of items and their associated probabilities of being picked,
+    picks an item randomly at a rate dictated by its given probability
+    """
 
     @staticmethod
     def _pick_weighted_random_(items: List[Any], probabilities: List[float]) -> Any:
@@ -85,9 +105,7 @@ class GillespieSimulator:
                 return y[0]
 
     """
-    :arg r0     -> Total of reaction rates
-
-    :returns a NamedVector representing the
+    returns a NamedVector representing the
     change vector of the reaction chosen randomly,
     which will happen next
     """
@@ -101,6 +119,12 @@ class GillespieSimulator:
 
         return GillespieSimulator._pick_weighted_random_(net.reactions, propensities) \
             .change_vector(net)
+
+    """
+    Performs a Gillespie simulation of the given network in the given
+    interval (dictated by the simulation setting given) and returns
+    a list of results.
+    """
 
     @staticmethod
     def simulate(net: Network, sim: SimulationSettings) -> SimulationResults:
@@ -118,6 +142,12 @@ class GillespieSimulator:
             results.append((t, net.species))
 
         return results
+
+    """
+    Visualises a given set of Gillespie simulation results where
+    simulation properties are dictated by the given simulation settings
+    object
+    """
 
     @staticmethod
     def visualise(results: SimulationResults, sim: SimulationSettings):

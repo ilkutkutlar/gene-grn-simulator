@@ -59,8 +59,8 @@
 	\subsection{Final report} 
 	The original timetable stated that starting from week 3, the final report would be updated continously as more features are added. This was eventually decided against as it is too early in the project and some details have not been clarified yet. Therefore, the writing of the final report will not start until term 2.
 	
-	\subsection{Testing} 
-	The specification specified a unit test would be implemented for each objective. This has not been implemented yet because in their current states, the components making up the code are too large and thus not easily testable. In the next stage of the project, these components will be broken down into smaller subcomponents to allow easy testing.
+	\subsection{Testing} \label{progress-testing}
+	The specification specified a unit test would be implemented for each objective. This could not be done because in their current states, the components making up the code are too large and thus not easily testable. In the next stage of the project, these components will be broken down into smaller subcomponents to allow easy testing.
 	
 	
 	\subsection{Simulation model} 
@@ -82,10 +82,8 @@
 	% TODO: Maybe also add species?
 	
 	\subsection{Objective 6a (SBML parsing)} 
-	
-	
-	\subsection{Updated Timetable}
-	
+	This objective was originally planned for later on. However, it was decided to be implemented earlier, so that SBML models available online (for example on the Biomodels Database) could be easily imported into the software without having to manually enter values to allow convenient testing with other circuits. The SBML parsing was achieved using the \verb|libsbml| library. The parsed values are subsequently converted into the internal representation used by the program which can then be simulated. 
+	% TODO: How do you prove correctness? Well, the manually entered values and the automaticly parsed one is more or less the same?
 	
 	
 	\section{Design}		% Quality of design, does the system have a good design? This is the code stuff!
@@ -116,6 +114,23 @@
 	%- How to prove they are done? Repressilator
 	%- For each, say: Changes to original place, and current state.
 	%- If not done, say why. With testing, not done because need to break it down further.
+	
+	\section{Project Management}
+	\begin{itemize}
+		\item Most of the important milestones mentioned in the original timetable have been achieved at this point. This success can mostly be attributed to the fact that the duration of all tasks were slightly overestimated.
+		\item The experience gained during this first part of the project has lead to some changes having to be made to the original timetable:
+		\begin{itemize}
+			% TODO: Help with testing the system, good, but, elaborate?
+			\item Tasks related to GUI have been decided to be of a greater importance than before due to its significance in determining usability. Starting the GUI earlier will allow more time to polish and improve it, as well as help with testing the system.
+			\item The tasks related to the reverse engineering feature have been given more time. The extra time has been accounted for by parallelising the tasks with the GUI tasks. Doing so will be possible as this time period coincides with the Christmas holiday, during which some other commitments such as attending lectures, etc. will not continue, thus more time can be invested in the project.
+			\item It has also been decided that a 10 day period will be allocated to researching and thinking about the type of approach to take for achieving reverse engineering and decide on the scope of the feature (i.e. which constraints will be offered).
+			\item As mentioned in section \ref{progress-testing}, it was not possible to implement unit tests. To solve this problem, a 1 week period will be allocated to refactoring the current code to break it up into smaller, easily testable functions and write unit tests for each. To avoid 
+			
+		\end{itemize}
+		
+	\end{itemize}
+	
+	\subsection{Updated Timetable}
 	
 	%% Updated timetable:
 	%- Finally, the updated timetable: GUI and rev. eng. at the same time.

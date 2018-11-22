@@ -3,55 +3,44 @@ from typing import Dict
 
 import libsbml
 
-
-def apply_change_vector(state: Dict[str, float], change: Dict[str, float]):
-    ret = state.copy()
-    for x in state:
-        ret[x] = state[x] + change[x]
-    return ret
-
-
 """
 Only evaluates nodes which contain constants.
 """
 
 
-def evaluate_ast_node(node: libsbml.ASTNode,
-                      symbols: Dict[str, float],
-                      species: Dict[str, float] = None):
+# TODO: Very inefficient! Iterative?
+def evaluate_ast_node(node: libsbml.ASTNode, symbols: Dict[str, float], species: Dict[str, float] = None) -> float:
     node_type = node.getType()
 
-    if node_type == libsbml.AST_REAL:
-        return node.getValue()
-    elif node_type == libsbml.AST_INTEGER:
-        return node.getValue()
-    elif node_type == libsbml.AST_RATIONAL:
-        return node.getValue()
+    # Base cases
+    # TODO: Rational numbers are stored differently: using numerator and denominator, account for that!
+    if node.isReal() or node.isInteger() or node.isRational():
+        value = node.getValue()
     elif node_type == libsbml.AST_NAME:
         name = node.getName()
         if name in symbols:
-            return symbols[name]
+            value = symbols[name]
         elif species and (name in species):
-            return species[name]
+            value = species[name]
         else:
-            return 0  # TODO: Error!
+            value = 0  # TODO: Error!
     elif node_type == libsbml.AST_FUNCTION_LN:
         val = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
-        return math.log(val, math.e)
+        value = math.log(val, math.e)
     else:
         left = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
         right = evaluate_ast_node(node.getRightChild(), symbols, species=species)
 
         if node_type == libsbml.AST_PLUS:
-            return left + right
+            value = left + right
         elif node_type == libsbml.AST_DIVIDE:
-            return left / right
+            value = left / right
         elif node_type == libsbml.AST_MINUS:
-            return left - right
+            value = left - right
         elif node_type == libsbml.AST_TIMES:
-            return left * right
-        elif node_type == 296:          # AST_POWER
-            return math.pow(left, right)
+            value = left * right
+        elif node_type == 296:  # AST_POWER
+            value = math.pow(left, right)
         else:
             # Debug codes:
             # print("ERROR!")
@@ -61,4 +50,51 @@ def evaluate_ast_node(node: libsbml.ASTNode,
             # print("Exponent: " + str(node.getExponent()))
             # print("Type: " + str(node.getType()))
 
-            return 0  # TODO: Error!
+            value = 0  # TODO: Error!
+
+    return value
+
+# def evaluate_ast_node_iter(node: libsbml.ASTNode, symbols: Dict[str, float], species: Dict[str, float] = None):
+#     value: float = 0
+#     node_type = node.getType()
+#     the_stack = [node]
+#
+#     while the_stack:
+#         if node_type == libsbml.AST_REAL or \
+#                 node_type == libsbml.AST_INTEGER or \
+#                 node_type == libsbml.AST_RATIONAL:
+#             value = node.getValue()
+#             the_stack.append(value)
+#         elif node_type == libsbml.AST_NAME:
+#             name = node.getName()
+#             if name in symbols:
+#                 value = symbols[name]
+#             elif species and (name in species):
+#                 value = species[name]
+#             else:
+#                 value = 0  # TODO: Error!
+#             the_stack.append(value)
+#         elif node_type == libsbml.AST_FUNCTION_LN:
+#
+#             val = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
+#             value = math.log(val, math.e)
+#         else:
+#             left = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
+#             right = evaluate_ast_node(node.getRightChild(), symbols, species=species)
+#
+#             the_stack.append(node.getLeftChild())
+#             the_stack.append(node.getRightChild())
+#
+#
+#             if node_type == libsbml.AST_PLUS:
+#                 value = left + right
+#             elif node_type == libsbml.AST_DIVIDE:
+#                 value = left / right
+#             elif node_type == libsbml.AST_MINUS:
+#                 value = left - right
+#             elif node_type == libsbml.AST_TIMES:
+#                 value = left * right
+#             elif node_type == 296:  # AST_POWER
+#                 value = math.pow(left, right)
+#             else:
+#                 value = 0  # TODO: Error!

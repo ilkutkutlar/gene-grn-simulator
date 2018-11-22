@@ -4,7 +4,6 @@ from typing import List, Tuple, Dict, Any
 
 import matplotlib.pyplot as plt
 
-from helper import apply_change_vector
 from models import NamedVector, Network, SimulationSettings
 
 
@@ -24,12 +23,36 @@ class GillespieSimulator:
         s1: float = random()  # To pick time
         return (1 / r0) * log(1 / s1, e)
 
+    def _apply_change_vector_(self, state: Dict[str, float], change: Dict[str, float]):
+        ret = state.copy()
+        for x in state:
+            ret[x] = state[x] + change[x]
+        return ret
+
     def _get_next_state_(self, r0: float):
         vj = self._pick_next_reaction_(r0)
-        return apply_change_vector(self.net.species, vj) if vj else self.net.species
+        return self._apply_change_vector_(self.net.species, vj) if vj else self.net.species
 
-    # List: Tuple: Item, probability
-    def _pick_weighted_random_(self, items: List[Any], probs: List[float]) -> Any:
+    # TODO: This would probably be more efficient!
+    #  Mostly memory efficiency, as we are building a list of tuples
+    #  with all the reactions, etc.
+    # def _get_weighted_int_(self, weights: List[float]):
+    #     cumilative: List[float] = []
+    #
+    #     for i in range(0, len(weights)):
+    #         prev_cumilative: float = 0 if (not cumilative) \
+    #             else (cumilative[len(cumilative) - 1])
+    #
+    #         cumilative_prob = prev_cumilative + weights[i]
+    #         item = items[i]
+    #         cumilative.append((item, cumilative_prob))
+    #
+    #     Always returns a value
+    # for y in cumilative:
+    #     if s2 < y[1]:
+    #         return y[0]
+
+    def _pick_weighted_random_(self, items: List[Any], probabilities: List[float]) -> Any:
         s2: float = random()  # To pick reaction
 
         # This is what this does:
@@ -48,7 +71,7 @@ class GillespieSimulator:
             prev_cumilative: float = 0 if (not cumilative) \
                 else (cumilative[len(cumilative) - 1])[1]
 
-            cumilative_prob = prev_cumilative + probs[i]
+            cumilative_prob = prev_cumilative + probabilities[i]
             item = items[i]
             cumilative.append((item, cumilative_prob))
 
@@ -71,37 +94,8 @@ class GillespieSimulator:
         for reaction in self.net.reactions:
             propensities.append(reaction.rate_function(self.net) / r0)
 
-        return self._pick_weighted_random_(self.net.reactions, propensities)\
+        return self._pick_weighted_random_(self.net.reactions, propensities) \
             .change_vector(self.net)
-
-        # # This is what this does:
-        # # Say we have 3 reactions with propensities 0.2, 0.3 and 0.5.
-        # # To pick one of them in random, you first arrange these propensities
-        # # on a number line using their cumilative probabilities:
-        # # |--|---|-----|
-        # # |.2|.5 |1.0  |
-        # # Then you generate a random number between 0 and 1. Say, we pick 0.77.
-        # # 0.77 falls inside the block that belongs to the reaction
-        # # with a propensity of 0.5, so we pick that.
-        #
-        # s2: float = random()  # To pick reaction
-        #
-        # cumilative_propensities: List[Tuple[float, NamedVector]] = []
-        #
-        # for reaction in self.net.reactions:
-        #     propensity: float = reaction.rate_function(self.net) / r0
-        #
-        #     prev_cumilative_prob = 0 if (not cumilative_propensities) \
-        #         else (cumilative_propensities[len(cumilative_propensities) - 1])[0]
-        #
-        #     cumilative_prob = prev_cumilative_prob + propensity
-        #     change = reaction.change_vector(self.net)
-        #     cumilative_propensities.append((cumilative_prob, change))
-        #
-        # # Always returns a value
-        # for y in cumilative_propensities:
-        #     if s2 < y[0]:
-        #         return y[1]
 
     def simulate(self) -> List[Tuple]:
         t: float = self.sim.start_time

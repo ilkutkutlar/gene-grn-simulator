@@ -74,8 +74,8 @@ def simulate_repressilator():
 
     print(net)
 
-    end_time = 100
-    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+    end_time = 1000
+    s = SimulationSettings("Results", "Time", "Concentration", 50, end_time,
                            [("LacI Protein", "laci_p"),
                             ("TetR Protein", "tetr_p"),
                             ("Cl Protein", "cl_p")])
@@ -126,6 +126,6 @@ def simulate_parser():
     print(net)
 
 
-simulate_repressilator()
+# simulate_repressilator()
 # simulate_switch()
-# simulate_parser()
+simulate_parser()

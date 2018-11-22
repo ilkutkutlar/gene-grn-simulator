@@ -47,7 +47,7 @@ beta = protein_decay_rate / mRNA_decay_rate
 
 def simulate_repressilator():
     species = {"laci_mrna": 0, "tetr_mrna": 20, "cl_mrna": 0,
-               "laci_p": 10, "tetr_p": 10, "cl_p": 10}
+               "laci_p": 0, "tetr_p": 0, "cl_p": 0}
     regulations = [Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION),
                    Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
                    Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]

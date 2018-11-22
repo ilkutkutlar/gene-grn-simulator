@@ -119,8 +119,8 @@ def simulate_switch():
 
 
 def simulate_parser():
-    p = SbmlParser("other_files/BIOMD0000000012.xml")
-    net: Network = p.parse()
+    filename = "other_files/BIOMD0000000012.xml"
+    net: Network = SbmlParser.parse(filename)
     print(net)
 
     end_time = 100
@@ -132,6 +132,6 @@ def simulate_parser():
     GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
 
 
-simulate_repressilator()
+# simulate_repressilator()
 # simulate_switch()
-# simulate_parser()
+simulate_parser()

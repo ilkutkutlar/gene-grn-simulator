@@ -124,12 +124,14 @@ class TranscriptionReaction(Reaction):
         '''
 
     @staticmethod
+    # [TF]^n / (Kd + [TF]^n)
     def _hill_activator_(tf: float, n: float, kd: float):
         a = pow(tf, n)
         b = kd + pow(tf, n)
         return a / b
 
     @staticmethod
+    # 1 / (1 + ([TF] / Kd) ^ n)
     def _hill_repressor_(tf: float, n: float, kd: float):
         c = 1 + pow(tf / kd, n)
         return 1 / c

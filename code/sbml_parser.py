@@ -13,37 +13,43 @@ from models import Network, Reaction, CustomReaction
 
 
 class SbmlParser:
-    def __init__(self, filename):
-        self.filename = filename
+    @staticmethod
+    def _get_species_(model):
+        species: Dict[str, float] = {}
+        for s in model.getListOfSpecies():
+            species[s.getId()] = s.getInitialAmount()
+        return species
 
-    def parse(self) -> Network:
-        net: Network = Network()
-        sbml: libsbml.SBMLReader = libsbml.SBMLReader()
+    @staticmethod
+    def _get_symbols_(model):
         symbols: Dict[str, float] = {}
 
-        parsed = sbml.readSBML(self.filename)
-        model: libsbml.Model = parsed.getModel()
+        """
+         Both list of parameters and rules constitute symbols
+         which may be used in the reactions. So, include all
+         in a symbol table.
+        """
 
-        # Initialise species and their initial amounts
-        for species in model.getListOfSpecies():
-            net.species[species.getId()] = species.getInitialAmount()
-
-        # Evaluate and store global parameters in a symbol table
         for param in model.getListOfParameters():
             if param.getConstant():
                 symbols[param.getId()] = param.getValue()
 
-        # Evaluate and store rules in the symbol table
-        rules = model.getListOfRules()
-        for r in rules:
+        """
+        Rules are different to parameters as they can contain symbols
+        themselves, which can be the parameters parsed in the above loop.
+        """
+
+        for r in model.getListOfRules():
             val = helper.evaluate_ast_node(r.getMath(), symbols)
             symbols[r.getId()] = val
 
-        net.symbols = symbols
+        return symbols
 
+    @staticmethod
+    def _get_reactions_(model):
         reactions: List[Reaction] = []
         for x in model.getListOfReactions():
-            reaction_rate_function = x.getKineticLaw().getMath()
+            reaction_rate_function = x.getKineticLaw().getMath().deepCopy()
 
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
@@ -51,15 +57,22 @@ class SbmlParser:
             left: str = reactants[0].getSpecies() if reactants else ""
             right: str = products[0].getSpecies() if products else ""
 
-            reactions.append(CustomReaction(reaction_rate_function.deepCopy(), left, right))
-        net.reactions = reactions
+            reactions.append(CustomReaction(reaction_rate_function, left, right))
+        return reactions
+
+    @staticmethod
+    def parse(filename: str) -> Network:
+        net: Network = Network()
+        sbml: libsbml.SBMLReader = libsbml.SBMLReader()
+
+        parsed = sbml.readSBML(filename)
+        model: libsbml.Model = parsed.getModel()
+
+        # Initialise species and their initial amounts
+        net.species = SbmlParser._get_species_(model)
+        # Evaluate and store global parameters in a symbol table
+        net.symbols = SbmlParser._get_symbols_(model)
+        # Parse reactions and create CustomReaction objects
+        net.reactions = SbmlParser._get_reactions_(model)
 
         return net
-
-
-def parsing():
-    p = SbmlParser("other_files/BIOMD0000000012.xml")
-    return p.parse()
-
-
-n = parsing()

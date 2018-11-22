@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2019-02-11" view-index="0" gantt-divider-location="553" resource-divider-location="300" version="2.8.6" locale="en_GB">
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2018-11-12" view-index="0" gantt-divider-location="728" resource-divider-location="300" version="2.8.6" locale="en_GB">
     <description/>
-    <view zooming-state="default:7" id="gantt-chart">
-        <field id="tpd3" name="Name" width="352" order="0"/>
-        <field id="tpd4" name="Begin date" width="92" order="1"/>
-        <field id="tpd5" name="End date" width="105" order="2"/>
+    <view zooming-state="default:6" id="gantt-chart">
+        <field id="tpd3" name="Name" width="410" order="0"/>
+        <field id="tpd4" name="Begin date" width="151" order="1"/>
+        <field id="tpd5" name="End date" width="163" order="2"/>
     </view>
     <view id="resource-table">
         <field id="0" name="Name" width="210" order="0"/>
@@ -33,8 +33,9 @@
             <taskproperty id="tpd8" name="coordinator" type="default" valuetype="text"/>
             <taskproperty id="tpd9" name="predecessorsr" type="default" valuetype="text"/>
         </taskproperties>
-        <task id="64" name="Final Report" color="#8cb6ce" meeting="false" start="2019-01-07" duration="189" complete="0" thirdDate="2018-10-15" thirdDate-constraint="0" expand="true"/>
+        <task id="64" name="Final Report" color="#8cb6ce" meeting="false" start="2019-01-07" duration="113" complete="0" thirdDate="2019-01-07" thirdDate-constraint="0" expand="true"/>
         <task id="65" name="Presentation" color="#8cb6ce" meeting="false" start="2019-01-25" duration="30" complete="0" thirdDate="2018-10-15" thirdDate-constraint="0" expand="true"/>
+        <task id="72" name="Implementing unit tests" color="#8cb6ce" meeting="false" start="2018-11-28" duration="7" complete="0" thirdDate="2018-11-05" thirdDate-constraint="0" expand="true"/>
         <task id="69" name="Thinking about reverse engineering" color="#8cb6ce" meeting="false" start="2018-11-28" duration="10" complete="0" thirdDate="2018-11-28" thirdDate-constraint="0" expand="true"/>
         <task id="34" name="3a - Convert constraints" color="#8cb6ce" meeting="false" start="2018-12-16" duration="14" complete="0" thirdDate="2018-12-16" thirdDate-constraint="0" expand="true"/>
         <task id="52" name="3b - Find the right circuit" color="#8cb6ce" meeting="false" start="2018-12-30" duration="21" complete="0" thirdDate="2018-12-30" thirdDate-constraint="0" expand="true"/>

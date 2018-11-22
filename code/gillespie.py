@@ -6,32 +6,35 @@ import matplotlib.pyplot as plt
 
 from models import NamedVector, Network, SimulationSettings
 
+SimulationResults = List[Tuple[float, NamedVector]]
+
 
 class GillespieSimulator:
-    def __init__(self, net: Network, sim: SimulationSettings):
-        self.net = net
-        self.sim = sim
 
-    def _calculate_r0_(self, net: Network):
+    @staticmethod
+    def _calculate_r0_(net: Network):
         r0: float = 0
-        for reaction in self.net.reactions:
+        for reaction in net.reactions:
             r0 += reaction.rate_function(net)
 
         return r0
 
-    def _get_theta_(self, r0: float):
+    @staticmethod
+    def _get_theta_(r0: float):
         s1: float = random()  # To pick time
         return (1 / r0) * log(1 / s1, e)
 
-    def _apply_change_vector_(self, state: Dict[str, float], change: Dict[str, float]):
+    @staticmethod
+    def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]):
         ret = state.copy()
         for x in state:
             ret[x] = state[x] + change[x]
         return ret
 
-    def _get_next_state_(self, r0: float):
-        vj = self._pick_next_reaction_(r0)
-        return self._apply_change_vector_(self.net.species, vj) if vj else self.net.species
+    @staticmethod
+    def _get_next_state_(net: Network, r0: float):
+        vj = GillespieSimulator._pick_next_reaction_(net, r0)
+        return GillespieSimulator._apply_change_vector_(net.species, vj) if vj else net.species
 
     # TODO: This would probably be more efficient!
     #  Mostly memory efficiency, as we are building a list of tuples
@@ -52,7 +55,8 @@ class GillespieSimulator:
     #     if s2 < y[1]:
     #         return y[0]
 
-    def _pick_weighted_random_(self, items: List[Any], probabilities: List[float]) -> Any:
+    @staticmethod
+    def _pick_weighted_random_(items: List[Any], probabilities: List[float]) -> Any:
         s2: float = random()  # To pick reaction
 
         # This is what this does:
@@ -71,8 +75,8 @@ class GillespieSimulator:
             prev_cumilative: float = 0 if (not cumilative) \
                 else (cumilative[len(cumilative) - 1])[1]
 
-            cumilative_prob = prev_cumilative + probabilities[i]
-            item = items[i]
+            cumilative_prob: float = prev_cumilative + probabilities[i]
+            item: Any = items[i]
             cumilative.append((item, cumilative_prob))
 
         # Always returns a value
@@ -88,54 +92,57 @@ class GillespieSimulator:
     which will happen next
     """
 
-    def _pick_next_reaction_(self, r0: float) -> NamedVector:
+    @staticmethod
+    def _pick_next_reaction_(net: Network, r0: float) -> NamedVector:
 
         propensities: List[float] = []
-        for reaction in self.net.reactions:
-            propensities.append(reaction.rate_function(self.net) / r0)
+        for reaction in net.reactions:
+            propensities.append(reaction.rate_function(net) / r0)
 
-        return self._pick_weighted_random_(self.net.reactions, propensities) \
-            .change_vector(self.net)
+        return GillespieSimulator._pick_weighted_random_(net.reactions, propensities) \
+            .change_vector(net)
 
-    def simulate(self) -> List[Tuple]:
-        t: float = self.sim.start_time
-        results: List[Tuple] = []
+    @staticmethod
+    def simulate(net: Network, sim: SimulationSettings) -> SimulationResults:
+        t: float = sim.start_time
+        results: SimulationResults = []
 
-        while t <= self.sim.end_time:
-            r0: float = self._calculate_r0_(self.net)
+        while t <= sim.end_time:
+            r0: float = GillespieSimulator._calculate_r0_(net)
 
             # Advance time
-            t = t + self._get_theta_(r0)
+            t: float = t + GillespieSimulator._get_theta_(r0)
             # Apply one reaction chosen randomly
-            self.net.species = self._get_next_state_(r0)
+            net.species = GillespieSimulator._get_next_state_(net, r0)
 
-            results.append((t, self.net.species))
+            results.append((t, net.species))
 
         return results
 
-    def visualise(self, results):
+    @staticmethod
+    def visualise(results: SimulationResults, sim: SimulationSettings):
         # plot results
         plt.figure()
 
         times: List[float] = []
         plottings: Dict[str, List[float]] = {}
 
-        for species in self.sim.plotted_species:
+        for species in sim.plotted_species:
             plottings[species[1]] = []
 
         for x in results:
             times.append(x[0])
 
-            for species in self.sim.plotted_species:
+            for species in sim.plotted_species:
                 plottings[species[1]].append(x[1][species[1]])
 
-        for species in self.sim.plotted_species:
+        for species in sim.plotted_species:
             plt.plot(times, plottings[species[1]], label=species[0])
 
-        plt.xlabel(self.sim.x_label)
-        plt.ylabel(self.sim.y_label)
+        plt.xlabel(sim.x_label)
+        plt.ylabel(sim.y_label)
         plt.legend(loc=0)
-        plt.title(self.sim.title)
+        plt.title(sim.title)
 
         plt.draw()
         plt.show()

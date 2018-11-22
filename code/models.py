@@ -97,11 +97,11 @@ class TranscriptionReaction(Reaction):
     #  -> mRNA
 
     def __init__(self, trans_rate: float,
-                 km: float, hill_coeff: float,
+                 kd: float, hill_coeff: float,
                  left: str, right: str):
         super().__init__(left, right)
         self.trans_rate = trans_rate
-        self.km = km
+        self.kd = kd
         self.hill_coeff = hill_coeff
 
     ''' Based on an ODE model and uses the Hill equation to calculate
@@ -116,12 +116,23 @@ class TranscriptionReaction(Reaction):
         beta    : Maximal transcription rate (promoter strength)
         [TF]    : The concentration of Transcript Factor that is regulating this promoter
         Kd      : Dissociation constant, the probability that the TF will dissociate from the 
-        binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and 
-        Kb = rate of TF unbinding.
+                    binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and 
+                    Kb = rate of TF unbinding.
         n       : Hill coefficient. Assumed to be 1 by default.
 
         Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
         '''
+
+    @staticmethod
+    def _hill_activator_(tf: float, n: float, kd: float):
+        a = pow(tf, n)
+        b = kd + pow(tf, n)
+        return a / b
+
+    @staticmethod
+    def _hill_repressor_(tf: float, n: float, kd: float):
+        c = 1 + pow(tf / kd, n)
+        return 1 / c
 
     def rate_function(self, n: Network) -> float:
         # Protein regulates mRNA
@@ -131,17 +142,10 @@ class TranscriptionReaction(Reaction):
         if regulations:
             regulator_concent = n.species[the_regulation.from_gene]
             if the_regulation.reg_type == RegType.ACTIVATION:
-                # Calculation arbitrarily broken down into separate
-                # parts to improve readability
-                a = pow(regulator_concent, self.hill_coeff)
-                b = self.km + pow(regulator_concent, self.hill_coeff)
-                hill_act = (a / b)
-                return self.trans_rate * hill_act
+                h = self._hill_activator_(regulator_concent, self.hill_coeff, self.kd)
             else:
-                c = pow(regulator_concent, self.hill_coeff)
-                d = (1 + (c / self.km))
-                hill_rep = (1 / d)
-                return self.trans_rate * hill_rep
+                h = self._hill_repressor_(regulator_concent, self.hill_coeff, self.kd)
+            return self.trans_rate * h
         else:
             return self.trans_rate
 

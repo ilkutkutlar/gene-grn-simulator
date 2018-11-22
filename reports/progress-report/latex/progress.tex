@@ -88,14 +88,15 @@
 	
 	\section{Design}		% Quality of design, does the system have a good design? This is the code stuff!
 	
+	
 	\section{Choice of Methods and Tools}
 	\begin{itemize}
 		\item Python is used as the main development language. This was chosen as it is a very flexible language with an extensive range of mathematical and scientific libraries.
-		\item The library \verb|matplotlib| was used for visualisation of simulation results. This is a popular library and thus has been thoroughly tested by many other users. The library is easy to use and offers many useful features out-of-the-box such as zooming into produced graphs, panning around, scaling, etc.
+		\item The library \verb|matplotlib| \cite{matplotlib} was used for visualisation of simulation results. This is a popular library and thus has been thoroughly tested by many other users. The library is easy to use and offers many useful features out-of-the-box such as zooming into produced graphs, panning around, scaling, etc.
 		\item For parsing SBML files, the \verb|libsbml| library was used. This library was developed by the original creators of the SBML standard and has excellent documentation, making it easy to work with.
 		\item For designing the GUI, the \verb|GTK+ 3| library will be used. This was chosen over the more popular \verb|tkinter| library as \verb|GTK+ 3| has a more modern design and good documentation.
 		\item For unit testing, the PyUnit library will be used.
-		\item The current state of the software does not have a dependency on \verb|NumPy/SciPy| as was mentioned in the specification.
+		\item The current state of the software does not have a dependency on \verb|NumPy/SciPy| \cite{numpy, scipy} as was mentioned in the specification.
 	\end{itemize}
 	
 	
@@ -124,8 +125,7 @@
 			\item Tasks related to GUI have been decided to be of a greater importance than before due to its significance in determining usability. Starting the GUI earlier will allow more time to polish and improve it, as well as help with testing the system.
 			\item The tasks related to the reverse engineering feature have been given more time. The extra time has been accounted for by parallelising the tasks with the GUI tasks. Doing so will be possible as this time period coincides with the Christmas holiday, during which some other commitments such as attending lectures, etc. will not continue, thus more time can be invested in the project.
 			\item It has also been decided that a 10 day period will be allocated to researching and thinking about the type of approach to take for achieving reverse engineering and decide on the scope of the feature (i.e. which constraints will be offered).
-			\item As mentioned in section \ref{progress-testing}, it was not possible to implement unit tests. To solve this problem, a 1 week period will be allocated to refactoring the current code to break it up into smaller, easily testable functions and write unit tests for each. To avoid 
-			
+			\item As mentioned in section \ref{progress-testing}, it was not possible to implement unit tests. To solve this problem, a 1 week period will be allocated to refactoring the current code to break it up into smaller, easily testable functions and write unit tests for each. The lessons learned from this experience will be used in the future to avoid the same problem with unit tests.
 		\end{itemize}
 		
 	\end{itemize}

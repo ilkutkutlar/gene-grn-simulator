@@ -1,3 +1,4 @@
+reports
 reports/progress-report/progress.aux
 reports/progress-report/progress.log
 reports/progress-report/progress.synctex.gz
@@ -17,6 +18,7 @@ reports/specification/specification.blg
 reports/specification/specification.pdf
 reports/specification/specification.out
 reports/specification/plan.txt
+code/venv
 code/.idea
 code/__pycache__
 

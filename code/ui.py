@@ -132,6 +132,6 @@ def simulate_parser():
     GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
 
 
-# simulate_repressilator()
+simulate_repressilator()
 # simulate_switch()
-simulate_parser()
+# simulate_parser()

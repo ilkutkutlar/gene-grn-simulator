@@ -28,12 +28,9 @@
 	% TODO: Implementation part rather short? Could also include working with lbiraries and reading documentations, etc.
 	
 	\section{Background}
+	Examining similar works will reveal that computer simulations of GRNs is a common problem among researchers. The popular GenoCAD tool offers a database of parts which the user can use to build genetic circuits and simulate them. A more general tool is COPASI which mostly focuses on simulations of biological systems (including but not limited to GRNs). 
 	
-
 	
-	The CAD of GRNs is useful for researchers, and thus this is a common problem. Some other similar tools include GenoCAD which allows design of GRNs
-	
-	...
 	% TODO: Complete this
 	
 	
@@ -64,19 +61,18 @@
 	The specification specified a unit test would be implemented for each objective. This could not be done because in their current states, the components making up the code are too large and thus not easily testable. In the next stage of the project, these components will be broken down into smaller subcomponents to allow easy testing.
 	
 	
-	\subsection{Simulation model} 
+	\subsection{Simulation model} \label{sim-model}
 	As mentioned in the specification, due to being ahead of schedule with the development progress, it was decided to switch to a more accurate and complex stochastic simulation model. 
 	
 	\subsection{Objective 1 (Models)}  
 	The change in simulation model meant that the internal models used to represent a GRN had to be changed as well. Firstly, the stochastic simulation algorithm used works by randomly firing reactions. To account for this, a model for representing a reaction was added. Furthermore, the model for representing the whole system has been changed to a list of species which exist in the system and reactions which may occur at a given propensity and are in terms of the species of the system. Finally, the original plan modelled each genome as a collection of a promoter and coding regions. This would allow the user to create or import promoters and coding regions and build genomes modularly using the available parts. As the network is now a list of reactions and species, genomes are not modelled this way. In the new system, to build a genome obeying the properties of a given promoter and/or coding region, reaction rates can be changed.
 	
 	\subsection{Objective 2 (Simulation \& Visualisation)} 
-	% TODO: Change this!
+	% TODO: Change this! -> Can write A LOT! Gillespie etc.
 	
-	This objective was changed slightly when the 
-	After switching from an ODE to stochastic model, the original plan to do an ODE simulation was also updated to do a stochastic simulation. 
-	
-	The Gillespie algorithm used for stochastic simulation of the network have been implemented and can produce results. The visualisation of the produced results have also been implemented.
+	%TODO: Could elaborate on the resources you used for learning to simulate!
+	%TODO: Should I maybe give more technical details?
+	The original plan of implementing an ODE simulation has been achieved. The internal representation can be translated into a set of ODEs, and with the help of NumPy and SciPy, these equations can be solved. However as mentioned in section \ref{sim-model}, it was later decided to switch to a stochastic simulation. To perform the simulation, the Gillespie algorithm was used. The Gillespie algorithm is a widely used stochastic simulation algorithm but is also very computationally intensive. Roughly, the algorithm works by advancing the time of the simulation by a random amount (which can be very small if there are a large number of reactions) and by applying a randomly chosen (weighted using the reaction propensity) reaction. One method to improve the running time is called tau-leaping and might be implemented in the next part of the project. In its current state, the project is capable of performing stochastic simulations and visualising the results as a graph.
 	
 	\subsection{Objective 5a (User can add new parts)} 
 	As explained before, as the system now is a list of species and reactions (and not genomes consisting a promoter and coding regions), the user now has to add reactions and supply reaction rates, rather than parts.
@@ -86,9 +82,8 @@
 	This objective was originally planned for later on. However, it was decided to be implemented earlier, so that SBML models available online (for example on the Biomodels Database) could be easily imported into the software without having to manually enter values to allow convenient testing with other circuits. The SBML parsing was achieved using the \verb|libsbml| library. The parsed values are subsequently converted into the internal representation used by the program which can then be simulated. 
 	% TODO: How do you prove correctness? Well, the manually entered values and the automaticly parsed one is more or less the same?
 	
-	
-	\section{Design}		% Quality of design, does the system have a good design? This is the code stuff!
-	
+	\subsection{Evaluation of the progress}
+		
 	
 	\section{Choice of Methods and Tools}
 	%TODO: - Platforms, frameworks, datasets etc

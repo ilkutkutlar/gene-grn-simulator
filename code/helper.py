@@ -2,6 +2,7 @@ import math
 from typing import Dict
 
 import libsbml
+from libsbml._libsbml import formulaToL3String
 
 
 class Operand:
@@ -30,6 +31,21 @@ class Operation:
 # value: float
 # for x in ops:
 #     value +=
+
+def evaluate_ast_string(string: str, symbols: Dict[str, float], species: Dict[str, float] = None):
+    temp = symbols.copy()
+    if species is not None:
+        for x in species:
+            temp[x] = species[x]
+
+    return eval(string, temp)
+
+
+def convert_ast_to_string(ast_node: libsbml.ASTNode):
+    raw: str = formulaToL3String(ast_node)
+    raw = raw.replace("^", "**")
+    return raw
+
 
 """
 Only evaluates nodes which contain constants.
@@ -128,3 +144,6 @@ def evaluate_ast_node_iter(node: libsbml.ASTNode, symbols: Dict[str, float], spe
                 value = math.pow(left, right)
             else:
                 value = 0  # TODO: Error!
+
+
+print(evaluate_ast_string("x + 5", {"x": 5}))

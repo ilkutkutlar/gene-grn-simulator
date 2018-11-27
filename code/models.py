@@ -260,3 +260,32 @@ class CustomReaction(Reaction):
 
     def __str__(self) -> str:
         return formulaToL3String(self.rate_function_ast)
+
+
+class TextEquationReaction(Reaction):
+    counter = 0
+
+    def __init__(self, rate_function_ast: str,
+                 left: str, right: str):
+        super().__init__(left, right)
+        self.rate_function_ast = rate_function_ast
+
+    def rate_function(self, n: Network) -> float:
+        self.counter += 1
+        print(self.counter)
+        return helper.evaluate_ast_string(self.rate_function_ast,
+                                          n.symbols, species=n.species)
+
+    def change_vector(self, n: Network) -> NamedVector:
+        change: Dict[str, float] = dict()
+        for x in n.species:
+            if x == self.left:  # x is a reactant, so -ve effect
+                change[x] = -self.rate_function(n)
+            elif x == self.right:  # x is a product, so +ve effect
+                change[x] = +self.rate_function(n)
+            else:
+                change[x] = 0
+        return change
+
+    def __str__(self) -> str:
+        return self.rate_function_ast

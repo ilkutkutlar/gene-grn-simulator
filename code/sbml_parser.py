@@ -3,7 +3,7 @@ from typing import Dict, List
 import libsbml
 
 import helper
-from models import Network, Reaction, TextEquationReaction
+from models import Network, Reaction, CustomSbmlReaction
 
 
 # 1. Core objects of libsbml:
@@ -57,7 +57,7 @@ class SbmlParser:
             left: str = reactants[0].getSpecies() if reactants else ""
             right: str = products[0].getSpecies() if products else ""
 
-            reactions.append(TextEquationReaction(helper.convert_ast_to_string(reaction_rate_function), left, right))
+            reactions.append(CustomSbmlReaction(helper.convert_ast_to_string(reaction_rate_function), left, right))
         return reactions
 
     @staticmethod

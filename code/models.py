@@ -262,7 +262,7 @@ class CustomReaction(Reaction):
         return formulaToL3String(self.rate_function_ast)
 
 
-class TextEquationReaction(Reaction):
+class CustomSbmlReaction(Reaction):
     counter = 0
 
     def __init__(self, rate_function_ast: str,

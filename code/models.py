@@ -2,9 +2,6 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Dict, Tuple, NamedTuple
 
-import libsbml
-from libsbml._libsbml import formulaToL3String
-
 import helper
 
 Vector = List[float]
@@ -82,7 +79,7 @@ class SimulationSettings:
 
 
 class Reaction(ABC):
-    def __init__(self, left: str, right: str):
+    def __init__(self, left: List[str], right: List[str]):
         self.left = left
         self.right = right
 
@@ -98,7 +95,7 @@ class TranscriptionReaction(Reaction):
 
     def __init__(self, trans_rate: float,
                  kd: float, hill_coeff: float,
-                 left: str, right: str):
+                 left: List[str], right: List[str]):
         super().__init__(left, right)
         self.trans_rate = trans_rate
         self.kd = kd
@@ -138,7 +135,7 @@ class TranscriptionReaction(Reaction):
 
     def rate_function(self, n: Network) -> float:
         # Protein regulates mRNA
-        regulations = n.get_inner_regulation(self.right)
+        regulations = n.get_inner_regulation(self.right[0])
         the_regulation = regulations[0]
 
         if regulations:
@@ -154,119 +151,94 @@ class TranscriptionReaction(Reaction):
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
         for x in n.species:
-            if x == self.right:
+            if x in self.right:
                 change[x] = self.rate_function(n)
             else:
                 change[x] = 0
         return change
 
     def __str__(self) -> str:
-        return "Transcription: " + self.left + " -> " + self.right
+        return "Transcription: " + self.left[0] + " -> " + self.right[0]
 
 
 class TranslationReaction(Reaction):
     # mRNA -> Protein
 
     def __init__(self, translation_rate: float,
-                 left: str, right: str):
+                 left: List[str], right: List[str]):
         super().__init__(left, right)
         self.translation_rate = translation_rate
 
     def rate_function(self, n: Network) -> float:
-        return self.translation_rate * n.species[self.left]
+        return self.translation_rate * n.species[self.left[0]]
 
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
         for x in n.species:
-            if x == self.right:
+            if x in self.right:
                 change[x] = self.rate_function(n)
             else:
                 change[x] = 0
         return change
 
     def __str__(self) -> str:
-        return "Translation: " + self.left + " -> " + self.right
+        return "Translation: " + self.left[0] + " -> " + self.right[0]
 
 
 class MrnaDegradationReaction(Reaction):
     # mRNA ->
 
     def __init__(self, decay_rate: float,
-                 left: str, right: str):
+                 left: List[str], right: List[str]):
         super().__init__(left, right)
         self.decay_rate = decay_rate
 
     def rate_function(self, n: Network) -> float:
-        return self.decay_rate * n.species[self.left]
+        return self.decay_rate * n.species[self.left[0]]
 
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
 
         for x in n.species:
-            if x == self.left:
+            if x in self.left:
                 change[x] = -self.rate_function(n)
             else:
                 change[x] = 0
         return change
 
     def __str__(self) -> str:
-        return "mRNA Degradation: " + self.left + " -> " + self.right
+        return "mRNA Degradation: " + self.left[0] + " -> " + self.right[0]
 
 
 class ProteinDegradationReaction(Reaction):
     # Protein ->
 
     def __init__(self, decay_rate: float,
-                 left: str, right: str):
+                 left: List[str], right: List[str]):
         super().__init__(left, right)
         self.decay_rate = decay_rate
 
     def rate_function(self, n: Network) -> float:
-        return self.decay_rate * n.species[self.left]
+        return self.decay_rate * n.species[self.left[0]]
 
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
         for x in n.species:
-            if x == self.left:
+            if x in self.left:
                 change[x] = -self.rate_function(n)
             else:
                 change[x] = 0
         return change
 
     def __str__(self) -> str:
-        return "Protein Degradation: " + self.left + " -> " + self.right
+        return "Protein Degradation: " + self.left[0] + " -> " + self.right[0]
 
 
 class CustomReaction(Reaction):
-    def __init__(self, rate_function_ast: libsbml.ASTNode,
-                 left: str, right: str):
-        super().__init__(left, right)
-        self.rate_function_ast = rate_function_ast
-
-    def rate_function(self, n: Network) -> float:
-        return helper.evaluate_ast_node(self.rate_function_ast,
-                                        n.symbols, species=n.species)
-
-    def change_vector(self, n: Network) -> NamedVector:
-        change: Dict[str, float] = dict()
-        for x in n.species:
-            if x == self.left:  # x is a reactant, so -ve effect
-                change[x] = -self.rate_function(n)
-            elif x == self.right:  # x is a product, so +ve effect
-                change[x] = +self.rate_function(n)
-            else:
-                change[x] = 0
-        return change
-
-    def __str__(self) -> str:
-        return formulaToL3String(self.rate_function_ast)
-
-
-class CustomSbmlReaction(Reaction):
     counter = 0
 
     def __init__(self, rate_function_ast: str,
-                 left: str, right: str):
+                 left: List[str], right: List[str]):
         super().__init__(left, right)
         self.rate_function_ast = rate_function_ast
 
@@ -278,13 +250,52 @@ class CustomSbmlReaction(Reaction):
 
     def change_vector(self, n: Network) -> NamedVector:
         change: Dict[str, float] = dict()
+
+        # fpm + MmyR -> [k1] fpm:MmyR
+        # ---------------------------
+        # MmyR -= k1[MmyR][fpm]     | General: if MmyR in left, then MmyR -= (k) * (left1) * (left2)
+        # fpm -= k1[MmyR][fpm]
+        # fpm:MmyR += k1[MmyR][fpm] | General: if fpm:MmyR in right, then fpm:MmyR += (k_) * (left1) * (left2)
+
+        # fpm:MmyR -> [k_1] fpm + MmyR
+        # ---------------------------
+        # MmyR += k_1 [fpm:MmyR]
+        # fpm += k_1 [fpm:MmyR]
+        # fpm:MmyR -= k_1[fpm:MmyR]
+
         for x in n.species:
-            if x == self.left:  # x is a reactant, so -ve effect
-                change[x] = -self.rate_function(n)
-            elif x == self.right:  # x is a product, so +ve effect
-                change[x] = +self.rate_function(n)
-            else:
+            if not (x in self.left) and not (x in self.right):
                 change[x] = 0
+                continue
+
+            if x in self.left:
+                if x not in change:
+                    change[x] = 0
+
+                if len(self.left) == 1:
+                    if self.left[0] != "":
+                        change[x] -= self.rate_function(n) * n.species[self.left[0]]
+                else:
+                    change[x] -= self.rate_function(n) * n.species[self.left[0]] * n.species[self.left[1]]
+
+            if x in self.right:
+                if x not in change:
+                    change[x] = 0
+
+                if len(self.left) == 1:
+                    if self.left[0] != "":
+                        change[x] += self.rate_function(n) * n.species[self.left[0]]
+                else:
+                    change[x] += self.rate_function(n) * n.species[self.left[0]] * n.species[self.left[1]]
+
+        # for x in n.species:
+        #     if x == self.left:  # x is a reactant, so -ve effect
+        #         change[x] = -self.rate_function(n)
+        #     elif x == self.right:  # x is a product, so +ve effect
+        #         change[x] = +self.rate_function(n)
+        #     else:
+        #         change[x] = 0
+
         return change
 
     def __str__(self) -> str:

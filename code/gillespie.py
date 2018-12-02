@@ -104,6 +104,9 @@ class GillespieSimulator:
             if s2 < y[1]:
                 return y[0]
 
+        # In case something goes wrong, at least return something
+        return cumilative[0][0]
+
     """
     returns a NamedVector representing the
     change vector of the reaction chosen randomly,

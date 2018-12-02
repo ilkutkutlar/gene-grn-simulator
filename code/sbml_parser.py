@@ -3,7 +3,7 @@ from typing import Dict, List
 import libsbml
 
 import helper
-from models import Network, Reaction, CustomSbmlReaction
+from models import Network, Reaction, CustomReaction
 
 
 # 1. Core objects of libsbml:
@@ -54,10 +54,25 @@ class SbmlParser:
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
 
-            left: str = reactants[0].getSpecies() if reactants else ""
-            right: str = products[0].getSpecies() if products else ""
+            left: List[str] = list()
+            right: List[str] = list()
 
-            reactions.append(CustomSbmlReaction(helper.convert_ast_to_string(reaction_rate_function), left, right))
+            if not reactants:
+                left.append("")
+
+            if not products:
+                right.append("")
+
+            for y in reactants:
+                left.append(y.getSpecies())
+
+            for y in products:
+                right.append(y.getSpecies())
+
+            # left: str = reactants[0].getSpecies() if reactants else ""
+            # right: str = products[0].getSpecies() if products else ""
+
+            reactions.append(CustomReaction(helper.convert_ast_to_string(reaction_rate_function), left, right))
         return reactions
 
     @staticmethod

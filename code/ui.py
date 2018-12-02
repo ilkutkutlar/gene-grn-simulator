@@ -60,21 +60,21 @@ def simulate_repressilator():
                    Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
                    Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]
     reactions = [
-        TranscriptionReaction(alpha, 40, 2, "", "laci_mrna"),
-        TranscriptionReaction(alpha, 40, 2, "", "tetr_mrna"),
-        TranscriptionReaction(alpha, 40, 2, "", "cl_mrna"),
+        TranscriptionReaction(alpha, 40, 2, [""], ["laci_mrna"]),
+        TranscriptionReaction(alpha, 40, 2, [""], ["tetr_mrna"]),
+        TranscriptionReaction(alpha, 40, 2, [""], ["cl_mrna"]),
 
-        MrnaDegradationReaction(mRNA_decay_rate, "laci_mrna", ""),
-        MrnaDegradationReaction(mRNA_decay_rate, "tetr_mrna", ""),
-        MrnaDegradationReaction(mRNA_decay_rate, "cl_mrna", ""),
+        MrnaDegradationReaction(mRNA_decay_rate, ["laci_mrna"], [""]),
+        MrnaDegradationReaction(mRNA_decay_rate, ["tetr_mrna"], [""]),
+        MrnaDegradationReaction(mRNA_decay_rate, ["cl_mrna"], [""]),
 
-        TranslationReaction(beta, "laci_mrna", "laci_p"),
-        TranslationReaction(beta, "tetr_mrna", "tetr_p"),
-        TranslationReaction(beta, "cl_mrna", "cl_p"),
+        TranslationReaction(beta, ["laci_mrna"], ["laci_p"]),
+        TranslationReaction(beta, ["tetr_mrna"], ["tetr_p"]),
+        TranslationReaction(beta, ["cl_mrna"], ["cl_p"]),
 
-        ProteinDegradationReaction(protein_decay_rate, "laci_p", ""),
-        ProteinDegradationReaction(protein_decay_rate, "tetr_p", ""),
-        ProteinDegradationReaction(protein_decay_rate, "cl_p", "")
+        ProteinDegradationReaction(protein_decay_rate, ["laci_p"], [""]),
+        ProteinDegradationReaction(protein_decay_rate, ["tetr_p"], [""]),
+        ProteinDegradationReaction(protein_decay_rate, ["cl_p"], [""])
     ]
 
     net = Network()
@@ -98,17 +98,17 @@ def simulate_switch():
                    "p_one": 0, "p_two": 100}
 
     net.reactions = [
-        TranscriptionReaction(200, 1, 1, "", "one_mrna"),
-        TranscriptionReaction(200, 1, 2.5, "", "two_mrna"),
+        TranscriptionReaction(200, 1, 1, [""], ["one_mrna"]),
+        TranscriptionReaction(200, 1, 2.5, [""], ["two_mrna"]),
 
-        MrnaDegradationReaction(0.3, "mrna_one", ""),
-        MrnaDegradationReaction(0.3, "mrna_two", ""),
+        MrnaDegradationReaction(0.3, ["mrna_one"], [""]),
+        MrnaDegradationReaction(0.3, ["mrna_two"], [""]),
 
-        TranslationReaction(156.25, "mrna_one", "p_one"),
-        TranslationReaction(15.6, "mrna_two", "p_two"),
+        TranslationReaction(156.25, ["mrna_one"], ["p_one"]),
+        TranslationReaction(15.6, ["mrna_two"], ["p_two"]),
 
-        ProteinDegradationReaction(1, "p_one", ""),
-        ProteinDegradationReaction(1, "p_two", ""),
+        ProteinDegradationReaction(1, ["p_one"], [""]),
+        ProteinDegradationReaction(1, ["p_two"], [""]),
     ]
 
     s = SimulationSettings("Results", "Time", "Concentration",

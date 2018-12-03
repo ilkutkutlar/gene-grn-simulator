@@ -245,6 +245,7 @@ class CustomReaction(Reaction):
     def rate_function(self, n: Network) -> float:
         self.counter += 1
         print(self.counter)
+        print(self.rate_function_ast)
         return helper.evaluate_ast_string(self.rate_function_ast,
                                           n.symbols, species=n.species)
 
@@ -273,7 +274,9 @@ class CustomReaction(Reaction):
                     change[x] = 0
 
                 if len(self.left) == 1:
-                    if self.left[0] != "":
+                    if self.left[0] == "":
+                        change[x] -= self.rate_function(n)
+                    else:
                         change[x] -= self.rate_function(n) * n.species[self.left[0]]
                 else:
                     change[x] -= self.rate_function(n) * n.species[self.left[0]] * n.species[self.left[1]]
@@ -283,18 +286,13 @@ class CustomReaction(Reaction):
                     change[x] = 0
 
                 if len(self.left) == 1:
-                    if self.left[0] != "":
-                        change[x] += self.rate_function(n) * n.species[self.left[0]]
-                else:
-                    change[x] += self.rate_function(n) * n.species[self.left[0]] * n.species[self.left[1]]
+                    if self.left[0] == "":
+                        change[x] += self.rate_function(n)
+                    else:
+                        change[x] += self.rate_function(n) * n.species[self.right[0]]
 
-        # for x in n.species:
-        #     if x == self.left:  # x is a reactant, so -ve effect
-        #         change[x] = -self.rate_function(n)
-        #     elif x == self.right:  # x is a product, so +ve effect
-        #         change[x] = +self.rate_function(n)
-        #     else:
-        #         change[x] = 0
+                else:
+                    change[x] += self.rate_function(n) * n.species[self.right[0]] * n.species[self.right[1]]
 
         return change
 

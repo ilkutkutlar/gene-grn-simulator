@@ -123,7 +123,7 @@ def simulate_parser():
     net: Network = SbmlParser.parse(filename)
     print(net)
 
-    end_time = 100
+    end_time = 10
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
                            [("LacI Protein", "PX"),
                             ("TetR Protein", "PY"),

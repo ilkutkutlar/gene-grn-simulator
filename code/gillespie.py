@@ -105,7 +105,7 @@ class GillespieSimulator:
                 return y[0]
 
         # In case something goes wrong, at least return something
-        return cumilative[0][0]
+        # return cumilative[0][0]
 
     """
     returns a NamedVector representing the

@@ -6,7 +6,11 @@ from libsbml._libsbml import formulaToL3String
 
 
 def evaluate_ast_string(string: str, symbols: Dict[str, float], species: Dict[str, float] = None):
-    temp = symbols.copy()
+    if symbols:
+        temp = symbols.copy()
+    else:
+        temp = dict()
+
     if species is not None:
         for x in species:
             temp[x] = species[x]

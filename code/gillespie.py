@@ -27,7 +27,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _get_theta_(r0: float):
+    def _get_theta_(r0: float) -> float:
         s1: float = random()  # To pick time
         return (1 / r0) * log(1 / s1, e)
 
@@ -36,7 +36,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]):
+    def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]) -> Dict[str, float]:
         ret = state.copy()
         for x in state:
             ret[x] = state[x] + change[x]
@@ -115,7 +115,6 @@ class GillespieSimulator:
 
     @staticmethod
     def _pick_next_reaction_(net: Network, r0: float) -> NamedVector:
-
         propensities: List[float] = []
         for reaction in net.reactions:
             propensities.append(reaction.rate_function(net) / r0)

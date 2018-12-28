@@ -130,7 +130,7 @@ class GillespieSimulator:
 
     @staticmethod
     def simulate(net: Network, sim: SimulationSettings) -> SimulationResults:
-        t: float = sim.start_time
+        t: float = 0
         results: SimulationResults = []
 
         while t <= sim.end_time:
@@ -159,6 +159,7 @@ class GillespieSimulator:
         times: List[float] = []
         plottings: Dict[str, List[float]] = {}
 
+        # species: (species title, species name)
         for species in sim.plotted_species:
             plottings[species[1]] = []
 

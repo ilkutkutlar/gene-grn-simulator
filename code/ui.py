@@ -242,6 +242,6 @@ def simulate_switch_parser():
 
 # simulate_repressilator()
 # simulate_switch()
-simulate_parser()
-# simulate_case_study()
+# simulate_parser()
+simulate_case_study()
 # simulate_switch_parser()

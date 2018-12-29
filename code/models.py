@@ -43,6 +43,9 @@ class Network:
         self.regulations = regulations
         self.symbols = []
 
+    """
+    Given a species name, returns the species which are regulating it.
+    """
     def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
 
@@ -114,6 +117,9 @@ class Reaction(ABC):
                 change[x] += self.rate_function(n)
 
         return change
+
+    def __str__(self) -> str:
+        return "Reaction"
 
 
 class TranscriptionReaction(Reaction):

@@ -4,6 +4,10 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
     QInputDialog, QDialog, QComboBox, QFormLayout, QLineEdit, QMainWindow
 
+from gene_controller import GeneController
+from models import TranslationReaction, TranscriptionReaction, MrnaDegradationReaction, ProteinDegradationReaction, \
+    CustomReaction
+
 
 class AddReactionDialog(QDialog):
     def __init__(self):
@@ -25,6 +29,15 @@ class AddReactionDialog(QDialog):
         # Common
         self.fields["name"] = QLineEdit()
         self.fields["name"].setPlaceholderText("Name")
+
+        self.fields["rp_info"] = QLabel()
+        self.fields["rp_info"].setText("Reactants and products must be comma separated names of species")
+
+        self.fields["reactants"] = QLineEdit()
+        self.fields["reactants"].setPlaceholderText("Reactants")
+
+        self.fields["products"] = QLineEdit()
+        self.fields["products"].setPlaceholderText("Products")
 
         # Transcription
         self.fields["transcription_rate"] = QLineEdit()
@@ -52,13 +65,23 @@ class AddReactionDialog(QDialog):
         self.fields["custom_equation"] = QLineEdit()
         self.fields["custom_equation"].setPlaceholderText("Equation")
 
+        # rp_layout = QHBoxLayout()
+        # rp_layout.addWidget(self.fields["reactants"])
+        # arrow_label = QLabel()
+        # arrow_label.setText("->")
+        # rp_layout.addWidget(arrow_label)
+        # rp_layout.addWidget(self.fields["products"])
+
         for field in self.fields:
             self.fields[field].setVisible(False)
             self.form.addWidget(self.fields[field])
 
+
         # Make the initial fields visible (i.e. the combo box has this reaction
         # selected when the dialog is first opened)
         self.fields["name"].setVisible(True)
+        self.fields["reactants"].setVisible(True)
+        self.fields["products"].setVisible(True)
         self.fields["transcription_rate"].setVisible(True)
         self.fields["kd"].setVisible(True)
         self.fields["hill_coefficient"].setVisible(True)
@@ -68,6 +91,8 @@ class AddReactionDialog(QDialog):
             self.fields[field].setVisible(False)
 
         self.fields["name"].setVisible(True)
+        self.fields["reactants"].setVisible(True)
+        self.fields["products"].setVisible(True)
 
         if index == 0:
             self.fields["transcription_rate"].setVisible(True)
@@ -82,11 +107,40 @@ class AddReactionDialog(QDialog):
         elif index == 4:
             self.fields["custom_equation"].setVisible(True)
 
+    def _handler_ok_button_clicked(self):
+        index = self.combo.currentIndex()
+
+        if index == 0:
+            GeneController.get_instance().network.reactions.append(
+                TranscriptionReaction(self.fields["transcription_rate"].text(),
+                                      self.fields["kd"].text(),
+                                      self.fields["hill_coefficient"].text(), left=[], right=[])
+            )
+        elif index == 1:
+            GeneController.get_instance().network.reactions.append(
+                TranslationReaction(self.fields["translation_rate"].text(), left=[], right=[])
+            )
+        elif index == 2:
+            GeneController.get_instance().network.reactions.append(
+                MrnaDegradationReaction(self.fields["mrna_decay_rate"].text(), left=[], right=[])
+            )
+        elif index == 3:
+            GeneController.get_instance().network.reactions.append(
+                ProteinDegradationReaction(self.fields["protein_decay_rate"].text(), left=[], right=[])
+            )
+        elif index == 4:
+            GeneController.get_instance().network.reactions.append(
+                CustomReaction(self.fields["custom_equation"].text(), left=[], right=[])
+            )
+
+        self.close()
+
     def _init_ui(self):
         self.layout = QVBoxLayout()  # The main layout
         self.form = QVBoxLayout()  # This holds the text fields for reaction parameters
         self.combo = QComboBox()  # Choose the type of reaction
         self.ok_button = QPushButton("OK", self)
+        self.ok_button.clicked.connect(self._handler_ok_button_clicked)
 
         self._init_combo()
         self._init_form_fields()
@@ -99,7 +153,6 @@ class AddReactionDialog(QDialog):
 
         self.setWindowTitle("Add reaction")
         self.setWindowModality(Qt.WindowModal)
-        self.exec_()
 
 
 class GeneWindow(QMainWindow):
@@ -128,50 +181,69 @@ class GeneWindow(QMainWindow):
         simulate.addAction("Deterministic (ODE)")
         simulate.addAction("Stochastic (Gillespie Algorithm)")
 
+    def _reactions_dialog_returned(self):
+        self._refresh_reactions_list()
 
     def _handler_add_reactions_button(self):
-        AddReactionDialog()
-
-    def _reactions_panel(self):
-        reactions_label = QLabel(self)
-        reactions_label.setText("Reactions")
-        reactions_list = QListWidget()
-        reactions_list.addItem("Test")
-        add_button = QPushButton("Add")
-        remove_button = QPushButton("Remove")
-        add_button.clicked.connect(self._handler_add_reactions_button)
-
-        layout = QVBoxLayout()
-        layout.addWidget(reactions_label)
-        layout.addWidget(reactions_list)
-        layout.addWidget(add_button)
-        layout.addWidget(remove_button)
-        layout.addStretch()
-
-        return layout
+        dialog = AddReactionDialog()
+        dialog.finished.connect(self._reactions_dialog_returned)
+        dialog.exec_()
 
     def _handler_add_species_button(self):
         (species, ok) = QInputDialog.getText(self, 'Add new species', 'Species name:')
 
         if ok:
-            print(str(species))
+            GeneController.get_instance().network.species[species] = 0
+            self._refresh_species_list()
+
+    def _refresh_reactions_list(self):
+        self.reactions_list.clear()
+        for reaction in GeneController.get_instance().network.reactions:
+            self.reactions_list.addItem(reaction.__str__())
+
+    def _reactions_panel(self):
+        self.reactions_label = QLabel(self)
+        self.reactions_label.setText("Reactions")
+        self.reactions_list = QListWidget()
+
+        self._refresh_reactions_list()
+
+        self.add_button = QPushButton("Add")
+        self.remove_button = QPushButton("Remove")
+        self.add_button.clicked.connect(self._handler_add_reactions_button)
+
+        self.reactions_layout = QVBoxLayout()
+        self.reactions_layout.addWidget(self.reactions_label)
+        self.reactions_layout.addWidget(self.reactions_list)
+        self.reactions_layout.addWidget(self.add_button)
+        self.reactions_layout.addWidget(self.remove_button)
+        self.reactions_layout.addStretch()
+
+        return self.reactions_layout
+
+    def _refresh_species_list(self):
+        self.species_list.clear()
+        for species in GeneController.get_instance().network.species:
+            self.species_list.addItem(species)
 
     def _species_panel(self):
-        species_label = QLabel(self)
-        species_label.setText("Species")
-        species_list = QListWidget()
-        species_list.addItem("Test")
-        add_button = QPushButton("Add")
-        remove_button = QPushButton("Remove")
-        add_button.clicked.connect(self._handler_add_species_button)
+        self.species_label = QLabel(self)
+        self.species_label.setText("Species")
+        self.species_list = QListWidget()
 
-        layout = QVBoxLayout()
-        layout.addWidget(species_label)
-        layout.addWidget(species_list)
-        layout.addWidget(add_button)
-        layout.addWidget(remove_button)
-        layout.addStretch()
-        return layout
+        self._refresh_species_list()
+
+        self.add_species_button = QPushButton("Add")
+        self.remove_species_button = QPushButton("Remove")
+        self.add_species_button.clicked.connect(self._handler_add_species_button)
+
+        self.species_layout = QVBoxLayout()
+        self.species_layout.addWidget(self.species_label)
+        self.species_layout.addWidget(self.species_list)
+        self.species_layout.addWidget(self.add_species_button)
+        self.species_layout.addWidget(self.remove_species_button)
+        self.species_layout.addStretch()
+        return self.species_layout
 
 
 app = QApplication([])

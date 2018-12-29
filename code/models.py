@@ -168,7 +168,7 @@ class TranscriptionReaction(Reaction):
     def rate_function(self, n: Network) -> float:
         # Protein regulates mRNA
         regulations = n.get_inner_regulation(self.right[0])
-        the_regulation = regulations[0]
+        the_regulation = regulations[0] if regulations else None
 
         if regulations:
             regulator_concent = n.species[the_regulation.from_gene]
@@ -242,4 +242,4 @@ class CustomReaction(Reaction):
                                           n.symbols, species=n.species)
 
     def __str__(self) -> str:
-        return self.rate_function_ast
+        return "Reaction (" + self.left[0] + " -> " + self.right[0] + "): " + self.rate_function_ast

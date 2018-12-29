@@ -24,30 +24,54 @@ class AddReactionDialog(QDialog):
         self.fields = {}
 
         # TODO: Regulation!
+
         # Common
         self.fields["name"] = QLineEdit()
 
         # Transcription
-        self.edit_transcription_rate = QLineEdit()
-        self.edit_kd = QLineEdit()
-        self.edit_hill_coeff = QLineEdit()
+        self.fields["transcription_rate"] = QLineEdit()
+        self.fields["kd"] = QLineEdit()
+        self.fields["hill_coefficient"] = QLineEdit()
 
         # Translation
-        self.edit_translation_rate = QLineEdit()
+        self.fields["translation_rate"] = QLineEdit()
 
         # mRNA decay
-        self.edit_mrna_decay_rate = QLineEdit()
+        self.fields["mrna_decay_rate"] = QLineEdit()
 
         # Protein decay
-        self.edit_protein_decay_rate = QLineEdit()
+        self.fields["protein_decay_rate"] = QLineEdit()
 
         # Custom reaction
-        self.edit_equation = QLineEdit()
+        self.fields["custom_equation"] = QLineEdit()
 
     def _clear_form_fields(self):
+        for field in self.fields:
+            self.fields[field].setParent(None)
 
 
-def _init_ui(self):
+        # for field in self.fields:
+        #     self.form.removeRow(self.fields[field])
+
+    def _reaction_type_changed(self, index):
+        self._clear_form_fields()
+        self.form.addRow("Name: ", self.fields["name"])
+
+        if index == 0:
+            self.form.addRow("Transcription Rate: ", self.fields["transcription_rate"])
+            self.form.addRow("Kd: ", self.fields["kd"])
+            self.form.addRow("Hill coefficient: ", self.fields["hill_coeff"])
+        elif index == 1:
+            self.form.addRow("Tranlation Rate: ", self.fields["translation_rate"])
+        elif index == 2:
+            self.form.addRow("Decay Rate: ", self.fields["mrna_decay_rate"])
+        elif index == 3:
+            self.form.addRow("Decay Rate: ", self.fields["protein_decay_rate"])
+        elif index == 4:
+            self.form.addRow("Equation: ", self.fields["custom_equation"])
+        self.form.update()
+
+    def _init_ui(self):
         self.layout = QVBoxLayout()
         self.form = QFormLayout()
         self.combo = QComboBox()
@@ -56,20 +80,11 @@ def _init_ui(self):
         self._init_combo()
         self._init_fields()
 
-        form.addRow("Name: ", name)
-        self.form.addRow("Transcription Rate: ", trans_rate)
-        self.form.addRow("Kd: ", kd)
-        self.form.addRow("Hill coefficient: ", hill_coeff)
-        form.addRow("Tranlation Rate: ", trans_rate)
-        form.addRow("Decay Rate: ", decay_rate)
-        form.addRow("Decay Rate: ", decay_rate)
-        form.addRow("Equation: ", equation)
-
         self.layout.addWidget(self.combo)
         self.layout.addLayout(self.form)
         self.layout.addWidget(self.ok_button)
-
         self.setLayout(self.layout)
+
         self.setWindowTitle("Add reaction")
         self.setWindowModality(Qt.ApplicationModal)
         self.exec_()

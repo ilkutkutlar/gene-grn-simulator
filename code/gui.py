@@ -2,8 +2,9 @@ import re
 import sys
 
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
-    QInputDialog, QDialog, QComboBox, QFormLayout, QLineEdit, QMainWindow, QAction
+    QInputDialog, QDialog, QComboBox, QFormLayout, QLineEdit, QMainWindow, QAction, QMessageBox
 
 from gene_controller import GeneController
 from gillespie import GillespieSimulator
@@ -25,111 +26,142 @@ class AddReactionDialog(QDialog):
         self.combo.currentIndexChanged.connect(self._handler_reaction_type_changed)
 
     def _init_form_fields(self):
-        self.fields = {}
+        validator = QDoubleValidator()
+        # Standard notation disallows constants such as "e"
+        validator.setNotation(QDoubleValidator.StandardNotation)
 
-        # TODO: Regulation!
+        def add_field_to_form(placeholder):
+            field = QLineEdit()
+            field.setPlaceholderText(placeholder)
+            field.setVisible(False)
+            self.form.addWidget(field)
+            return field
+
+        def add_number_field_to_form(placeholder):
+            field = add_field_to_form(placeholder)
+            field.setValidator(validator)
+            return field
+
         # Common
-        self.fields["name"] = QLineEdit()
-        self.fields["name"].setPlaceholderText("Name")
-
-        self.fields["rp_info"] = QLabel()
-        self.fields["rp_info"].setText("Reactants and products must be comma separated names of species")
-
-        self.fields["reactants"] = QLineEdit()
-        self.fields["reactants"].setPlaceholderText("Reactants")
-
-        self.fields["products"] = QLineEdit()
-        self.fields["products"].setPlaceholderText("Products")
-
-        # Transcription
-        self.fields["transcription_rate"] = QLineEdit()
-        self.fields["transcription_rate"].setPlaceholderText("Transcription Rate")
-
-        self.fields["kd"] = QLineEdit()
-        self.fields["kd"].setPlaceholderText("Kd")
-
-        self.fields["hill_coefficient"] = QLineEdit()
-        self.fields["hill_coefficient"].setPlaceholderText("Hill coefficient")
-
-        # Translation
-        self.fields["translation_rate"] = QLineEdit()
-        self.fields["translation_rate"].setPlaceholderText("Tranlation Rate")
-
-        # mRNA decay
-        self.fields["mrna_decay_rate"] = QLineEdit()
-        self.fields["mrna_decay_rate"].setPlaceholderText("Decay Rate")
-
-        # Protein decay
-        self.fields["protein_decay_rate"] = QLineEdit()
-        self.fields["protein_decay_rate"].setPlaceholderText("Decay Rate")
-
-        # Custom reaction
-        self.fields["custom_equation"] = QLineEdit()
-        self.fields["custom_equation"].setPlaceholderText("Equation")
-
-        for field in self.fields:
-            self.fields[field].setVisible(False)
-            self.form.addWidget(self.fields[field])
-
         # Make the initial fields visible (i.e. the combo box has this reaction
         # selected when the dialog is first opened)
-        self.fields["name"].setVisible(True)
-        self.fields["rp_info"].setVisible(True)
-        self.fields["reactants"].setVisible(True)
-        self.fields["products"].setVisible(True)
+        self.name_field = add_field_to_form("Name")
+        self.name_field.setVisible(True)
 
-        self.fields["transcription_rate"].setVisible(True)
-        self.fields["kd"].setVisible(True)
-        self.fields["hill_coefficient"].setVisible(True)
+        self.rp_info_field = QLabel()
+        self.rp_info_field.setText("Reactants and products must be comma separated names of species")
+        self.form.addWidget(self.rp_info_field)
+        self.rp_info_field.setVisible(True)
+
+        self.reactants_field = add_field_to_form("Reactants")
+        self.reactants_field.setVisible(True)
+
+        self.products_field = add_field_to_form("Products")
+        self.products_field.setVisible(True)
+
+        # Transcription
+        self.transcription_rate_field = add_number_field_to_form("Transcription Rate")
+        self.transcription_rate_field.setVisible(True)
+
+        self.kd_field = add_number_field_to_form("Kd")
+        self.kd_field.setVisible(True)
+
+        self.hill_coefficient_field = add_number_field_to_form("Hill coefficient")
+        self.hill_coefficient_field.setVisible(True)
+
+        # Translation
+        self.translation_rate_field = add_number_field_to_form("Tranlation Rate")
+
+        # mRNA decay
+        self.mrna_decay_rate_field = add_number_field_to_form("Decay Rate")
+
+        # Protein decay
+        self.protein_decay_rate_field = add_number_field_to_form("Decay Rate")
+
+        # Custom reaction
+        self.custom_equation_field = add_field_to_form("Equation")
+
+
 
     def _handler_reaction_type_changed(self, index):
-        for field in self.fields:
-            self.fields[field].setVisible(False)
+        self.name_field.setVisible(True)
+        self.rp_info_field.setVisible(True)
+        self.reactants_field.setVisible(True)
+        self.products_field.setVisible(True)
 
-        self.fields["name"].setVisible(True)
-        self.fields["rp_info"].setVisible(True)
-        self.fields["reactants"].setVisible(True)
-        self.fields["products"].setVisible(True)
+        self.transcription_rate_field.setVisible(False)
+        self.kd_field.setVisible(False)
+        self.hill_coefficient_field.setVisible(False)
+        self.translation_rate_field.setVisible(False)
+        self.mrna_decay_rate_field.setVisible(False)
+        self.protein_decay_rate_field.setVisible(False)
+        self.custom_equation_field.setVisible(False)
 
         if index == 0:
-            self.fields["transcription_rate"].setVisible(True)
-            self.fields["kd"].setVisible(True)
-            self.fields["hill_coefficient"].setVisible(True)
+            self.transcription_rate_field.setVisible(True)
+            self.kd_field.setVisible(True)
+            self.hill_coefficient_field.setVisible(True)
         elif index == 1:
-            self.fields["translation_rate"].setVisible(True)
+            self.translation_rate_field.setVisible(True)
         elif index == 2:
-            self.fields["mrna_decay_rate"].setVisible(True)
+            self.mrna_decay_rate_field.setVisible(True)
         elif index == 3:
-            self.fields["protein_decay_rate"].setVisible(True)
+            self.protein_decay_rate_field.setVisible(True)
         elif index == 4:
-            self.fields["custom_equation"].setVisible(True)
+            self.rp_info_field.setVisible(False)
+            self.reactants_field.setVisible(False)
+            self.products_field.setVisible(False)
+            self.custom_equation_field.setVisible(True)
+
+    def _validate_species(self, species):
+        for s in species:
+            if s not in GeneController.get_instance().network.species:
+                return False
+        return True
 
     def _handler_ok_button_clicked(self):
         index = self.combo.currentIndex()
-        left = self.fields["reactants"].text().split(",")
-        right = self.fields["products"].text().split(",")
+        left = self.reactants_field.text().split(",")
+        right = self.products_field.text().split(",")
+
+        error_message = QMessageBox()
+        error_message.setIcon(QMessageBox.Warning)
+        error_message.setWindowTitle("Error")
+        error_message.setStandardButtons(QMessageBox.Ok)
+        message_text = " include some invalid species. " \
+                       "Please add the species before you use them."
+
+        if not self._validate_species(left):
+            error_message.setText("Reactants" + message_text)
+
+        if not self._validate_species(right):
+            error_message.setText("Products" + message_text)
+
+        button = error_message.exec_()
+        if button == QMessageBox.Ok:
+            return
 
         if index == 0:
             GeneController.get_instance().network.reactions.append(
-                TranscriptionReaction(self.fields["transcription_rate"].text(),
-                                      self.fields["kd"].text(),
-                                      self.fields["hill_coefficient"].text(), left=left, right=right)
+                TranscriptionReaction(self.transcription_rate_field.text(),
+                                      self.kd_field.text(),
+                                      self.hill_coefficient_field.text(), left=left, right=right)
             )
         elif index == 1:
             GeneController.get_instance().network.reactions.append(
-                TranslationReaction(self.fields["translation_rate"].text(), left=left, right=right)
+                TranslationReaction(self.translation_rate_field.text(), left=left, right=right)
             )
         elif index == 2:
             GeneController.get_instance().network.reactions.append(
-                MrnaDegradationReaction(self.fields["mrna_decay_rate"].text(), left=left, right=right)
+                MrnaDegradationReaction(self.mrna_decay_rate_field.text(), left=left, right=right)
             )
         elif index == 3:
             GeneController.get_instance().network.reactions.append(
-                ProteinDegradationReaction(self.fields["protein_decay_rate"].text(), left=left, right=right)
+                ProteinDegradationReaction(self.protein_decay_rate_field.text(), left=left, right=right)
             )
         elif index == 4:
             GeneController.get_instance().network.reactions.append(
-                CustomReaction(self.fields["custom_equation"].text(), left=left, right=right)
+                CustomReaction(self.custom_equation_field.text(), left=left, right=right)
             )
 
         self.close()
@@ -265,6 +297,20 @@ class GeneWindow(QMainWindow):
             from_gene = reg_match.group(1)
             to_gene = reg_match.group(3)
             reg_type_str = reg_match.group(2)
+
+            error_message = QMessageBox()
+            error_message.setIcon(QMessageBox.Warning)
+            error_message.setWindowTitle("Error")
+            error_message.setStandardButtons(QMessageBox.Ok)
+            message_text = "Regulation includes some invalid species. " \
+                           "Please add the species before you use them."
+
+            if not self._validate_species(from_gene) or not self._validate_species(to_gene):
+                error_message.setText(message_text)
+
+            button = error_message.exec_()
+            if button == QMessageBox.Ok:
+                return
 
             reg_type = None
             if reg_type_str == "->":

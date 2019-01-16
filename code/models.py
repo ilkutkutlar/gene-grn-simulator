@@ -181,9 +181,10 @@ class TranscriptionReaction(Reaction):
             return self.trans_rate
 
     def __str__(self) -> str:
-        left = self.left[0] if self.left else ""
-        right = self.right[0] if self.right else ""
-        return "Transcription: " + left + " -> " + right
+        left = self.left[0] if self.left else "∅"
+        right = self.right[0] if self.right else "∅"
+        return "Transcription: " + left + " -> " + right \
+               + "\n   ↳ Tr. Rate: " + str(self.trans_rate) + " | Kd: " + str(self.kd) + " | n: " + str(self.hill_coeff)
 
 
 class TranslationReaction(Reaction):
@@ -198,9 +199,10 @@ class TranslationReaction(Reaction):
         return self.translation_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        left = self.left[0] if self.left else ""
-        right = self.right[0] if self.right else ""
-        return "Translation: " + left + " -> " + right
+        left = self.left[0] if self.left else "∅"
+        right = self.right[0] if self.right else "∅"
+        return "Translation: " + left + " -> " + right \
+            + "\n   ↳ Tr. Rate: " + str(self.translation_rate)
 
 
 class MrnaDegradationReaction(Reaction):
@@ -215,9 +217,10 @@ class MrnaDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        left = self.left[0] if self.left else ""
-        right = self.right[0] if self.right else ""
-        return "mRNA Degradation: " + left + " -> " + right
+        left = self.left[0] if self.left else "∅"
+        right = self.right[0] if self.right else "∅"
+        return "mRNA Degradation: " + left + " -> " + right \
+               + "\n   ↳ Decay Rate: " + str(self.decay_rate)
 
 
 class ProteinDegradationReaction(Reaction):
@@ -232,9 +235,10 @@ class ProteinDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        left = self.left[0] if self.left else ""
-        right = self.right[0] if self.right else ""
-        return "Protein Degradation: " + left + " -> " + right
+        left = self.left[0] if self.left else "∅"
+        right = self.right[0] if self.right else "∅"
+        return "Protein Degradation: " + left + " -> " + right \
+            + "\n   ↳ Decay Rate: " + str(self.decay_rate)
 
 
 class CustomReaction(Reaction):
@@ -250,6 +254,6 @@ class CustomReaction(Reaction):
                                           n.symbols, species=n.species)
 
     def __str__(self) -> str:
-        left = self.left[0] if self.left else ""
-        right = self.right[0] if self.right else ""
+        left = self.left[0] if self.left else "∅"
+        right = self.right[0] if self.right else "∅"
         return "Reaction (" + left + " -> " + right + "): " + self.rate_function_ast

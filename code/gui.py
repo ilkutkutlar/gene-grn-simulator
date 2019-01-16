@@ -1,11 +1,10 @@
 import re
-import sys
 from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
-    QInputDialog, QDialog, QComboBox, QFormLayout, QLineEdit, QMainWindow, QAction, QMessageBox
+    QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox
 
 from gene_controller import GeneController
 from gillespie import GillespieSimulator
@@ -157,32 +156,47 @@ class AddReactionDialog(QDialog):
         if not self._error_check_species(left, right):
             return
 
+        def to_float(default, val) -> float:
+            try:
+                m: float = float(val)
+            except ValueError:
+                m: float = default
+            return m
+
         if index == 0:
+            tr_rate: float = to_float(
+                0, self.transcription_rate_field.text().strip())
+
+            kd: float = to_float(
+                1, self.kd_field.text().strip())
+
+            hill_coeff: float = to_float(
+                1, self.hill_coefficient_field.text().strip())
+
             GeneController.get_instance().network.reactions.append(
-                TranscriptionReaction(float(self.transcription_rate_field.text()),
-                                      float(self.kd_field.text()),
-                                      float(self.hill_coefficient_field.text()),
-                                      left=left, right=right))
+                TranscriptionReaction(tr_rate, kd, hill_coeff, left=left, right=right))
         elif index == 1:
+            tr_rate: float = to_float(0, self.translation_rate_field.text().strip())
+
             GeneController.get_instance().network.reactions.append(
-                TranslationReaction(float(self.translation_rate_field.text()),
-                                    left=left, right=right)
-            )
+                TranslationReaction(tr_rate, left=left, right=right))
+
         elif index == 2:
+            decay_rate: float = to_float(0, self.mrna_decay_rate_field.text().strip())
+
             GeneController.get_instance().network.reactions.append(
-                MrnaDegradationReaction(float(self.mrna_decay_rate_field.text()),
-                                        left=left, right=right)
-            )
+                MrnaDegradationReaction(decay_rate, left=left, right=right))
+
         elif index == 3:
+            decay_rate: float = to_float(0, self.protein_decay_rate_field.text().strip())
+
             GeneController.get_instance().network.reactions.append(
-                ProteinDegradationReaction(float(self.protein_decay_rate_field.text()),
-                                           left=left, right=right)
-            )
+                ProteinDegradationReaction(decay_rate, left=left, right=right))
         elif index == 4:
+            eq = self.custom_equation_field.text().strip()
+
             GeneController.get_instance().network.reactions.append(
-                CustomReaction(self.custom_equation_field.text(),
-                               left=left, right=right)
-            )
+                CustomReaction(eq, left=left, right=right))
 
         self.close()
 

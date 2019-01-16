@@ -12,6 +12,16 @@ from models import TranslationReaction, TranscriptionReaction, MrnaDegradationRe
     CustomReaction, SimulationSettings, Regulation, RegType
 
 
+def validate_species(species):
+    if species:
+        for s in species:
+            if s not in GeneController.get_instance().network.species:
+                return False
+        return True
+    else:
+        return True
+
+
 class AddReactionDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -111,15 +121,6 @@ class AddReactionDialog(QDialog):
             self.products_field.setVisible(False)
             self.custom_equation_field.setVisible(True)
 
-    def _validate_species(self, species):
-        if species:
-            for s in species:
-                if s not in GeneController.get_instance().network.species:
-                    return False
-            return True
-        else:
-            return True
-
     def _error_check_species(self, left, right):
         error_message = QMessageBox()
         error_message.setIcon(QMessageBox.Warning)
@@ -127,12 +128,12 @@ class AddReactionDialog(QDialog):
         error_message.setStandardButtons(QMessageBox.Ok)
         message_text = None
 
-        if not self._validate_species(left):
+        if not validate_species(left):
             message_text = \
                 "Reactants include some invalid species. " \
                 "Please add the species before you use them."
 
-        if not self._validate_species(right):
+        if not validate_species(right):
             message_text = \
                 "Products include some invalid species. " \
                 "Please add the species before you use them."
@@ -335,23 +336,21 @@ class GeneWindow(QMainWindow):
         if ok:
             reg_match = re.match(
                 "(.*)(->|-\|)(.*)", reg)
-            from_gene = reg_match.group(1)
-            to_gene = reg_match.group(3)
-            reg_type_str = reg_match.group(2)
+            from_gene = reg_match.group(1).strip()
+            to_gene = reg_match.group(3).strip()
+            reg_type_str = reg_match.group(2).strip()  # -> or -|
 
-            error_message = QMessageBox()
-            error_message.setIcon(QMessageBox.Warning)
-            error_message.setWindowTitle("Error")
-            error_message.setStandardButtons(QMessageBox.Ok)
-            message_text = "Regulation includes some invalid species. " \
-                           "Please add the species before you use them."
+            if not validate_species(from_gene) or not validate_species(to_gene):
+                error_message = QMessageBox()
+                error_message.setIcon(QMessageBox.Warning)
+                error_message.setWindowTitle("Error")
+                error_message.setStandardButtons(QMessageBox.Ok)
+                error_message.setText("Regulation includes some invalid species. " \
+                                      "Please add the species before you use them.")
 
-            if not self._validate_species(from_gene) or not self._validate_species(to_gene):
-                error_message.setText(message_text)
-
-            button = error_message.exec_()
-            if button == QMessageBox.Ok:
-                return
+                button = error_message.exec_()
+                if button == QMessageBox.Ok:
+                    return
 
             reg_type = None
             if reg_type_str == "->":
@@ -374,7 +373,6 @@ class GeneWindow(QMainWindow):
         for reaction in GeneController.get_instance().network.reactions:
             m_list.addItem(reaction.__str__())
         print(GeneController.get_instance().network.reactions)
-
 
     @staticmethod
     def _refresh_species_list(m_list):

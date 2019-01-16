@@ -180,13 +180,11 @@ class AddReactionDialog(QDialog):
 
             GeneController.get_instance().network.reactions.append(
                 TranslationReaction(tr_rate, left=left, right=right))
-
         elif index == 2:
             decay_rate: float = to_float(0, self.mrna_decay_rate_field.text().strip())
 
             GeneController.get_instance().network.reactions.append(
                 MrnaDegradationReaction(decay_rate, left=left, right=right))
-
         elif index == 3:
             decay_rate: float = to_float(0, self.protein_decay_rate_field.text().strip())
 
@@ -235,7 +233,7 @@ class AddRemoveListLayout(QVBoxLayout):
         self.m_remove_button = QPushButton("Remove")
 
         self.m_add_button.clicked.connect(add_function)
-        # self.remove_button.clicked.connect(remove_function)
+        self.m_remove_button.clicked.connect(remove_function)
 
         self.addWidget(self.m_label)
         self.addWidget(self.m_list)
@@ -256,17 +254,17 @@ class GeneWindow(QMainWindow):
             "Species",
             self._refresh_species_list,
             self._handler_add_species_button,
-            None)
+            self._handler_remove_species_button)
         self.reactions_panel = AddRemoveListLayout(
             "Reactions",
             self._refresh_reactions_list,
             self._handler_add_reactions_button,
-            None)
+            self._handler_remove_reactions_button)
         self.regulations_panel = AddRemoveListLayout(
             "Regulations",
             self._refresh_regulations_list,
             self._handler_add_regulation_button,
-            None)
+            self._handler_remove_regulation_button)
 
         layout.addLayout(self.species_panel)
         layout.addLayout(self.reactions_panel)
@@ -279,21 +277,6 @@ class GeneWindow(QMainWindow):
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Gene")
         self.show()
-
-    def _handler_deterministic_clicked(self):
-        print("Not implemented yet")
-
-    def _handler_stochastic_clicked(self):
-        (time, ok) = QInputDialog.getText(self, 'Simulation Settings', 'Simulation Time (s)')
-
-        if ok:
-            net = GeneController.get_instance().network
-            labels = []
-            for species in net.species:
-                labels.append((species, species))
-
-            s = SimulationSettings("Results", "Time", "Concentration", 0, time, labels)
-            GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
 
     def _init_menubar(self):
         self.menubar = self.menuBar()
@@ -310,10 +293,31 @@ class GeneWindow(QMainWindow):
         simulate.addAction(deterministic)
         simulate.addAction(stochastic)
 
+    def _handler_deterministic_clicked(self):
+        print("Not implemented yet")
+
+    def _handler_stochastic_clicked(self):
+        (time, ok) = QInputDialog.getText(self, 'Simulation Settings', 'Simulation Time (s)')
+
+        if ok:
+            net = GeneController.get_instance().network
+            labels = []
+            for species in net.species:
+                labels.append((species, species))
+
+            s = SimulationSettings("Results", "Time", "Concentration", 0, time, labels)
+            GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
+
     def _handler_add_reactions_button(self):
         dialog = AddReactionDialog()
         dialog.finished.connect(lambda: self._refresh_reactions_list(self.reactions_panel.m_list))
         dialog.exec_()
+
+    def _handler_remove_reactions_button(self):
+        prop_key = "id" + str(self.reactions_panel.m_list.currentIndex())
+        react_id = self.reactions_panel.m_list.property(prop_key)
+        del GeneController.get_instance().network.reactions[react_id]
+        self._refresh_reactions_list(self.reactions_panel.m_list)
 
     def _handler_add_species_button(self):
         (species, ok) = QInputDialog.getText(self, 'Add new species', 'Species name:')
@@ -321,6 +325,11 @@ class GeneWindow(QMainWindow):
         if ok:
             GeneController.get_instance().network.species[species] = 0
             self._refresh_species_list(self.species_panel.m_list)
+
+    def _handler_remove_species_button(self):
+        species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentIndex()))
+        del GeneController.get_instance().network.species[species_id]
+        self._refresh_species_list(self.species_panel.m_list)
 
     def _handler_add_regulation_button(self):
         (reg, ok) = QInputDialog.getText(self, 'Add regulation', 'Format: X -> Y (Activator), X -| Y (Repressor)')
@@ -357,23 +366,38 @@ class GeneWindow(QMainWindow):
             GeneController.get_instance().network.regulations.append(Regulation(from_gene, to_gene, reg_type))
             self._refresh_regulations_list(self.regulations_panel.m_list)
 
+    def _handler_remove_regulation_button(self):
+        reg_id = self.regulations_panel.m_list.currentIndex().property(
+            "id" + str(self.regulations_panel.m_list.currentIndex()))
+        GeneController.get_instance().network.regulations.remove(reg_id)
+        self._refresh_reactions_list(self.regulations_panel.m_list)
+
     @staticmethod
     def _refresh_reactions_list(m_list):
         m_list.clear()
+        i: int = 0
         for reaction in GeneController.get_instance().network.reactions:
             m_list.addItem(reaction.__str__())
+            m_list.setProperty("id" + i, i)
+            i += 1
 
     @staticmethod
     def _refresh_species_list(m_list):
         m_list.clear()
+        i: int = 0
         for species in GeneController.get_instance().network.species:
             m_list.addItem(species)
+            m_list.setProperty("id" + str(i), species)
+            i += 1
 
     @staticmethod
     def _refresh_regulations_list(m_list):
         m_list.clear()
+        i: int = 0
         for regulation in GeneController.get_instance().network.regulations:
             m_list.addItem(regulation.__str__())
+            m_list.setProperty("id" + i, i)
+            i += 1
 
 
 app = QApplication([])

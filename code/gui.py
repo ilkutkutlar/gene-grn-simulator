@@ -121,6 +121,31 @@ class AddReactionDialog(QDialog):
         else:
             return True
 
+    def _error_check_species(self, left, right):
+        error_message = QMessageBox()
+        error_message.setIcon(QMessageBox.Warning)
+        error_message.setWindowTitle("Error")
+        error_message.setStandardButtons(QMessageBox.Ok)
+        message_text = None
+
+        if not self._validate_species(left):
+            message_text = \
+                "Reactants include some invalid species. " \
+                "Please add the species before you use them."
+
+        if not self._validate_species(right):
+            message_text = \
+                "Products include some invalid species. " \
+                "Please add the species before you use them."
+
+        if message_text:
+            error_message.setText(message_text)
+            button = error_message.exec_()
+            if button == QMessageBox.Ok:
+                return False
+        else:
+            return True
+
     def _handler_ok_button_clicked(self):
         index = self.combo.currentIndex()
         left_text = self.reactants_field.text().strip()
@@ -129,29 +154,14 @@ class AddReactionDialog(QDialog):
         left: List[str] = [] if len(left_text) == 0 else left_text.split(",")
         right: List[str] = [] if len(right_text) == 0 else right_text.split(",")
 
-        error_message = QMessageBox()
-        error_message.setIcon(QMessageBox.Warning)
-        error_message.setWindowTitle("Error")
-        error_message.setStandardButtons(QMessageBox.Ok)
-        message_text = " include some invalid species. " \
-                       "Please add the species before you use them."
-
-        if not self._validate_species(left):
-            error_message.setText("Reactants" + message_text)
-
-        if not self._validate_species(right):
-            error_message.setText("Products" + message_text)
-
-        button = error_message.exec_()
-        if button == QMessageBox.Ok:
+        if not self._error_check_species(left, right):
             return
 
         if index == 0:
             GeneController.get_instance().network.reactions.append(
                 TranscriptionReaction(self.transcription_rate_field.text(),
                                       self.kd_field.text(),
-                                      self.hill_coefficient_field.text(), left=left, right=right)
-            )
+                                      self.hill_coefficient_field.text(), left=left, right=right))
         elif index == 1:
             GeneController.get_instance().network.reactions.append(
                 TranslationReaction(self.translation_rate_field.text(), left=left, right=right)

@@ -181,7 +181,9 @@ class TranscriptionReaction(Reaction):
             return self.trans_rate
 
     def __str__(self) -> str:
-        return "Transcription: " + self.left[0] + " -> " + self.right[0]
+        left = self.left[0] if self.left else ""
+        right = self.right[0] if self.right else ""
+        return "Transcription: " + left + " -> " + right
 
 
 class TranslationReaction(Reaction):
@@ -196,7 +198,9 @@ class TranslationReaction(Reaction):
         return self.translation_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        return "Translation: " + self.left[0] + " -> " + self.right[0]
+        left = self.left[0] if self.left else ""
+        right = self.right[0] if self.right else ""
+        return "Translation: " + left + " -> " + right
 
 
 class MrnaDegradationReaction(Reaction):
@@ -211,7 +215,9 @@ class MrnaDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        return "mRNA Degradation: " + self.left[0] + " -> " + self.right[0]
+        left = self.left[0] if self.left else ""
+        right = self.right[0] if self.right else ""
+        return "mRNA Degradation: " + left + " -> " + right
 
 
 class ProteinDegradationReaction(Reaction):
@@ -226,7 +232,9 @@ class ProteinDegradationReaction(Reaction):
         return self.decay_rate * n.species[self.left[0]]
 
     def __str__(self) -> str:
-        return "Protein Degradation: " + self.left[0] + " -> " + self.right[0]
+        left = self.left[0] if self.left else ""
+        right = self.right[0] if self.right else ""
+        return "Protein Degradation: " + left + " -> " + right
 
 
 class CustomReaction(Reaction):
@@ -242,4 +250,6 @@ class CustomReaction(Reaction):
                                           n.symbols, species=n.species)
 
     def __str__(self) -> str:
-        return "Reaction (" + self.left[0] + " -> " + self.right[0] + "): " + self.rate_function_ast
+        left = self.left[0] if self.left else ""
+        right = self.right[0] if self.right else ""
+        return "Reaction (" + left + " -> " + right + "): " + self.rate_function_ast

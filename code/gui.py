@@ -1,15 +1,16 @@
 import re
 from typing import List
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QDir
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
-    QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox
+    QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox, QFileDialog
 
 from gene_controller import GeneController
 from gillespie import GillespieSimulator
 from models import TranslationReaction, TranscriptionReaction, MrnaDegradationReaction, ProteinDegradationReaction, \
-    CustomReaction, SimulationSettings, Regulation, RegType
+    CustomReaction, SimulationSettings, Regulation, RegType, Network
+from sbml_parser import SbmlParser
 
 
 def validate_species(species):
@@ -281,8 +282,14 @@ class GeneWindow(QMainWindow):
 
     def _init_menubar(self):
         self.menubar = self.menuBar()
+
+        # File menu
         file = self.menubar.addMenu("File")
-        file.addAction("Open SBML file")
+        open_file = QAction("Open SBML file", self)
+        open_file.triggered.connect(self._handler_open_sbml_clicked)
+        file.addAction(open_file)
+
+        # Simulate menu
         simulate = self.menubar.addMenu("Simulate")
 
         deterministic = QAction("Deterministic (ODE)", self)
@@ -293,6 +300,28 @@ class GeneWindow(QMainWindow):
 
         simulate.addAction(deterministic)
         simulate.addAction(stochastic)
+
+    def _handler_open_sbml_clicked(self):
+        file_dialog = QFileDialog()
+        file_dialog.setFileMode(QFileDialog.AnyFile)
+        # TODO: Why is the filter not working?
+        # file_dialog.setFilter("SBML files (*.xml)")
+
+        if file_dialog.exec_():
+            # selectedFiles returns all files, we only want to open one
+            filename: str = file_dialog.selectedFiles()[0]
+            net: Network = SbmlParser.parse(filename)
+            GeneController.get_instance().network = net
+
+            # Display a nice message showing the contents of the file loaded
+            message = QMessageBox()
+            message.setText("SBML file has been opened and this network has been loaded: \n\n" + net.__str__())
+            message.exec_()
+
+            self._refresh_reactions_list(self.reactions_panel.m_list)
+            self._refresh_species_list(self.species_panel.m_list)
+            self._refresh_regulations_list(self.regulations_panel.m_list)
+
 
     def _handler_deterministic_clicked(self):
         print("Not implemented yet")
@@ -345,7 +374,7 @@ class GeneWindow(QMainWindow):
                 error_message.setIcon(QMessageBox.Warning)
                 error_message.setWindowTitle("Error")
                 error_message.setStandardButtons(QMessageBox.Ok)
-                error_message.setText("Regulation includes some invalid species. " \
+                error_message.setText("Regulation includes some invalid species. "
                                       "Please add the species before you use them.")
 
                 button = error_message.exec_()

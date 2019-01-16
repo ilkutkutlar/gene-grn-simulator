@@ -242,8 +242,6 @@ class ProteinDegradationReaction(Reaction):
 
 
 class CustomReaction(Reaction):
-    counter = 0
-
     def __init__(self, rate_function_ast: str,
                  left: List[str], right: List[str]):
         super().__init__(left, right)

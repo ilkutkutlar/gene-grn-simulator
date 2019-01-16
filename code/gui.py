@@ -314,9 +314,7 @@ class GeneWindow(QMainWindow):
         dialog.exec_()
 
     def _handler_remove_reactions_button(self):
-        prop_key = "id" + str(self.reactions_panel.m_list.currentIndex())
-        react_id = self.reactions_panel.m_list.property(prop_key)
-        del GeneController.get_instance().network.reactions[react_id]
+        del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]
         self._refresh_reactions_list(self.reactions_panel.m_list)
 
     def _handler_add_species_button(self):
@@ -327,7 +325,7 @@ class GeneWindow(QMainWindow):
             self._refresh_species_list(self.species_panel.m_list)
 
     def _handler_remove_species_button(self):
-        species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentIndex()))
+        species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
         del GeneController.get_instance().network.species[species_id]
         self._refresh_species_list(self.species_panel.m_list)
 
@@ -367,19 +365,16 @@ class GeneWindow(QMainWindow):
             self._refresh_regulations_list(self.regulations_panel.m_list)
 
     def _handler_remove_regulation_button(self):
-        reg_id = self.regulations_panel.m_list.currentIndex().property(
-            "id" + str(self.regulations_panel.m_list.currentIndex()))
-        GeneController.get_instance().network.regulations.remove(reg_id)
+        del GeneController.get_instance().network.regulations[self.regulations_panel.m_list.currentRow()]
         self._refresh_reactions_list(self.regulations_panel.m_list)
 
     @staticmethod
     def _refresh_reactions_list(m_list):
         m_list.clear()
-        i: int = 0
         for reaction in GeneController.get_instance().network.reactions:
             m_list.addItem(reaction.__str__())
-            m_list.setProperty("id" + i, i)
-            i += 1
+        print(GeneController.get_instance().network.reactions)
+
 
     @staticmethod
     def _refresh_species_list(m_list):
@@ -389,15 +384,14 @@ class GeneWindow(QMainWindow):
             m_list.addItem(species)
             m_list.setProperty("id" + str(i), species)
             i += 1
+        print(GeneController.get_instance().network.species)
 
     @staticmethod
     def _refresh_regulations_list(m_list):
         m_list.clear()
-        i: int = 0
         for regulation in GeneController.get_instance().network.regulations:
             m_list.addItem(regulation.__str__())
-            m_list.setProperty("id" + i, i)
-            i += 1
+        print(GeneController.get_instance().network.regulations)
 
 
 app = QApplication([])

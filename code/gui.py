@@ -1,5 +1,6 @@
 import re
 import sys
+from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
@@ -81,8 +82,6 @@ class AddReactionDialog(QDialog):
         # Custom reaction
         self.custom_equation_field = add_field_to_form("Equation")
 
-
-
     def _handler_reaction_type_changed(self, index):
         self.name_field.setVisible(True)
         self.rp_info_field.setVisible(True)
@@ -114,15 +113,21 @@ class AddReactionDialog(QDialog):
             self.custom_equation_field.setVisible(True)
 
     def _validate_species(self, species):
-        for s in species:
-            if s not in GeneController.get_instance().network.species:
-                return False
-        return True
+        if species:
+            for s in species:
+                if s not in GeneController.get_instance().network.species:
+                    return False
+            return True
+        else:
+            return True
 
     def _handler_ok_button_clicked(self):
         index = self.combo.currentIndex()
-        left = self.reactants_field.text().split(",")
-        right = self.products_field.text().split(",")
+        left_text = self.reactants_field.text().strip()
+        right_text = self.products_field.text().strip()
+
+        left: List[str] = [] if len(left_text) == 0 else left_text.split(",")
+        right: List[str] = [] if len(right_text) == 0 else right_text.split(",")
 
         error_message = QMessageBox()
         error_message.setIcon(QMessageBox.Warning)

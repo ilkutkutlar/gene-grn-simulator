@@ -133,7 +133,7 @@ class GillespieSimulator:
         t: float = 0
         results: SimulationResults = []
 
-        while t <= sim.end_time:
+        while t <= int(sim.end_time):
             r0: float = GillespieSimulator._calculate_r0_(net)
 
             # Advance time

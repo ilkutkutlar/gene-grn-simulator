@@ -159,24 +159,29 @@ class AddReactionDialog(QDialog):
 
         if index == 0:
             GeneController.get_instance().network.reactions.append(
-                TranscriptionReaction(self.transcription_rate_field.text(),
-                                      self.kd_field.text(),
-                                      self.hill_coefficient_field.text(), left=left, right=right))
+                TranscriptionReaction(float(self.transcription_rate_field.text()),
+                                      float(self.kd_field.text()),
+                                      float(self.hill_coefficient_field.text()),
+                                      left=left, right=right))
         elif index == 1:
             GeneController.get_instance().network.reactions.append(
-                TranslationReaction(self.translation_rate_field.text(), left=left, right=right)
+                TranslationReaction(float(self.translation_rate_field.text()),
+                                    left=left, right=right)
             )
         elif index == 2:
             GeneController.get_instance().network.reactions.append(
-                MrnaDegradationReaction(self.mrna_decay_rate_field.text(), left=left, right=right)
+                MrnaDegradationReaction(float(self.mrna_decay_rate_field.text()),
+                                        left=left, right=right)
             )
         elif index == 3:
             GeneController.get_instance().network.reactions.append(
-                ProteinDegradationReaction(self.protein_decay_rate_field.text(), left=left, right=right)
+                ProteinDegradationReaction(float(self.protein_decay_rate_field.text()),
+                                           left=left, right=right)
             )
         elif index == 4:
             GeneController.get_instance().network.reactions.append(
-                CustomReaction(self.custom_equation_field.text(), left=left, right=right)
+                CustomReaction(self.custom_equation_field.text(),
+                               left=left, right=right)
             )
 
         self.close()

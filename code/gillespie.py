@@ -18,7 +18,8 @@ class GillespieSimulator:
     def _calculate_r0_(net: Network):
         r0: float = 0
         for reaction in net.reactions:
-            r0 += reaction.rate_function(net)
+            t = reaction.rate_function(net)
+            r0 += t
 
         return r0
 

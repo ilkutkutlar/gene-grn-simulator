@@ -1,7 +1,7 @@
 import re
 from typing import List
 
-from PyQt5.QtCore import Qt, QDir
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
     QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox, QFileDialog
@@ -322,7 +322,6 @@ class GeneWindow(QMainWindow):
             self._refresh_species_list(self.species_panel.m_list)
             self._refresh_regulations_list(self.regulations_panel.m_list)
 
-
     def _handler_deterministic_clicked(self):
         print("Not implemented yet")
 
@@ -330,12 +329,14 @@ class GeneWindow(QMainWindow):
         (time, ok) = QInputDialog.getText(self, 'Simulation Settings', 'Simulation Time (s)')
 
         if ok:
+            end_time = int(time) if time else 0
+
             net = GeneController.get_instance().network
             labels = []
             for species in net.species:
                 labels.append((species, species))
 
-            s = SimulationSettings("Results", "Time", "Concentration", 0, time, labels)
+            s = SimulationSettings("Results", "Time", "Concentration", 0, end_time, labels)
             GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
 
     def _handler_add_reactions_button(self):

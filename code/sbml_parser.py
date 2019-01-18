@@ -3,6 +3,7 @@ from typing import Dict, List
 import libsbml
 
 import helper
+from gene_controller import GeneController
 from models import Network, Reaction, CustomReaction
 
 
@@ -91,3 +92,12 @@ class SbmlParser:
         net.reactions = SbmlParser._get_reactions_(model)
 
         return net
+
+    @staticmethod
+    def save_as_sbml(net: Network):
+        model: libsbml.Model
+
+        for react in net.reactions:
+            r = libsbml.Reaction()
+            r.addReactant()
+            model.addReaction()

@@ -23,6 +23,20 @@ def validate_species(species):
         return True
 
 
+def show_error_message(message) -> bool:
+    error_message = QMessageBox()
+    error_message.setIcon(QMessageBox.Warning)
+    error_message.setWindowTitle("Error")
+    error_message.setStandardButtons(QMessageBox.Ok)
+    error_message.setText(message)
+
+    button = error_message.exec_()
+    if button == QMessageBox.Ok:
+        return True
+    else:
+        return False
+
+
 class AddReactionDialog(QDialog):
     def __init__(self):
         super().__init__()
@@ -123,10 +137,6 @@ class AddReactionDialog(QDialog):
             self.custom_equation_field.setVisible(True)
 
     def _error_check_species(self, left, right):
-        error_message = QMessageBox()
-        error_message.setIcon(QMessageBox.Warning)
-        error_message.setWindowTitle("Error")
-        error_message.setStandardButtons(QMessageBox.Ok)
         message_text = None
 
         if not validate_species(left):
@@ -140,9 +150,7 @@ class AddReactionDialog(QDialog):
                 "Please add the species before you use them."
 
         if message_text:
-            error_message.setText(message_text)
-            button = error_message.exec_()
-            if button == QMessageBox.Ok:
+            if self.show_erro_message(message_text):
                 return False
         else:
             return True
@@ -349,11 +357,45 @@ class GeneWindow(QMainWindow):
         self._refresh_reactions_list(self.reactions_panel.m_list)
 
     def _handler_add_species_button(self):
-        (species, ok) = QInputDialog.getText(self, 'Add new species', 'Species name:')
+        dia = QDialog()
+        main = QVBoxLayout()
 
-        if ok:
-            GeneController.get_instance().network.species[species] = 0
-            self._refresh_species_list(self.species_panel.m_list)
+        name = QLineEdit()
+        name.setPlaceholderText("Species name")
+
+        validator = QDoubleValidator()
+        # Standard notation disallows constants such as "e"
+        validator.setNotation(QDoubleValidator.StandardNotation)
+        init_con = QLineEdit()
+        init_con.setPlaceholderText("Initial amount")
+        init_con.setValidator(validator)
+
+        ok_button = QPushButton()
+        ok_button.setText("Ok")
+
+        def dialog_ok_button_clicked_handler():
+            name_text = name.text().strip()
+            init_con_text = init_con.text().strip()
+            init_con_value = float(init_con_text) if init_con_text else 0
+
+            if name_text == "":
+                if show_error_message("You can't have a blank species name."):
+                    return
+            else:
+                GeneController.get_instance().network.species[name_text] = init_con_value
+                self._refresh_species_list(self.species_panel.m_list)
+            dia.close()
+
+        ok_button.clicked.connect(dialog_ok_button_clicked_handler)
+
+        main.addWidget(name)
+        main.addWidget(init_con)
+        main.addWidget(ok_button)
+
+        dia.setWindowTitle("Add new species")
+        dia.setLayout(main)
+        dia.exec_()
+
 
     def _handler_remove_species_button(self):
         species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
@@ -371,15 +413,8 @@ class GeneWindow(QMainWindow):
             reg_type_str = reg_match.group(2).strip()  # -> or -|
 
             if not validate_species(from_gene) or not validate_species(to_gene):
-                error_message = QMessageBox()
-                error_message.setIcon(QMessageBox.Warning)
-                error_message.setWindowTitle("Error")
-                error_message.setStandardButtons(QMessageBox.Ok)
-                error_message.setText("Regulation includes some invalid species. "
-                                      "Please add the species before you use them.")
-
-                button = error_message.exec_()
-                if button == QMessageBox.Ok:
+                if show_error_message("Regulation includes some invalid species. "
+                                      "Please add the species before you use them."):
                     return
 
             reg_type = None
@@ -409,7 +444,7 @@ class GeneWindow(QMainWindow):
         m_list.clear()
         i: int = 0
         for species in GeneController.get_instance().network.species:
-            m_list.addItem(species)
+            m_list.addItem(species + ": " + str(GeneController.get_instance().network.species[species]))
             m_list.setProperty("id" + str(i), species)
             i += 1
         print(GeneController.get_instance().network.species)

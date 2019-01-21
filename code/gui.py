@@ -20,6 +20,7 @@ def validate_species(species):
                 return False
         return True
     else:
+        # To ensure that empty sets are accepted
         return True
 
 
@@ -97,11 +98,8 @@ class AddReactionDialog(QDialog):
         # Translation
         self.translation_rate_field = add_number_field_to_form("Tranlation Rate")
 
-        # mRNA decay
-        self.mrna_decay_rate_field = add_number_field_to_form("Decay Rate")
-
-        # Protein decay
-        self.protein_decay_rate_field = add_number_field_to_form("Decay Rate")
+        # mRNA and Protein decay
+        self.decay_rate_field = add_number_field_to_form("Decay Rate")
 
         # Custom reaction
         self.custom_equation_field = add_field_to_form("Equation")
@@ -116,8 +114,9 @@ class AddReactionDialog(QDialog):
         self.kd_field.setVisible(False)
         self.hill_coefficient_field.setVisible(False)
         self.translation_rate_field.setVisible(False)
-        self.mrna_decay_rate_field.setVisible(False)
-        self.protein_decay_rate_field.setVisible(False)
+
+        self.decay_rate_field.setVisible(False)
+
         self.custom_equation_field.setVisible(False)
 
         if index == 0:
@@ -127,13 +126,10 @@ class AddReactionDialog(QDialog):
         elif index == 1:
             self.translation_rate_field.setVisible(True)
         elif index == 2:
-            self.mrna_decay_rate_field.setVisible(True)
+            self.decay_rate_field.setVisible(True)
         elif index == 3:
-            self.protein_decay_rate_field.setVisible(True)
+            self.decay_rate_field.setVisible(True)
         elif index == 4:
-            self.rp_info_field.setVisible(False)
-            self.reactants_field.setVisible(False)
-            self.products_field.setVisible(False)
             self.custom_equation_field.setVisible(True)
 
     def _error_check_species(self, left, right):
@@ -191,12 +187,12 @@ class AddReactionDialog(QDialog):
             GeneController.get_instance().network.reactions.append(
                 TranslationReaction(tr_rate, left=left, right=right))
         elif index == 2:
-            decay_rate: float = to_float(0, self.mrna_decay_rate_field.text().strip())
+            decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
 
             GeneController.get_instance().network.reactions.append(
                 MrnaDegradationReaction(decay_rate, left=left, right=right))
         elif index == 3:
-            decay_rate: float = to_float(0, self.protein_decay_rate_field.text().strip())
+            decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
 
             GeneController.get_instance().network.reactions.append(
                 ProteinDegradationReaction(decay_rate, left=left, right=right))
@@ -337,7 +333,7 @@ class GeneWindow(QMainWindow):
         (time, ok) = QInputDialog.getText(self, 'Simulation Settings', 'Simulation Time (s)')
 
         if ok:
-            end_time = int(time) if time else 0
+            end_time = int(time) if time else 1
 
             net = GeneController.get_instance().network
             labels = []
@@ -376,7 +372,7 @@ class GeneWindow(QMainWindow):
         def dialog_ok_button_clicked_handler():
             name_text = name.text().strip()
             init_con_text = init_con.text().strip()
-            init_con_value = float(init_con_text) if init_con_text else 0
+            init_con_value = float(init_con_text) if init_con_text else float(0)
 
             if name_text == "":
                 if show_error_message("You can't have a blank species name."):
@@ -391,11 +387,11 @@ class GeneWindow(QMainWindow):
         main.addWidget(name)
         main.addWidget(init_con)
         main.addWidget(ok_button)
-
+        dia.setFixedHeight(120)
+        dia.setMinimumWidth(200)
         dia.setWindowTitle("Add new species")
         dia.setLayout(main)
         dia.exec_()
-
 
     def _handler_remove_species_button(self):
         species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
@@ -412,7 +408,8 @@ class GeneWindow(QMainWindow):
             to_gene = reg_match.group(3).strip()
             reg_type_str = reg_match.group(2).strip()  # -> or -|
 
-            if not validate_species(from_gene) or not validate_species(to_gene):
+            if from_gene not in GeneController.get_instance().network.species or \
+                    to_gene not in GeneController.get_instance().network.species:
                 if show_error_message("Regulation includes some invalid species. "
                                       "Please add the species before you use them."):
                     return

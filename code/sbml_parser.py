@@ -52,6 +52,12 @@ class SbmlParser:
         for x in model.getListOfReactions():
             reaction_rate_function = x.getKineticLaw().getMath().deepCopy()
 
+            # 179 -> Degradation
+            # 183 -> Transcription
+            # 184 -> Translation
+
+            print(x.getSBOTerm())
+
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
 

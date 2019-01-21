@@ -30,7 +30,8 @@ class GillespieSimulator:
     @staticmethod
     def _get_theta_(r0: float) -> float:
         s1: float = random()  # To pick time
-        return (1 / r0) * log(1 / s1, e)
+        epsilon = 0.001
+        return (1 / (r0 + epsilon)) * log(1 / s1, e)
 
     """
     Adds a given change vector to the network's state vector
@@ -106,7 +107,7 @@ class GillespieSimulator:
                 return y[0]
 
         # In case something goes wrong, at least return something
-        # return cumilative[0][0]
+        return cumilative[0][0]
 
     """
     returns a NamedVector representing the
@@ -118,7 +119,11 @@ class GillespieSimulator:
     def _pick_next_reaction_(net: Network, r0: float) -> NamedVector:
         propensities: List[float] = []
         for reaction in net.reactions:
-            propensities.append(reaction.rate_function(net) / r0)
+            try:
+                div_result = reaction.rate_function(net) / r0
+            except ZeroDivisionError:
+                div_result = reaction.rate_function(net) / 1
+            propensities.append(div_result)
 
         return GillespieSimulator._pick_weighted_random_(net.reactions, propensities) \
             .change_vector(net)

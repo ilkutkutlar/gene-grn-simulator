@@ -46,6 +46,7 @@ class Network:
     """
     Given a species name, returns the species which are regulating it.
     """
+
     def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
 
@@ -81,10 +82,70 @@ class SimulationSettings:
         self.title = title
 
 
+class Formulae:
+    @staticmethod
+    def translation_rate(n: Network, rate: float, mrna_species: str):
+        return rate * n.species[mrna_species]
+
+    """
+    Based on an ODE model and uses the Hill equation to calculate
+    the promoter strength when being regulated by a TF:
+
+    Hill equation for repressor bindings:
+    beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
+
+    Hill equation for activator bindings:
+    beta * ([TF]^n / (Kd + [TF]^n) )
+
+    beta    : Maximal transcription rate (promoter strength)
+    [TF]    : The concentration of Transcript Factor that is regulating this promoter
+    Kd      : Dissociation constant, the probability that the TF will dissociate from the
+                binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
+                Kb = rate of TF unbinding.
+    n       : Hill coefficient. Assumed to be 1 by default.
+
+    Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
+    """
+
+    @staticmethod
+    def _hill_activator(tf: float, n: float, kd: float):
+        a = pow(tf, n)
+        b = kd + pow(tf, n)
+        return a / b
+
+    @staticmethod
+    def _hill_repressor(tf: float, n: float, kd: float):
+        c = 1 + pow(tf / kd, n)
+        return 1 / c
+
+    @staticmethod
+    def transcription_rate(n: Network, rate: float, hill_coeff: float,
+                           kd: float, transcribed_species: str):
+
+        # Protein regulates mRNA
+        regulations = n.get_inner_regulation(transcribed_species)
+        the_regulation = regulations[0] if regulations else None
+
+        if regulations:
+            regulator_concent = n.species[the_regulation.from_gene]
+            if the_regulation.reg_type == RegType.ACTIVATION:
+                h = Formulae._hill_activator(regulator_concent, hill_coeff, kd)
+            else:
+                h = Formulae._hill_repressor(regulator_concent, hill_coeff, kd)
+            return rate * h
+        else:
+            return rate
+
+    @staticmethod
+    def degradation_rate(n: Network, rate: float, decaying_species: str):
+        return rate * n.species[decaying_species]
+
+
 class Reaction(ABC):
-    def __init__(self, left: List[str], right: List[str]):
+    def __init__(self, left: List[str], right: List[str], rate_function):
         self.left = left
         self.right = right
+        self.rate_function = rate_function
 
     @abstractmethod
     def rate_function(self, n: Network) -> float:
@@ -154,14 +215,14 @@ class TranscriptionReaction(Reaction):
 
     @staticmethod
     # [TF]^n / (Kd + [TF]^n)
-    def _hill_activator_(tf: float, n: float, kd: float):
+    def _hill_activator(tf: float, n: float, kd: float):
         a = pow(tf, n)
         b = kd + pow(tf, n)
         return a / b
 
     @staticmethod
     # 1 / (1 + ([TF] / Kd) ^ n)
-    def _hill_repressor_(tf: float, n: float, kd: float):
+    def _hill_repressor(tf: float, n: float, kd: float):
         c = 1 + pow(tf / kd, n)
         return 1 / c
 
@@ -173,9 +234,9 @@ class TranscriptionReaction(Reaction):
         if regulations:
             regulator_concent = n.species[the_regulation.from_gene]
             if the_regulation.reg_type == RegType.ACTIVATION:
-                h = self._hill_activator_(regulator_concent, self.hill_coeff, self.kd)
+                h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
             else:
-                h = self._hill_repressor_(regulator_concent, self.hill_coeff, self.kd)
+                h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
             return self.trans_rate * h
         else:
             return self.trans_rate
@@ -202,12 +263,10 @@ class TranslationReaction(Reaction):
         left = self.left[0] if self.left else "∅"
         right = self.right[0] if self.right else "∅"
         return "Translation: " + left + " -> " + right \
-            + "\n   ↳ Tr. Rate: " + str(self.translation_rate)
+               + "\n   ↳ Tr. Rate: " + str(self.translation_rate)
 
 
-class MrnaDegradationReaction(Reaction):
-    # mRNA ->
-
+class DegradationReaction(Reaction):
     def __init__(self, decay_rate: float,
                  left: List[str], right: List[str]):
         super().__init__(left, right)
@@ -219,26 +278,8 @@ class MrnaDegradationReaction(Reaction):
     def __str__(self) -> str:
         left = self.left[0] if self.left else "∅"
         right = self.right[0] if self.right else "∅"
-        return "mRNA Degradation: " + left + " -> " + right \
+        return "Degradation: " + left + " -> " + right \
                + "\n   ↳ Decay Rate: " + str(self.decay_rate)
-
-
-class ProteinDegradationReaction(Reaction):
-    # Protein ->
-
-    def __init__(self, decay_rate: float,
-                 left: List[str], right: List[str]):
-        super().__init__(left, right)
-        self.decay_rate = decay_rate
-
-    def rate_function(self, n: Network) -> float:
-        return self.decay_rate * n.species[self.left[0]]
-
-    def __str__(self) -> str:
-        left = self.left[0] if self.left else "∅"
-        right = self.right[0] if self.right else "∅"
-        return "Protein Degradation: " + left + " -> " + right \
-            + "\n   ↳ Decay Rate: " + str(self.decay_rate)
 
 
 class CustomReaction(Reaction):

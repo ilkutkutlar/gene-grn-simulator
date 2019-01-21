@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWid
 
 from gene_controller import GeneController
 from gillespie import GillespieSimulator
-from models import TranslationReaction, TranscriptionReaction, MrnaDegradationReaction, ProteinDegradationReaction, \
-    CustomReaction, SimulationSettings, Regulation, RegType, Network
+from models import TranslationReaction, TranscriptionReaction, \
+    CustomReaction, SimulationSettings, Regulation, RegType, Network, DegradationReaction
 from sbml_parser import SbmlParser
 
 
@@ -190,12 +190,12 @@ class AddReactionDialog(QDialog):
             decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
 
             GeneController.get_instance().network.reactions.append(
-                MrnaDegradationReaction(decay_rate, left=left, right=right))
+                DegradationReaction(decay_rate, left=left, right=right))
         elif index == 3:
             decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
 
             GeneController.get_instance().network.reactions.append(
-                ProteinDegradationReaction(decay_rate, left=left, right=right))
+                DegradationReaction(decay_rate, left=left, right=right))
         elif index == 4:
             eq = self.custom_equation_field.text().strip()
 

@@ -3,7 +3,7 @@ from typing import Dict
 
 import helper
 from gillespie import GillespieSimulator
-from models import Network, CustomReaction, SimulationSettings
+from models.models import Network, CustomReaction, SimulationSettings
 
 
 class GillespieTest(unittest.TestCase):

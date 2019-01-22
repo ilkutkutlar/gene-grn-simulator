@@ -3,8 +3,7 @@ from typing import Dict, List
 import libsbml
 
 import helper
-from gene_controller import GeneController
-from models import Network, Reaction, CustomReaction
+from models.models import Network, Reaction, CustomReaction
 
 
 # 1. Core objects of libsbml:

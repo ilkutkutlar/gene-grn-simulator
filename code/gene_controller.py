@@ -1,5 +1,4 @@
-from models import Network
-
+from models.network import Network
 
 class GeneController:
     instance = None

@@ -6,11 +6,15 @@ from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
     QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox, QFileDialog
 
+from formulae import Formulae
 from gene_controller import GeneController
 from gillespie import GillespieSimulator
-from models import TranslationReaction, TranscriptionReaction, \
-    CustomReaction, SimulationSettings, Regulation, RegType, Network, DegradationReaction
+from models.network import Network
+from models.reg_type import RegType
+from models.regulation import Regulation
+from models.simulation_settings import SimulationSettings
 from sbml_parser import SbmlParser
+from models.reaction import Reaction
 
 
 def validate_species(species):
@@ -74,18 +78,10 @@ class AddReactionDialog(QDialog):
         self.name_field = add_field_to_form("Name")
         self.name_field.setVisible(True)
 
-        self.rp_info_field = QLabel()
-        self.rp_info_field.setText("Reactants and products must be comma separated names of species")
-        self.form.addWidget(self.rp_info_field)
-        self.rp_info_field.setVisible(True)
-
-        self.reactants_field = add_field_to_form("Reactants")
-        self.reactants_field.setVisible(True)
-
-        self.products_field = add_field_to_form("Products")
-        self.products_field.setVisible(True)
-
         # Transcription
+        self.transcribed_species = add_field_to_form("Transcribed Species")
+        self.transcribed_species.setVisible(True)
+
         self.transcription_rate_field = add_number_field_to_form("Transcription Rate")
         self.transcription_rate_field.setVisible(True)
 
@@ -96,13 +92,26 @@ class AddReactionDialog(QDialog):
         self.hill_coefficient_field.setVisible(True)
 
         # Translation
+        self.translated_mrna = add_field_to_form("Translated mRNA Species")
         self.translation_rate_field = add_number_field_to_form("Tranlation Rate")
 
         # mRNA and Protein decay
+        self.decaying_species = add_number_field_to_form("Decaying Species")
         self.decay_rate_field = add_number_field_to_form("Decay Rate")
 
         # Custom reaction
         self.custom_equation_field = add_field_to_form("Equation")
+
+        self.rp_info_field = QLabel()
+        self.rp_info_field.setText("Reactants and products must be comma separated names of species")
+        self.form.addWidget(self.rp_info_field)
+        self.rp_info_field.setVisible(False)
+
+        self.reactants_field = add_field_to_form("Reactants")
+        self.reactants_field.setVisible(False)
+
+        self.products_field = add_field_to_form("Products")
+        self.products_field.setVisible(False)
 
     def _handler_reaction_type_changed(self, index):
         self.name_field.setVisible(True)
@@ -179,28 +188,18 @@ class AddReactionDialog(QDialog):
             hill_coeff: float = to_float(
                 1, self.hill_coefficient_field.text().strip())
 
-            GeneController.get_instance().network.reactions.append(
-                TranscriptionReaction(tr_rate, kd, hill_coeff, left=left, right=right))
+            r = Reaction(left, right, Formulae.transcription_rate(tr_rate, kd, hill_coeff))
         elif index == 1:
             tr_rate: float = to_float(0, self.translation_rate_field.text().strip())
-
-            GeneController.get_instance().network.reactions.append(
-                TranslationReaction(tr_rate, left=left, right=right))
-        elif index == 2:
+            r = Reaction(left, right, Formulae.translation_rate(tr_rate, ))
+        elif index == 2 or index == 3:
             decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
-
-            GeneController.get_instance().network.reactions.append(
-                DegradationReaction(decay_rate, left=left, right=right))
-        elif index == 3:
-            decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
-
-            GeneController.get_instance().network.reactions.append(
-                DegradationReaction(decay_rate, left=left, right=right))
+            r = Reaction(left, right, Formulae.degradation_rate(decay_rate, ))
         elif index == 4:
             eq = self.custom_equation_field.text().strip()
+            r = Reaction(left, right, Formulae.custom_reaction_rate(eq))
 
-            GeneController.get_instance().network.reactions.append(
-                CustomReaction(eq, left=left, right=right))
+        GeneController.get_instance().network.reactions.append(r)
 
         self.close()
 

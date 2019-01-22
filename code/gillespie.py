@@ -4,7 +4,9 @@ from typing import List, Tuple, Dict, Any
 
 import matplotlib.pyplot as plt
 
-from models import NamedVector, Network, SimulationSettings
+from models.models import NamedVector
+from models.network import Network
+from models.simulation_settings import SimulationSettings
 
 SimulationResults = List[Tuple[float, NamedVector]]
 

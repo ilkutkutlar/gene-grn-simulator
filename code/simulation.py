@@ -1,13 +1,13 @@
-from typing import List, Dict, NamedTuple, Tuple
+from typing import List, Dict, NamedTuple
 
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
 from gillespie import SimulationResults
-from models import SimulationSettings, Regulation
+from models.models import SimulationSettings, Regulation
 from ode.models import Network, Cassette, RegType
-from models import Network as OtherNetwork
+from models.models import Network as OtherNetwork
 
 
 class Concentration(NamedTuple):

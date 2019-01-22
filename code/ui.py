@@ -1,7 +1,7 @@
 from math import log, e
 
 from gillespie import GillespieSimulator
-from models import TranscriptionReaction, Network, DegradationReaction, TranslationReaction, \
+from models.models import TranscriptionReaction, Network, DegradationReaction, TranslationReaction, \
     SimulationSettings, Regulation, RegType, CustomReaction
 
 # region Constants

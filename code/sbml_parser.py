@@ -44,6 +44,9 @@ class SbmlParser:
             val = helper.evaluate_ast_node(r.getMath(), symbols)
             symbols[r.getId()] = val
 
+        for c in model.getListOfCompartments():
+            symbols[c.getId()] = c.getSize()
+
         return symbols
 
     @staticmethod
@@ -51,12 +54,7 @@ class SbmlParser:
         reactions: List[Reaction] = []
         for x in model.getListOfReactions():
             reaction_rate_function = x.getKineticLaw().getMath().deepCopy()
-
-            # 179 -> Degradation
-            # 183 -> Transcription
-            # 184 -> Translation
-
-            print(x.getSBOTerm())
+            parameters = {}
 
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
@@ -76,10 +74,24 @@ class SbmlParser:
             for y in products:
                 right.append(y.getSpecies())
 
-            # left: str = reactants[0].getSpecies() if reactants else ""
-            # right: str = products[0].getSpecies() if products else ""
+            for p in x.getKineticLaw().getListOfParameters():
+                parameters[p.getId()] = p.getValue()
 
-            r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function))
+            sbo: str = x.getSBOTerm()
+
+            # 179 -> Degradation
+            # 183 -> Transcription
+            # 184 -> Translation
+
+            if sbo == "179":
+                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
+            elif sbo == "183":
+                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
+            elif sbo == "184":
+                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
+            else:
+                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
+
             reactions.append(Reaction(left, right, r))
         return reactions
 

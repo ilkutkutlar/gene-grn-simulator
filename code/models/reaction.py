@@ -69,4 +69,10 @@ class Reaction:
                    + "\n   ↳ Decay Rate: " + rate
         elif isinstance(self.rate_fn, CustomFormula):
             rate_function_ast = str(self.rate_fn.rate_function_ast)
-            return "Reaction (" + left + " -> " + right + "): " + rate_function_ast
+
+            params = ""
+            for p in self.rate_fn.parameters:
+                params += "\n       • " + p + ": " + str(self.rate_fn.parameters[p])
+
+            return "Reaction (" + left + " -> " + right + "): " + rate_function_ast \
+                   + "\n  ↳ Parameters: " + params

@@ -1,5 +1,6 @@
 from models.network import Network
 
+
 class GeneController:
     instance = None
 

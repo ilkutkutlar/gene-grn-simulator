@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Callable, Dict
 
 import helper
 from models.network import Network
@@ -62,7 +62,7 @@ class TranscriptionFormula(Formula):
                     h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
                 else:
                     h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
-                return self.rate * h
+                return h * self.rate
             else:
                 return self.rate
 
@@ -94,11 +94,13 @@ class DegradationFormula(Formula):
 
 
 class CustomFormula(Formula):
-    def __init__(self, rate_function_ast: str):
+    def __init__(self, rate_function_ast: str, parameters: Dict[str, float]):
         self.rate_function_ast = rate_function_ast
+        self.parameters = parameters
 
     def formula_function(self) -> Callable[[Network], float]:
         def curried(n: Network):
-            return helper.evaluate_ast_string(self.rate_function_ast, n.symbols, species=n.species)
+            return helper.evaluate_ast_string(self.rate_function_ast,
+                                              n.symbols, species=n.species, parameters=self.parameters)
 
         return curried

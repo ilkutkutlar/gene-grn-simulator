@@ -2,7 +2,7 @@ import unittest
 from typing import Dict
 
 import helper
-from gillespie import GillespieSimulator
+from gillespie_simulator import GillespieSimulator
 from models.models import Network, CustomReaction, SimulationSettings
 
 

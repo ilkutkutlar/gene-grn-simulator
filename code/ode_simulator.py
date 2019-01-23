@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import odeint
 
-from gillespie import SimulationResults
+from gillespie_simulator import SimulationResults
 from models.models import SimulationSettings, Regulation
 from ode.models import Network, Cassette, RegType
 from models.models import Network as OtherNetwork

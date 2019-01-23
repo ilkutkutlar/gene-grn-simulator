@@ -3,13 +3,14 @@ from typing import Dict, List
 import libsbml
 
 import helper
-from models.models import Network, Reaction, CustomReaction
-
 
 # 1. Core objects of libsbml:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
 # 2. Classes:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
+from formulae import Formulae
+from models.network import Network
+from models.reaction import Reaction
 
 
 class SbmlParser:
@@ -78,7 +79,8 @@ class SbmlParser:
             # left: str = reactants[0].getSpecies() if reactants else ""
             # right: str = products[0].getSpecies() if products else ""
 
-            reactions.append(CustomReaction(helper.convert_ast_to_string(reaction_rate_function), left, right))
+            r = Formulae.custom_reaction_rate(helper.convert_ast_to_string(reaction_rate_function))
+            reactions.append(Reaction(left, right, r))
         return reactions
 
     @staticmethod

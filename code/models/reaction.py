@@ -2,13 +2,16 @@ from typing import List, Dict, Callable
 
 from models.models import NamedVector
 from models.network import Network
+from models.reaction_type import ReactionType
 
 
 class Reaction:
-    def __init__(self, left: List[str], right: List[str], rate_fn: Callable[[Network], float]):
+    def __init__(self, left: List[str], right: List[str],
+                 rate_fn: Callable[[Network], float], reaction_type: ReactionType):
         self.left = left
         self.right = right
         self.rate_fn = rate_fn
+        self.type = reaction_type
 
     def rate_function(self, n: Network) -> float:
         return self.rate_fn(n)

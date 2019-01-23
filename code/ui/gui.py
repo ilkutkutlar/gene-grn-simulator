@@ -3,18 +3,22 @@ from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, \
-    QInputDialog, QDialog, QComboBox, QLineEdit, QMainWindow, QAction, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QDialog, QLineEdit
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
+from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QMainWindow, QAction, QMessageBox, \
+    QFileDialog
 
 from formulae import Formulae
 from gene_controller import GeneController
-from gillespie import GillespieSimulator
+from gillespie_simulator import GillespieSimulator
 from models.network import Network
+from models.reaction import Reaction
+from models.reaction_type import ReactionType
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 from sbml_parser import SbmlParser
-from models.reaction import Reaction
 
 
 def validate_species(species):
@@ -42,10 +46,53 @@ def show_error_message(message) -> bool:
         return False
 
 
+class AddRemoveListLayout(QVBoxLayout):
+
+    def __init__(self, label, refresh_function, add_function, remove_function):
+        super().__init__()
+
+        self.m_label = QLabel()
+        self.m_label.setText(label)
+
+        self.m_list = QListWidget()
+        refresh_function(self.m_list)
+
+        self.m_add_button = QPushButton("Add")
+        self.m_remove_button = QPushButton("Remove")
+
+        self.m_add_button.clicked.connect(add_function)
+        self.m_remove_button.clicked.connect(remove_function)
+
+        self.addWidget(self.m_label)
+        self.addWidget(self.m_list)
+        self.addWidget(self.m_add_button)
+        self.addWidget(self.m_remove_button)
+        self.addStretch()
+
+
 class AddReactionDialog(QDialog):
     def __init__(self):
         super().__init__()
         self._init_ui()
+
+    def _init_ui(self):
+        self.layout = QVBoxLayout()  # The main layout
+        self.form = QVBoxLayout()  # This holds the text fields for reaction parameters
+        self.combo = QComboBox()  # Choose the type of reaction
+        self.ok_button = QPushButton("OK", self)
+        self.ok_button.clicked.connect(self._handler_ok_button_clicked)
+
+        self._init_combo()
+        self._init_form_fields()
+
+        self.layout.addWidget(self.combo)
+        self.layout.addLayout(self.form)
+        self.layout.addWidget(self.ok_button)
+
+        self.setLayout(self.layout)
+
+        self.setWindowTitle("Add reaction")
+        self.setWindowModality(Qt.WindowModal)
 
     def _init_combo(self):
         self.combo.addItem("Transcription Reaction")
@@ -79,8 +126,8 @@ class AddReactionDialog(QDialog):
         self.name_field.setVisible(True)
 
         # Transcription
-        self.transcribed_species = add_field_to_form("Transcribed Species")
-        self.transcribed_species.setVisible(True)
+        self.transcribed_species_field = add_field_to_form("Transcribed Species")
+        self.transcribed_species_field.setVisible(True)
 
         self.transcription_rate_field = add_number_field_to_form("Transcription Rate")
         self.transcription_rate_field.setVisible(True)
@@ -92,54 +139,48 @@ class AddReactionDialog(QDialog):
         self.hill_coefficient_field.setVisible(True)
 
         # Translation
-        self.translated_mrna = add_field_to_form("Translated mRNA Species")
+        self.translated_mrna_field = add_field_to_form("Translated mRNA Species")
+        self.produced_protein_field = add_field_to_form("Produced Protein Species")
         self.translation_rate_field = add_number_field_to_form("Tranlation Rate")
 
         # mRNA and Protein decay
-        self.decaying_species = add_number_field_to_form("Decaying Species")
+        self.decaying_species_field = add_number_field_to_form("Decaying Species")
         self.decay_rate_field = add_number_field_to_form("Decay Rate")
 
         # Custom reaction
-        self.custom_equation_field = add_field_to_form("Equation")
-
         self.rp_info_field = QLabel()
         self.rp_info_field.setText("Reactants and products must be comma separated names of species")
         self.form.addWidget(self.rp_info_field)
         self.rp_info_field.setVisible(False)
 
         self.reactants_field = add_field_to_form("Reactants")
-        self.reactants_field.setVisible(False)
-
         self.products_field = add_field_to_form("Products")
-        self.products_field.setVisible(False)
+        self.custom_equation_field = add_field_to_form("Equation")
 
-    def _handler_reaction_type_changed(self, index):
-        self.name_field.setVisible(True)
-        self.rp_info_field.setVisible(True)
-        self.reactants_field.setVisible(True)
-        self.products_field.setVisible(True)
+    def _hide_all_fields(self):
+        # Common
+        self.name_field.setVisible(False)
 
-        self.transcription_rate_field.setVisible(False)
-        self.kd_field.setVisible(False)
+        # Transcription
         self.hill_coefficient_field.setVisible(False)
+        self.transcribed_species_field.setVisible(False)
+        self.kd_field.setVisible(False)
+        self.transcription_rate_field.setVisible(False)
+
+        # Translation
         self.translation_rate_field.setVisible(False)
+        self.translated_mrna_field.setVisible(False)
+        self.produced_protein_field.setVisible(False)
 
+        # Degradation
         self.decay_rate_field.setVisible(False)
+        self.decaying_species_field.setVisible(False)
 
+        # Custom reactions
+        self.rp_info_field.setVisible(False)
+        self.reactants_field.setVisible(False)
+        self.products_field.setVisible(False)
         self.custom_equation_field.setVisible(False)
-
-        if index == 0:
-            self.transcription_rate_field.setVisible(True)
-            self.kd_field.setVisible(True)
-            self.hill_coefficient_field.setVisible(True)
-        elif index == 1:
-            self.translation_rate_field.setVisible(True)
-        elif index == 2:
-            self.decay_rate_field.setVisible(True)
-        elif index == 3:
-            self.decay_rate_field.setVisible(True)
-        elif index == 4:
-            self.custom_equation_field.setVisible(True)
 
     def _error_check_species(self, left, right):
         message_text = None
@@ -155,21 +196,35 @@ class AddReactionDialog(QDialog):
                 "Please add the species before you use them."
 
         if message_text:
-            if self.show_erro_message(message_text):
+            if show_error_message(message_text):
                 return False
         else:
             return True
 
+    def _handler_reaction_type_changed(self, index):
+        self._hide_all_fields()
+        self.name_field.setVisible(True)
+
+        if index == 0:
+            self.transcription_rate_field.setVisible(True)
+            self.kd_field.setVisible(True)
+            self.hill_coefficient_field.setVisible(True)
+            self.transcribed_species_field.setVisible(True)
+        elif index == 1:
+            self.translation_rate_field.setVisible(True)
+            self.translated_mrna_field.setVisible(True)
+            self.produced_protein_field.setVisible(True)
+        elif index == 2 or index == 3:
+            self.decay_rate_field.setVisible(True)
+            self.decaying_species_field.setVisible(True)
+        elif index == 4:
+            self.rp_info_field.setVisible(True)
+            self.reactants_field.setVisible(True)
+            self.products_field.setVisible(True)
+            self.custom_equation_field.setVisible(True)
+
     def _handler_ok_button_clicked(self):
         index = self.combo.currentIndex()
-        left_text = self.reactants_field.text().strip()
-        right_text = self.products_field.text().strip()
-
-        left: List[str] = [] if len(left_text) == 0 else left_text.split(",")
-        right: List[str] = [] if len(right_text) == 0 else right_text.split(",")
-
-        if not self._error_check_species(left, right):
-            return
 
         def to_float(default, val) -> float:
             try:
@@ -178,73 +233,54 @@ class AddReactionDialog(QDialog):
                 m: float = default
             return m
 
-        if index == 0:
-            tr_rate: float = to_float(
-                0, self.transcription_rate_field.text().strip())
+        if index == 0:  # Transcription
+            tr_rate: float = to_float(0, self.transcription_rate_field.text().strip())
+            kd: float = to_float(1, self.kd_field.text().strip())
+            hill_coeff: float = to_float(1, self.hill_coefficient_field.text().strip())
+            transcribed_species: str = self.transcribed_species_field.text().strip()
 
-            kd: float = to_float(
-                1, self.kd_field.text().strip())
+            if not self._error_check_species([], transcribed_species):
+                return
 
-            hill_coeff: float = to_float(
-                1, self.hill_coefficient_field.text().strip())
-
-            r = Reaction(left, right, Formulae.transcription_rate(tr_rate, kd, hill_coeff))
-        elif index == 1:
+            r = Reaction([], [transcribed_species],
+                         Formulae.transcription_rate(tr_rate, kd, hill_coeff, transcribed_species),
+                         ReactionType.TRANSCRIPTION)
+        elif index == 1:  # Translation
             tr_rate: float = to_float(0, self.translation_rate_field.text().strip())
-            r = Reaction(left, right, Formulae.translation_rate(tr_rate, ))
-        elif index == 2 or index == 3:
+            translated_mrna: str = self.translated_mrna_field.text().strip()
+            produced_protein: str = self.produced_protein_field.text().strip()
+
+            if not self._error_check_species(translated_mrna, produced_protein):
+                return
+
+            r = Reaction([translated_mrna], [produced_protein], Formulae.translation_rate(tr_rate, translated_mrna),
+                         ReactionType.TRANSLATION)
+        elif index == 2 or index == 3:  # Degradation
             decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
-            r = Reaction(left, right, Formulae.degradation_rate(decay_rate, ))
-        elif index == 4:
+            decaying_species: str = self.decaying_species_field.text().strip()
+
+            if not self._error_check_species(decaying_species, []):
+                return
+
+            r = Reaction([decaying_species], [], Formulae.degradation_rate(decay_rate, decaying_species),
+                         ReactionType.DEGRADATION)
+        else:  # index = 4, Custom reaction
+            left_text = self.reactants_field.text().strip()
+            right_text = self.products_field.text().strip()
+
+            left: List[str] = [] if len(left_text) == 0 else left_text.split(",")
+            right: List[str] = [] if len(right_text) == 0 else right_text.split(",")
+
+            if not self._error_check_species(left, right):
+                return
+
             eq = self.custom_equation_field.text().strip()
-            r = Reaction(left, right, Formulae.custom_reaction_rate(eq))
+            r = Reaction(left, right, Formulae.custom_reaction_rate(eq),
+                         ReactionType.CUSTOM)
 
         GeneController.get_instance().network.reactions.append(r)
 
         self.close()
-
-    def _init_ui(self):
-        self.layout = QVBoxLayout()  # The main layout
-        self.form = QVBoxLayout()  # This holds the text fields for reaction parameters
-        self.combo = QComboBox()  # Choose the type of reaction
-        self.ok_button = QPushButton("OK", self)
-        self.ok_button.clicked.connect(self._handler_ok_button_clicked)
-
-        self._init_combo()
-        self._init_form_fields()
-
-        self.layout.addWidget(self.combo)
-        self.layout.addLayout(self.form)
-        self.layout.addWidget(self.ok_button)
-
-        self.setLayout(self.layout)
-
-        self.setWindowTitle("Add reaction")
-        self.setWindowModality(Qt.WindowModal)
-
-
-class AddRemoveListLayout(QVBoxLayout):
-
-    def __init__(self, label, refresh_function, add_function, remove_function):
-        super().__init__()
-
-        self.m_label = QLabel()
-        self.m_label.setText(label)
-
-        self.m_list = QListWidget()
-        refresh_function(self.m_list)
-
-        self.m_add_button = QPushButton("Add")
-        self.m_remove_button = QPushButton("Remove")
-
-        self.m_add_button.clicked.connect(add_function)
-        self.m_remove_button.clicked.connect(remove_function)
-
-        self.addWidget(self.m_label)
-        self.addWidget(self.m_list)
-        self.addWidget(self.m_add_button)
-        self.addWidget(self.m_remove_button)
-        self.addStretch()
 
 
 class GeneWindow(QMainWindow):

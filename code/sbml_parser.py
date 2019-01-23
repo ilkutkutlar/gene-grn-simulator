@@ -8,7 +8,7 @@ import helper
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
 # 2. Classes:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
-from formulae import Formulae
+from formulae import CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 
@@ -79,7 +79,7 @@ class SbmlParser:
             # left: str = reactants[0].getSpecies() if reactants else ""
             # right: str = products[0].getSpecies() if products else ""
 
-            r = Formulae.custom_reaction_rate(helper.convert_ast_to_string(reaction_rate_function))
+            r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function))
             reactions.append(Reaction(left, right, r))
         return reactions
 

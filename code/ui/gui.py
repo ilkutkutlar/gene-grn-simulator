@@ -9,12 +9,11 @@ from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
 from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
-from formulae import Formulae
+from formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from gene_controller import GeneController
 from gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
-from models.reaction_type import ReactionType
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
@@ -243,8 +242,7 @@ class AddReactionDialog(QDialog):
                 return
 
             r = Reaction([], [transcribed_species],
-                         Formulae.transcription_rate(tr_rate, kd, hill_coeff, transcribed_species),
-                         ReactionType.TRANSCRIPTION)
+                         TranscriptionFormula(tr_rate, kd, hill_coeff, transcribed_species))
         elif index == 1:  # Translation
             tr_rate: float = to_float(0, self.translation_rate_field.text().strip())
             translated_mrna: str = self.translated_mrna_field.text().strip()
@@ -253,8 +251,7 @@ class AddReactionDialog(QDialog):
             if not self._error_check_species(translated_mrna, produced_protein):
                 return
 
-            r = Reaction([translated_mrna], [produced_protein], Formulae.translation_rate(tr_rate, translated_mrna),
-                         ReactionType.TRANSLATION)
+            r = Reaction([translated_mrna], [produced_protein], TranslationFormula(tr_rate, translated_mrna))
         elif index == 2 or index == 3:  # Degradation
             decay_rate: float = to_float(0, self.decay_rate_field.text().strip())
             decaying_species: str = self.decaying_species_field.text().strip()
@@ -262,8 +259,7 @@ class AddReactionDialog(QDialog):
             if not self._error_check_species(decaying_species, []):
                 return
 
-            r = Reaction([decaying_species], [], Formulae.degradation_rate(decay_rate, decaying_species),
-                         ReactionType.DEGRADATION)
+            r = Reaction([decaying_species], [], DegradationFormula(decay_rate, decaying_species))
         else:  # index = 4, Custom reaction
             left_text = self.reactants_field.text().strip()
             right_text = self.products_field.text().strip()
@@ -275,8 +271,7 @@ class AddReactionDialog(QDialog):
                 return
 
             eq = self.custom_equation_field.text().strip()
-            r = Reaction(left, right, Formulae.custom_reaction_rate(eq),
-                         ReactionType.CUSTOM)
+            r = Reaction(left, right, CustomFormula(eq))
 
         GeneController.get_instance().network.reactions.append(r)
 

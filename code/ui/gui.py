@@ -3,7 +3,7 @@ from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QComboBox, QSizePolicy
 from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
 from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QMainWindow, QAction, QMessageBox, \
@@ -54,7 +54,6 @@ class AddRemoveListLayout(QVBoxLayout):
         self.m_label.setText(label)
 
         self.m_list = QListWidget()
-        refresh_function(self.m_list)
 
         self.m_add_button = QPushButton("Add")
         self.m_remove_button = QPushButton("Remove")
@@ -64,9 +63,11 @@ class AddRemoveListLayout(QVBoxLayout):
 
         self.addWidget(self.m_label)
         self.addWidget(self.m_list)
+        self.addStretch()
         self.addWidget(self.m_add_button)
         self.addWidget(self.m_remove_button)
-        self.addStretch()
+
+        refresh_function(self.m_list)
 
 
 class AddReactionDialog(QDialog):
@@ -296,15 +297,9 @@ class GeneWindow(QMainWindow):
             self._refresh_reactions_list,
             self._handler_add_reactions_button,
             self._handler_remove_reactions_button)
-        self.regulations_panel = AddRemoveListLayout(
-            "Regulations",
-            self._refresh_regulations_list,
-            self._handler_add_regulation_button,
-            self._handler_remove_regulation_button)
 
         layout.addLayout(self.species_panel)
         layout.addLayout(self.reactions_panel)
-        layout.addLayout(self.regulations_panel)
         self._init_menubar()
 
         central_widget = QWidget()
@@ -354,7 +349,6 @@ class GeneWindow(QMainWindow):
 
             self._refresh_reactions_list(self.reactions_panel.m_list)
             self._refresh_species_list(self.species_panel.m_list)
-            self._refresh_regulations_list(self.regulations_panel.m_list)
 
     def _handler_deterministic_clicked(self):
         print("Not implemented yet")
@@ -428,37 +422,6 @@ class GeneWindow(QMainWindow):
         del GeneController.get_instance().network.species[species_id]
         self._refresh_species_list(self.species_panel.m_list)
 
-    def _handler_add_regulation_button(self):
-        (reg, ok) = QInputDialog.getText(self, 'Add regulation', 'Format: X -> Y (Activator), X -| Y (Repressor)')
-
-        if ok:
-            reg_match = re.match(
-                "(.*)(->|-\|)(.*)", reg)
-            from_gene = reg_match.group(1).strip()
-            to_gene = reg_match.group(3).strip()
-            reg_type_str = reg_match.group(2).strip()  # -> or -|
-
-            if from_gene not in GeneController.get_instance().network.species or \
-                    to_gene not in GeneController.get_instance().network.species:
-                if show_error_message("Regulation includes some invalid species. "
-                                      "Please add the species before you use them."):
-                    return
-
-            reg_type = None
-            if reg_type_str == "->":
-                reg_type = RegType.ACTIVATION
-            elif reg_type_str == "-|":
-                reg_type = RegType.REPRESSION
-            else:
-                print("ERROR!")
-
-            GeneController.get_instance().network.regulations.append(Regulation(from_gene, to_gene, reg_type))
-            self._refresh_regulations_list(self.regulations_panel.m_list)
-
-    def _handler_remove_regulation_button(self):
-        del GeneController.get_instance().network.regulations[self.regulations_panel.m_list.currentRow()]
-        self._refresh_reactions_list(self.regulations_panel.m_list)
-
     @staticmethod
     def _refresh_reactions_list(m_list):
         m_list.clear()
@@ -475,13 +438,6 @@ class GeneWindow(QMainWindow):
             m_list.setProperty("id" + str(i), species)
             i += 1
         print(GeneController.get_instance().network.species)
-
-    @staticmethod
-    def _refresh_regulations_list(m_list):
-        m_list.clear()
-        for regulation in GeneController.get_instance().network.regulations:
-            m_list.addItem(regulation.__str__())
-        print(GeneController.get_instance().network.regulations)
 
 
 app = QApplication([])

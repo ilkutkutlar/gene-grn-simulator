@@ -29,13 +29,16 @@ class OdeSimulator:
 
     def dy_dt(self, y, t):
         changes = dict()
+        unpacked = dict()
+
+        i = 0
         for x in self.net.species:
             changes[x] = 0
-
-        vectors = list()
+            unpacked[x] = y[i]
+            i += 1
 
         for r in self.net.reactions:
-            rate = r.rate_function(self.net)
+            rate = r.rate_function(unpacked)
 
             if r.left:
                 for x in r.left:
@@ -45,14 +48,9 @@ class OdeSimulator:
                 for x in r.right:
                     changes[x] += rate
 
-            vectors.append(r.change_vector(self.net))
-
         new_y = list()
         for s in changes:
             new_y.append(changes[s])
-
-        for x in vectors:
-            self.net.apply_change_vector(x)
 
         return new_y
 
@@ -67,7 +65,7 @@ class OdeSimulator:
         t: list = np.linspace(sim.start_time, sim.end_time, 100)
 
         # solve the ODEs
-        solution: np.ndarray = odeint(self.dy_dt, y0, t, mxstep=50000)
+        solution: np.ndarray = odeint(self.dy_dt, y0, t)
 
         return solution
 
@@ -150,13 +148,13 @@ def main():
     species = {"laci_mrna": 0, "tetr_mrna": 20, "cl_mrna": 0,
                "laci_p": 0, "tetr_p": 0, "cl_p": 0}
 
-    regulations = [Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION),
-                   Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION),
-                   Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)]
+    laci_reg = Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION)
+    tetr_reg = Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION)
+    cl_reg = Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)
 
-    reactions = [Reaction([], ["laci_mrna"], TranscriptionFormula(alpha, 2, 40, "laci_mrna")),
-                 Reaction([], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna")),
-                 Reaction([], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna")),
+    reactions = [Reaction([], ["laci_mrna"], TranscriptionFormula(alpha, 2, 40, "laci_mrna", [laci_reg])),
+                 Reaction([], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna", [tetr_reg])),
+                 Reaction([], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna", [cl_reg])),
 
                  Reaction(["laci_mrna"], [], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
                  Reaction(["tetr_mrna"], [], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
@@ -171,9 +169,9 @@ def main():
                  Reaction(["cl_p"], [], DegradationFormula(protein_decay_rate, "cl_p"))]
 
     net = Network()
-    net.initialise(species, reactions, regulations)
+    net.initialise(species, reactions)
 
-    end_time = 100
+    end_time = 1000
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
                            [("laci_p", "LacI"),
                             ("tetr_p", "TetR"),
@@ -186,13 +184,12 @@ def main():
 def simpler():
     species = {"x": 0, "y": 20}
 
-    regulations = [Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)]
-
-    reactions = [Reaction([], ["x"], TranscriptionFormula(5, 2, 40, "x")),
+    reactions = [Reaction([], ["x"], TranscriptionFormula(5, 2, 40, "x", [
+        Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)])),
                  Reaction(["y"], [], DegradationFormula(0.3, "y"))]
 
     net = Network()
-    net.initialise(species, reactions, regulations)
+    net.initialise(species, reactions)
 
     end_time = 100
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
@@ -203,5 +200,5 @@ def simpler():
 
 
 if __name__ == '__main__':
-    simpler()
-    # main()
+    # simpler()
+    main()

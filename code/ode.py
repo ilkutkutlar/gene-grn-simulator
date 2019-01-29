@@ -102,7 +102,7 @@ class Simulator:
             protein_translation_rate = gene.codes_for[0].protein.translation_rate
             protein_concentration = concent[gene.identifier].protein
             delta_protein_val = self.delta_protein(protein_degradation, protein_translation_rate,
-                                              protein_concentration, mrna_concentration)
+                                                   protein_concentration, mrna_concentration)
 
             new_mrna.append(delta_mrna_val)
             new_protein.append(delta_protein_val)

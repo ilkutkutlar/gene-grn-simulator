@@ -1,23 +1,26 @@
 from abc import ABC, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
 import helper
 from models.network import Network
 from models.reg_type import RegType
+from models.regulation import Regulation
 
 
 class Formula(ABC):
     @abstractmethod
-    def formula_function(self, n: Network) -> float:
+    def formula_function(self, state: Dict[str, float]) -> float:
         pass
 
 
 class TranscriptionFormula(Formula):
-    def __init__(self, rate: float, hill_coeff: float, kd: float, transcribed_species: str):
+    def __init__(self, rate: float, hill_coeff: float, kd: float,
+                 transcribed_species: str, regulators: List[Regulation]):
         self.rate = rate
         self.hill_coeff = hill_coeff
         self.kd = kd
         self.transcribed_species = transcribed_species
+        self.regulators = regulators
 
     """
         Based on an ODE model and uses the Hill equation to calculate
@@ -50,13 +53,12 @@ class TranscriptionFormula(Formula):
         c = 1 + pow(tf / kd, n)
         return 1 / c
 
-    def formula_function(self, n: Network):
+    def formula_function(self, state: Dict[str, float]):
         # Protein regulates mRNA
-        regulations = n.get_inner_regulation(self.transcribed_species)
-        the_regulation = regulations[0] if regulations else None
+        the_regulation = self.regulators[0] if self.regulators else None
 
-        if regulations:
-            regulator_concent = n.species[the_regulation.from_gene]
+        if self.regulators:
+            regulator_concent = state[the_regulation.from_gene]
             if the_regulation.reg_type == RegType.ACTIVATION:
                 h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
             else:
@@ -72,8 +74,8 @@ class TranslationFormula(Formula):
         self.rate = rate
         self.mrna_species = mrna_species
 
-    def formula_function(self, n: Network) -> float:
-        return self.rate * n.species[self.mrna_species]
+    def formula_function(self, state: Dict[str, float]) -> float:
+        return self.rate * state[self.mrna_species]
 
 
 class DegradationFormula(Formula):
@@ -81,15 +83,19 @@ class DegradationFormula(Formula):
         self.rate = rate
         self.decaying_species = decaying_species
 
-    def formula_function(self, n: Network) -> float:
-        return self.rate * n.species[self.decaying_species]
+    def formula_function(self, state: Dict[str, float]) -> float:
+        return self.rate * state[self.decaying_species]
 
 
 class CustomFormula(Formula):
-    def __init__(self, rate_function_ast: str, parameters: Dict[str, float]):
+    def __init__(self, rate_function_ast: str,
+                 parameters: Dict[str, float], symbols: Dict[str, float]):
         self.rate_function_ast = rate_function_ast
         self.parameters = parameters
+        self.symbols = symbols
 
-    def formula_function(self, n: Network) -> float:
+    def formula_function(self, state: Dict[str, float]) -> float:
         return helper.evaluate_ast_string(self.rate_function_ast,
-                                          n.symbols, species=n.species, parameters=self.parameters)
+                                          symbols=self.symbols,
+                                          species=state,
+                                          parameters=self.parameters)

@@ -15,34 +15,27 @@ from models.simulation_settings import SimulationSettings
 
 
 class OdeSimulator:
-    """
-    Adds a given change vector to the network's state vector
-    """
 
-    @staticmethod
-    def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]) -> Dict[str, float]:
-        ret = state.copy()
-        for x in state:
-            ret[x] = state[x] + change[x]
-        return ret
+    def __init__(self, net):
+        self.net = net
 
     """
-    Calculate the next values of the given list of values
+    Calculate the change in the values of species of the network
     
     :param List[float] y: List of values
     :param int t: Not used
     :param Network net: The Network which acts as the context for the given values
     """
 
-    @staticmethod
-    def dy_dt(y: List[float], t: int, net: Network) -> List[float]:
+    def dy_dt(self, y, t):
         changes = dict()
-        for x in net.species:
+        for x in self.net.species:
             changes[x] = 0
 
-        for r in net.reactions:
-            rate = r.rate_function(net)
-            change_vector = r.change_vector(net)
+        vectors = list()
+
+        for r in self.net.reactions:
+            rate = r.rate_function(self.net)
 
             if r.left:
                 for x in r.left:
@@ -52,27 +45,29 @@ class OdeSimulator:
                 for x in r.right:
                     changes[x] += rate
 
-            net.species = OdeSimulator._apply_change_vector_(net.species, change_vector)
+            vectors.append(r.change_vector(self.net))
 
         new_y = list()
         for s in changes:
             new_y.append(changes[s])
 
+        for x in vectors:
+            self.net.apply_change_vector(x)
+
         return new_y
 
-    @staticmethod
-    def simulate(net: Network, sim: SimulationSettings) -> np.ndarray:
+    def simulate(self, sim: SimulationSettings) -> np.ndarray:
         y0: list = list()
 
         # Build the initial state
-        for key in net.species:
-            y0.append(net.species[key])
+        for key in self.net.species:
+            y0.append(self.net.species[key])
 
         # time grid -> The time space for which the equations will be solved
-        t: list = np.linspace(sim.start_time, sim.end_time, 10)
+        t: list = np.linspace(sim.start_time, sim.end_time, 100)
 
         # solve the ODEs
-        solution: np.ndarray = odeint(OdeSimulator.dy_dt, y0, t, args=(net,))
+        solution: np.ndarray = odeint(self.dy_dt, y0, t)
 
         return solution
 
@@ -82,24 +77,23 @@ class OdeSimulator:
         for each species at time i. 
     """
 
-    @staticmethod
-    def visualise(results: np.ndarray, sim: SimulationSettings, net: Network):
+    def visualise(self, results: np.ndarray, sim: SimulationSettings):
         values: Dict[str, float] = dict()
 
         # Attach species names to results
         i = 0
-        for s in net.species:
+        for s in self.net.species:
             # Syntax meaning, a list consisting of the ith element of each list in results
             values[s] = results[:, i]
             i += 1
 
         plt.figure()
 
-        t: list = np.linspace(sim.start_time, sim.end_time, 10)
+        t: list = np.linspace(sim.start_time, sim.end_time, 100)
         for s in sim.plotted_species:
             species_name = s[0]
             species_label = s[1]
-            plt.plot(t, values[species_name], "X")
+            plt.plot(t, values[species_name], label=species_label)
 
         plt.xlabel(sim.x_label)
         plt.ylabel(sim.y_label)
@@ -181,10 +175,12 @@ def main():
 
     end_time = 100
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("laci_p", "L"),
-                            ("tetr_p", "T"),
-                            ("cl_p", "C")])
-    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s, net)
+                           [("laci_p", "LacI"),
+                            ("tetr_p", "TetR"),
+                            ("cl_p", "Cl")])
+
+    ode = OdeSimulator(net)
+    ode.visualise(ode.simulate(s), s)
 
 
 def simpler():
@@ -195,10 +191,12 @@ def simpler():
     net = Network()
     net.initialise(species, reactions, regulations)
 
-    end_time = 10
+    end_time = 100
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
                            [("x", "X"), ("y", "Y")])
-    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s, net)
+
+    ode = OdeSimulator(net)
+    ode.visualise(ode.simulate(s), s)
 
 
 if __name__ == '__main__':

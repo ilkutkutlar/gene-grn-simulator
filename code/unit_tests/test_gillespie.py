@@ -31,13 +31,13 @@ class GillespieTest(unittest.TestCase):
         # r3 reaction rate: 5
         # r0 = 100 + 25 + 5 = 130
 
-        self.assertEqual(130, GillespieSimulator._calculate_r0_(net))
+        self.assertEqual(130, GillespieSimulator._calculate_r0(net))
 
     def test_apply_change_vector(self):
         v1: Dict[str, float] = {"X": 10, "Y": 20, "Z": 35}
         v2: Dict[str, float] = {"X": 10, "Y": 23, "Z": 50}
 
-        self.assertEqual(GillespieSimulator._apply_change_vector_(v1, v2),
+        self.assertEqual(GillespieSimulator._apply_change_vector(v1, v2),
                          {"X": 20, "Y": 43, "Z": 85})
 
     def test_evaluate_ast_string(self):

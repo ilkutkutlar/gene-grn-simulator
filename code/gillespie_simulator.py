@@ -17,7 +17,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _calculate_r0_(net: Network):
+    def _calculate_r0(net: Network):
         r0: float = 0
         for reaction in net.reactions:
             t = reaction.rate_function(net)
@@ -30,7 +30,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _get_theta_(r0: float) -> float:
+    def _get_theta(r0: float) -> float:
         s1: float = random()  # To pick time
         epsilon = 0.001
         return (1 / (r0 + epsilon)) * log(1 / s1, e)
@@ -40,7 +40,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _apply_change_vector_(state: Dict[str, float], change: Dict[str, float]) -> Dict[str, float]:
+    def _apply_change_vector(state: Dict[str, float], change: Dict[str, float]) -> Dict[str, float]:
         ret = state.copy()
         for x in state:
             ret[x] = state[x] + change[x]
@@ -51,9 +51,9 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _get_next_state_(net: Network, r0: float):
-        vj = GillespieSimulator._pick_next_reaction_(net, r0)
-        return GillespieSimulator._apply_change_vector_(net.species, vj) if vj else net.species
+    def _get_next_state(net: Network, r0: float):
+        vj = GillespieSimulator._pick_next_reaction(net, r0)
+        return GillespieSimulator._apply_change_vector(net.species, vj) if vj else net.species
 
     # TODO: This would probably be more efficient!
     #  Mostly memory efficiency, as we are building a list of tuples
@@ -80,7 +80,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _pick_weighted_random_(items: List[Any], probabilities: List[float]) -> Any:
+    def _pick_weighted_random(items: List[Any], probabilities: List[float]) -> Any:
         s2: float = random()  # To pick reaction
 
         # This is what this does:
@@ -118,7 +118,7 @@ class GillespieSimulator:
     """
 
     @staticmethod
-    def _pick_next_reaction_(net: Network, r0: float) -> NamedVector:
+    def _pick_next_reaction(net: Network, r0: float) -> NamedVector:
         propensities: List[float] = []
         for reaction in net.reactions:
             try:
@@ -127,7 +127,7 @@ class GillespieSimulator:
                 div_result = reaction.rate_function(net) / 1
             propensities.append(div_result)
 
-        return GillespieSimulator._pick_weighted_random_(net.reactions, propensities) \
+        return GillespieSimulator._pick_weighted_random(net.reactions, propensities) \
             .change_vector(net)
 
     """
@@ -142,12 +142,12 @@ class GillespieSimulator:
         results: SimulationResults = []
 
         while t <= int(sim.end_time):
-            r0: float = GillespieSimulator._calculate_r0_(net)
+            r0: float = GillespieSimulator._calculate_r0(net)
 
             # Advance time
-            t: float = t + GillespieSimulator._get_theta_(r0)
+            t: float = t + GillespieSimulator._get_theta(r0)
             # Apply one reaction chosen randomly
-            net.species = GillespieSimulator._get_next_state_(net, r0)
+            net.species = GillespieSimulator._get_next_state(net, r0)
 
             results.append((t, net.species))
 

@@ -30,6 +30,10 @@ class Network:
     def get_inner_regulation(self, name: str) -> List[Regulation]:
         return list(filter(lambda reg: reg.to_gene == name, self.regulations))
 
+    def apply_change_vector(self, change: Dict[str, float]) -> None:
+        for x in change:
+            self.species[x] += change[x]
+
     def __str__(self) -> str:
         ret = "\nGlobal Parameters: \n"
         for x in self.symbols:

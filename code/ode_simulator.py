@@ -1,12 +1,11 @@
 from math import log, e
-from typing import List, Dict
+from typing import Dict
 
 import matplotlib.pyplot as plt
-import numpy
 import numpy as np
 from scipy.integrate import odeint
 
-from formulae import TranscriptionFormula, DegradationFormula, TranslationFormula
+from models.formulae import TranscriptionFormula, DegradationFormula, TranslationFormula
 from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType
@@ -16,8 +15,12 @@ from models.simulation_settings import SimulationSettings
 
 class OdeSimulator:
 
-    def __init__(self, net):
+    def __init__(self, net, sim: SimulationSettings):
         self.net = net
+        self.sim = sim
+
+        # time grid -> The time space for which the equations will be solved
+        self.time_space: list = np.linspace(sim.start_time, sim.end_time, sim.precision)
 
     """
     Calculate the change in the values of species of the network
@@ -54,18 +57,12 @@ class OdeSimulator:
 
         return new_y
 
-    def simulate(self, sim: SimulationSettings) -> np.ndarray:
-        y0: list = list()
-
+    def simulate(self) -> np.ndarray:
         # Build the initial state
-        for key in self.net.species:
-            y0.append(self.net.species[key])
-
-        # time grid -> The time space for which the equations will be solved
-        t: list = np.linspace(sim.start_time, sim.end_time, 100)
+        y0: list = [self.net.species[key] for key in self.net.species]
 
         # solve the ODEs
-        solution: np.ndarray = odeint(self.dy_dt, y0, t)
+        solution: np.ndarray = odeint(self.dy_dt, y0, self.time_space)
 
         return solution
 
@@ -75,28 +72,25 @@ class OdeSimulator:
         for each species at time i. 
     """
 
-    def visualise(self, results: np.ndarray, sim: SimulationSettings):
+    def visualise(self, results: np.ndarray):
         values: Dict[str, float] = dict()
 
         # Attach species names to results
         i = 0
         for s in self.net.species:
-            # Syntax meaning, a list consisting of the ith element of each list in results
+            # Syntax meaning: a list consisting of the ith element of each list in results
             values[s] = results[:, i]
             i += 1
 
         plt.figure()
 
-        t: list = np.linspace(sim.start_time, sim.end_time, 100)
-        for s in sim.plotted_species:
-            species_name = s[0]
-            species_label = s[1]
-            plt.plot(t, values[species_name], label=species_label)
+        for s in self.sim.plotted_species:
+            plt.plot(self.time_space, values[s], label=s)
 
-        plt.xlabel(sim.x_label)
-        plt.ylabel(sim.y_label)
+        plt.xlabel("Time")
+        plt.ylabel("Concentration")
         plt.legend(loc=0)
-        plt.title(sim.title)
+        plt.title("Results")
 
         plt.draw()
         plt.show()
@@ -135,11 +129,9 @@ def main():
     # Derived values
 
     # Active transcription rate (rescaled?)
-    alpha = transcription_rate_active * translation_efficiency \
-            * protein_half_life / (log(2, e) * Km)
+    alpha = transcription_rate_active * translation_efficiency * protein_half_life / (log(2, e) * Km)
     # Repressed transcription rate (rescaled?)
-    alpha0 = transcription_rate_repr * translation_efficiency \
-             * protein_half_life / (log(2, e) * Km)
+    alpha0 = transcription_rate_repr * translation_efficiency * protein_half_life / (log(2, e) * Km)
     # Translation rate
     beta = protein_decay_rate / mRNA_decay_rate
 
@@ -169,16 +161,13 @@ def main():
                  Reaction(["cl_p"], [], DegradationFormula(protein_decay_rate, "cl_p"))]
 
     net = Network()
-    net.initialise(species, reactions)
+    net.species = species
+    net.reactions = reactions
 
-    end_time = 1000
-    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("laci_p", "LacI"),
-                            ("tetr_p", "TetR"),
-                            ("cl_p", "Cl")])
+    s = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
 
-    ode = OdeSimulator(net)
-    ode.visualise(ode.simulate(s), s)
+    ode = OdeSimulator(net, s)
+    ode.visualise(ode.simulate())
 
 
 def simpler():
@@ -188,15 +177,14 @@ def simpler():
         Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)])),
                  Reaction(["y"], [], DegradationFormula(0.3, "y"))]
 
-    net = Network()
-    net.initialise(species, reactions)
+    net: Network = Network()
+    net.species = species
+    net.reactions = reactions
 
-    end_time = 100
-    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("x", "X"), ("y", "Y")])
+    s = SimulationSettings(0, 100, 100, ["x", "y"])
 
-    ode = OdeSimulator(net)
-    ode.visualise(ode.simulate(s), s)
+    ode = OdeSimulator(net, s)
+    ode.visualise(ode.simulate())
 
 
 if __name__ == '__main__':

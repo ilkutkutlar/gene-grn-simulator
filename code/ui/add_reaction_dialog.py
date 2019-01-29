@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QVBoxLayout, QComboBox, QPushButton
 
-from formulae import Formulae
+from models.formulae import Formulae
 from gene_controller import GeneController
 from models.reaction import Reaction
 from ui.gui import validate_species

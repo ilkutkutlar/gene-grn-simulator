@@ -5,7 +5,7 @@ class GeneController:
     instance = None
 
     def __init__(self):
-        self.network = Network()
+        self.network = Network({}, [])
 
     @staticmethod
     def get_instance():

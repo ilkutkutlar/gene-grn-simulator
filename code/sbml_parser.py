@@ -8,7 +8,7 @@ import helper
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
 # 2. Classes:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
-from formulae import CustomFormula
+from models.formulae import CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 

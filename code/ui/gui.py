@@ -1,21 +1,18 @@
-import re
 from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QComboBox, QSizePolicy
+from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
 from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
-from formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from gene_controller import GeneController
 from gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
-from models.reg_type import RegType
-from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 from sbml_parser import SbmlParser
 

@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from models.models import NamedVector
 from models.network import Network
 

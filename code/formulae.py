@@ -62,6 +62,7 @@ class TranscriptionFormula(Formula):
                     h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
                 else:
                     h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
+
                 return h * self.rate
             else:
                 return self.rate

@@ -1,3 +1,4 @@
+import numpy
 from math import log, e
 from typing import List, Dict, NamedTuple
 
@@ -14,11 +15,6 @@ from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 
 
-class Concentration(NamedTuple):
-    mRNA: float
-    protein: float
-
-
 class OdeSimulator:
     """
     Adds a given change vector to the network's state vector
@@ -31,6 +27,15 @@ class OdeSimulator:
             ret[x] = state[x] + change[x]
         return ret
 
+    @staticmethod
+    def _apply_change_vector(state: np.ndarray, change: List[float]):
+        ret = state.copy()
+
+        for x in range(0, len(change)):
+            numpy.append(ret, ret.item(x) + change[x])
+
+        return ret
+
     """
     Calculate the next values of the given list of values
     
@@ -41,14 +46,26 @@ class OdeSimulator:
 
     @staticmethod
     def dy_dt(y: List[float], t: int, net: Network) -> List[float]:
-        new_y: List[float] = list()
+        unpacked = dict()
+
+        i = 0
+        for x in net.species:
+            unpacked[x] = y[i]
+            i += 1
 
         for r in net.reactions:
-            vj = r.change_vector(net)
-            net.species = OdeSimulator._apply_change_vector_(net.species, vj)
+            rate = r.rate_function(net)
+            if r.left:
+                for x in r.left:
+                    unpacked[x] -= rate
 
-        for s in net.species:
-            new_y.append(net.species[s])
+            if r.right:
+                for x in r.right:
+                    unpacked[x] += rate
+
+        new_y = list()
+        for s in unpacked:
+            new_y.append(unpacked[s])
 
         return new_y
 
@@ -61,20 +78,25 @@ class OdeSimulator:
             y0.append(net.species[key])
 
         # time grid -> The time space for which the equations will be solved
-        t: list = np.linspace(sim.start_time, sim.end_time, 1000)
+        t: list = np.linspace(sim.start_time, sim.end_time, 100)
 
         # solve the ODEs
         solution = odeint(OdeSimulator.dy_dt, y0, t, args=(net,))
 
         results: SimulationResults = []
-        for x in solution:
+
+        i = 0
+
+        # solution: List[List[float]], where List[float] is the list containing each species' concentration
+        for x in solution:      # x: List[float]
             specs: Dict[str, float] = {}
 
-            for y in x:
+            for y in x:         # y: float
                 for sp in net.species:
                     specs[sp] = y
 
-            results.append((x, specs))
+            results.append((i, specs))
+            i += 1
 
         return results
 
@@ -90,7 +112,7 @@ class OdeSimulator:
         for species in sim.plotted_species:
             plottings[species[1]] = []
 
-        for x in results:
+        for x in results:       # Tuple[float, NamedVector]
             times.append(x[0])
 
             for species in sim.plotted_species:
@@ -107,62 +129,8 @@ class OdeSimulator:
         plt.draw()
         plt.show()
 
-    # region legacy
 
-    """
-    Return the change in mRNA per unit time under regulation.
-
-    :param float b_m    : mRNA degradation rate
-    :param float rps    : Regulated promoter strength calculated from Hill function
-    :param float mrna   : mRNA concentration
-
-    ----------
-    Value is calculated using this formula:
-
-    d[mRNA]/dt = a_m*H([TF]) - b_m * [mRNA]
-        - a_m           -> transcription rate
-        - H([TF])       -> Hill equation
-        - a_m*H([TF])   -> regulated promoter strength (rps)
-        - [mRNA]        -> mRNA concentration (mrna)
-        - b_m           -> mRNA degradation rate (b_m)
-    """
-
-    @staticmethod
-    def delta_mrna(b_m: float, mrna: float, rps: float):
-        return rps - b_m * mrna
-
-    # d[protein]/dt = a_p*[mRNA] - b_p * [protein]
-    # [protein] -> protein concentration (p)
-    # [mRNA]    -> mRNA concentration (m)
-    # a_p       -> translation rate (a_p)
-    # b_p       -> protein degradation rate (b_p)
-    @staticmethod
-    def delta_protein(a_p: float, b_p: float, p: float, m: float):
-        return a_p * m - b_p * p
-
-    # rps = regulated promoter strength.
-    # Given a gene, calculates the promoter strength under regulation.
-    @staticmethod
-    def calculate_rps(network: Network, gene: str, kd: float, n: int):
-
-        # Identifier of the gene and the regulation
-        regulation: Regulation = network.get_inner_regulation(gene)[0]
-        regulator: str = network.get_inner_regulation(gene)[0].from_gene
-        regulation_type = regulation.reg_type
-
-        regulator_concentration = network.species[regulator]
-
-        if regulation_type == RegType.ACTIVATION:
-            rps: float = network.ps_active(regulator_concentration, kd, gene.promoter, n)
-        else:
-            rps: float = network.ps_repressed(regulator_concentration, kd, gene.promoter, n)
-
-        return rps
-
-    # endregion
-
-
-if __name__ == '__main__':
+def main():
     # p_lacI0 = 10
     # p_tetR0 = 10
     # p_cl0 = 10
@@ -216,17 +184,17 @@ if __name__ == '__main__':
                  Reaction([], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna")),
                  Reaction([], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna")),
 
-                 Reaction(["laci_mrna"], [""], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
-                 Reaction(["tetr_mrna"], [""], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
-                 Reaction(["cl_mrna"], [""], DegradationFormula(mRNA_decay_rate, "cl_mrna")),
+                 Reaction(["laci_mrna"], [], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
+                 Reaction(["tetr_mrna"], [], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
+                 Reaction(["cl_mrna"], [], DegradationFormula(mRNA_decay_rate, "cl_mrna")),
 
                  Reaction(["laci_mrna"], ["laci_p"], TranslationFormula(beta, "laci_mrna")),
                  Reaction(["tetr_mrna"], ["tetr_p"], TranslationFormula(beta, "tetr_mrna")),
                  Reaction(["cl_mrna"], ["cl_p"], TranslationFormula(beta, "cl_mrna")),
 
-                 Reaction(["laci_p"], [""], DegradationFormula(protein_decay_rate, "laci_p")),
-                 Reaction(["tetr_p"], [""], DegradationFormula(protein_decay_rate, "tetr_p")),
-                 Reaction(["cl_p"], [""], DegradationFormula(protein_decay_rate, "cl_p"))]
+                 Reaction(["laci_p"], [], DegradationFormula(protein_decay_rate, "laci_p")),
+                 Reaction(["tetr_p"], [], DegradationFormula(protein_decay_rate, "tetr_p")),
+                 Reaction(["cl_p"], [], DegradationFormula(protein_decay_rate, "cl_p"))]
 
     net = Network()
     net.initialise(species, reactions, regulations)
@@ -237,3 +205,22 @@ if __name__ == '__main__':
                             ("TetR Protein", "tetr_p"),
                             ("Cl Protein", "cl_p")])
     OdeSimulator.visualise(OdeSimulator.simulate(net, s), s)
+
+
+def simpler():
+    species = {"x": 0, "y": 20}
+    regulations = []
+    reactions = [Reaction([], ["x"], TranscriptionFormula(1, 1, 20, "x"))]
+
+    net = Network()
+    net.initialise(species, reactions, regulations)
+
+    end_time = 10
+    s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
+                           [("X", "x"), ("Y", "y")])
+    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s)
+
+
+if __name__ == '__main__':
+    simpler()
+    # main()

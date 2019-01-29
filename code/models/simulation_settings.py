@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 
 class SimulationSettings:
-    # Tuple[label, species_name]
+    # Tuple[species_name, label]
     def __init__(self, title: str, x_label: str, y_label: str, start_time: float, end_time: float,
                  plotted_species: List[Tuple[str, str]]):
         self.plotted_species = plotted_species

@@ -169,16 +169,16 @@ class GillespieSimulator:
 
         # species: (species title, species name)
         for species in sim.plotted_species:
-            plottings[species[1]] = []
+            plottings[species[0]] = []
 
         for x in results:
             times.append(x[0])
 
             for species in sim.plotted_species:
-                plottings[species[1]].append(x[1][species[1]])
+                plottings[species[0]].append(x[1][species[0]])
 
         for species in sim.plotted_species:
-            plt.plot(times, plottings[species[1]], label=species[0])
+            plt.plot(times, plottings[species[0]], label=species[1])
 
         plt.xlabel(sim.x_label)
         plt.ylabel(sim.y_label)

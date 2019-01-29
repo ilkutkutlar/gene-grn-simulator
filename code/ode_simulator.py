@@ -1,13 +1,12 @@
-import numpy
 from math import log, e
-from typing import List, Dict, NamedTuple
+from typing import List, Dict
 
 import matplotlib.pyplot as plt
+import numpy
 import numpy as np
 from scipy.integrate import odeint
 
 from formulae import TranscriptionFormula, DegradationFormula, TranslationFormula
-from gillespie_simulator import SimulationResults
 from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType
@@ -27,15 +26,6 @@ class OdeSimulator:
             ret[x] = state[x] + change[x]
         return ret
 
-    @staticmethod
-    def _apply_change_vector(state: np.ndarray, change: List[float]):
-        ret = state.copy()
-
-        for x in range(0, len(change)):
-            numpy.append(ret, ret.item(x) + change[x])
-
-        return ret
-
     """
     Calculate the next values of the given list of values
     
@@ -46,31 +36,32 @@ class OdeSimulator:
 
     @staticmethod
     def dy_dt(y: List[float], t: int, net: Network) -> List[float]:
-        unpacked = dict()
-
-        i = 0
+        changes = dict()
         for x in net.species:
-            unpacked[x] = y[i]
-            i += 1
+            changes[x] = 0
 
         for r in net.reactions:
             rate = r.rate_function(net)
+            change_vector = r.change_vector(net)
+
             if r.left:
                 for x in r.left:
-                    unpacked[x] -= rate
+                    changes[x] -= rate
 
             if r.right:
                 for x in r.right:
-                    unpacked[x] += rate
+                    changes[x] += rate
+
+            net.species = OdeSimulator._apply_change_vector_(net.species, change_vector)
 
         new_y = list()
-        for s in unpacked:
-            new_y.append(unpacked[s])
+        for s in changes:
+            new_y.append(changes[s])
 
         return new_y
 
     @staticmethod
-    def simulate(net: Network, sim: SimulationSettings) -> SimulationResults:
+    def simulate(net: Network, sim: SimulationSettings) -> np.ndarray:
         y0: list = list()
 
         # Build the initial state
@@ -78,48 +69,37 @@ class OdeSimulator:
             y0.append(net.species[key])
 
         # time grid -> The time space for which the equations will be solved
-        t: list = np.linspace(sim.start_time, sim.end_time, 100)
+        t: list = np.linspace(sim.start_time, sim.end_time, 10)
 
         # solve the ODEs
-        solution = odeint(OdeSimulator.dy_dt, y0, t, args=(net,))
+        solution: np.ndarray = odeint(OdeSimulator.dy_dt, y0, t, args=(net,))
 
-        results: SimulationResults = []
+        return solution
 
-        i = 0
-
-        # solution: List[List[float]], where List[float] is the list containing each species' concentration
-        for x in solution:      # x: List[float]
-            specs: Dict[str, float] = {}
-
-            for y in x:         # y: float
-                for sp in net.species:
-                    specs[sp] = y
-
-            results.append((i, specs))
-            i += 1
-
-        return results
+    """
+    :param np.ndarray results: A two dimensional NumPy array containing results
+        in the format where the ith array inside 'results' has the values
+        for each species at time i. 
+    """
 
     @staticmethod
-    def visualise(results: SimulationResults, sim: SimulationSettings):
-        # plot results
+    def visualise(results: np.ndarray, sim: SimulationSettings, net: Network):
+        values: Dict[str, float] = dict()
+
+        # Attach species names to results
+        i = 0
+        for s in net.species:
+            # Syntax meaning, a list consisting of the ith element of each list in results
+            values[s] = results[:, i]
+            i += 1
+
         plt.figure()
 
-        times: List[float] = []
-        plottings: Dict[str, List[float]] = {}
-
-        # species: (species title, species name)
-        for species in sim.plotted_species:
-            plottings[species[1]] = []
-
-        for x in results:       # Tuple[float, NamedVector]
-            times.append(x[0])
-
-            for species in sim.plotted_species:
-                plottings[species[1]].append(x[1][species[1]])
-
-        for species in sim.plotted_species:
-            plt.plot(times, plottings[species[1]], label=species[0])
+        t: list = np.linspace(sim.start_time, sim.end_time, 10)
+        for s in sim.plotted_species:
+            species_name = s[0]
+            species_label = s[1]
+            plt.plot(t, values[species_name], "X")
 
         plt.xlabel(sim.x_label)
         plt.ylabel(sim.y_label)
@@ -201,10 +181,10 @@ def main():
 
     end_time = 100
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("LacI Protein", "laci_p"),
-                            ("TetR Protein", "tetr_p"),
-                            ("Cl Protein", "cl_p")])
-    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s)
+                           [("laci_p", "L"),
+                            ("tetr_p", "T"),
+                            ("cl_p", "C")])
+    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s, net)
 
 
 def simpler():
@@ -217,10 +197,10 @@ def simpler():
 
     end_time = 10
     s = SimulationSettings("Results", "Time", "Concentration", 0, end_time,
-                           [("X", "x"), ("Y", "y")])
-    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s)
+                           [("x", "X"), ("y", "Y")])
+    OdeSimulator.visualise(OdeSimulator.simulate(net, s), s, net)
 
 
 if __name__ == '__main__':
-    simpler()
-    # main()
+    # simpler()
+    main()

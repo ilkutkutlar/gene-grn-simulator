@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable, Dict
+from typing import Dict
 
 import helper
 from models.network import Network
@@ -8,7 +8,7 @@ from models.reg_type import RegType
 
 class Formula(ABC):
     @abstractmethod
-    def formula_function(self) -> Callable[[Network], float]:
+    def formula_function(self, n: Network) -> float:
         pass
 
 
@@ -50,24 +50,21 @@ class TranscriptionFormula(Formula):
         c = 1 + pow(tf / kd, n)
         return 1 / c
 
-    def formula_function(self) -> Callable[[Network], float]:
-        def curried(n: Network):
-            # Protein regulates mRNA
-            regulations = n.get_inner_regulation(self.transcribed_species)
-            the_regulation = regulations[0] if regulations else None
+    def formula_function(self, n: Network):
+        # Protein regulates mRNA
+        regulations = n.get_inner_regulation(self.transcribed_species)
+        the_regulation = regulations[0] if regulations else None
 
-            if regulations:
-                regulator_concent = n.species[the_regulation.from_gene]
-                if the_regulation.reg_type == RegType.ACTIVATION:
-                    h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
-                else:
-                    h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
-
-                return h * self.rate
+        if regulations:
+            regulator_concent = n.species[the_regulation.from_gene]
+            if the_regulation.reg_type == RegType.ACTIVATION:
+                h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
             else:
-                return self.rate
+                h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
 
-        return curried
+            return h * self.rate
+        else:
+            return self.rate
 
 
 class TranslationFormula(Formula):
@@ -75,11 +72,8 @@ class TranslationFormula(Formula):
         self.rate = rate
         self.mrna_species = mrna_species
 
-    def formula_function(self) -> Callable[[Network], float]:
-        def curried(n: Network):
-            return self.rate * n.species[self.mrna_species]
-
-        return curried
+    def formula_function(self, n: Network) -> float:
+        return self.rate * n.species[self.mrna_species]
 
 
 class DegradationFormula(Formula):
@@ -87,11 +81,8 @@ class DegradationFormula(Formula):
         self.rate = rate
         self.decaying_species = decaying_species
 
-    def formula_function(self) -> Callable[[Network], float]:
-        def curried(n: Network):
-            return self.rate * n.species[self.decaying_species]
-
-        return curried
+    def formula_function(self, n: Network) -> float:
+        return self.rate * n.species[self.decaying_species]
 
 
 class CustomFormula(Formula):
@@ -99,9 +90,6 @@ class CustomFormula(Formula):
         self.rate_function_ast = rate_function_ast
         self.parameters = parameters
 
-    def formula_function(self) -> Callable[[Network], float]:
-        def curried(n: Network):
-            return helper.evaluate_ast_string(self.rate_function_ast,
-                                              n.symbols, species=n.species, parameters=self.parameters)
-
-        return curried
+    def formula_function(self, n: Network) -> float:
+        return helper.evaluate_ast_string(self.rate_function_ast,
+                                          n.symbols, species=n.species, parameters=self.parameters)

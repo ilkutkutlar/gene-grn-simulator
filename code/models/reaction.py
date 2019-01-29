@@ -13,7 +13,7 @@ class Reaction:
         self.rate_fn = rate_fn
 
     def rate_function(self, n: Network) -> float:
-        return self.rate_fn.formula_function()(n)
+        return self.rate_fn.formula_function(n)
 
     def change_vector(self, n: Network) -> NamedVector:
         # fpm + MmyR -> [k1] fpm:MmyR

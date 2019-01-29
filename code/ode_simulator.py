@@ -67,7 +67,7 @@ class OdeSimulator:
         t: list = np.linspace(sim.start_time, sim.end_time, 100)
 
         # solve the ODEs
-        solution: np.ndarray = odeint(self.dy_dt, y0, t)
+        solution: np.ndarray = odeint(self.dy_dt, y0, t, mxstep=50000)
 
         return solution
 
@@ -185,8 +185,11 @@ def main():
 
 def simpler():
     species = {"x": 0, "y": 20}
-    regulations = []
-    reactions = [Reaction([], ["x"], TranscriptionFormula(1, 1, 20, "x"))]
+
+    regulations = [Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)]
+
+    reactions = [Reaction([], ["x"], TranscriptionFormula(5, 2, 40, "x")),
+                 Reaction(["y"], [], DegradationFormula(0.3, "y"))]
 
     net = Network()
     net.initialise(species, reactions, regulations)
@@ -200,5 +203,5 @@ def simpler():
 
 
 if __name__ == '__main__':
-    # simpler()
-    main()
+    simpler()
+    # main()

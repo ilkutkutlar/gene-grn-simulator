@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QM
     QFileDialog
 
 from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
-from gene_controller import GeneController
+from ui.gene_controller import GeneController
 from gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
@@ -361,7 +361,7 @@ class GeneWindow(QMainWindow):
             for species in net.species:
                 labels.append((species, species))
 
-            s = SimulationSettings("Results", "Time", "Concentration", 0, end_time, labels)
+            s = SimulationSettings(0, end_time, 100, net.species)
             GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
 
     def _handler_add_reactions_button(self):

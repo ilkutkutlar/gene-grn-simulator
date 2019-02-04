@@ -15,14 +15,14 @@ from models.reaction import Reaction
 
 class SbmlParser:
     @staticmethod
-    def _get_species_(model):
+    def _get_species(model):
         species: Dict[str, float] = {}
         for s in model.getListOfSpecies():
             species[s.getId()] = s.getInitialAmount()
         return species
 
     @staticmethod
-    def _get_symbols_(model):
+    def _get_symbols(model):
         symbols: Dict[str, float] = {}
 
         """
@@ -50,10 +50,11 @@ class SbmlParser:
         return symbols
 
     @staticmethod
-    def _get_reactions_(model):
+    def _get_reactions(model, symbols):
         reactions: List[Reaction] = []
         for x in model.getListOfReactions():
-            reaction_rate_function = x.getKineticLaw().getMath().deepCopy()
+            rate_function = helper.convert_ast_to_string(
+                x.getKineticLaw().getMath().deepCopy())
             parameters = {}
 
             reactants = x.getListOfReactants()
@@ -61,6 +62,8 @@ class SbmlParser:
 
             left: List[str] = list()
             right: List[str] = list()
+            # left: List[str] = [y.getSpecies() for y in reactants]
+            # right: List[str] = [y.getSpecies() for y in products]
 
             if not reactants:
                 left.append("")
@@ -83,15 +86,16 @@ class SbmlParser:
             # 183 -> Transcription
             # 184 -> Translation
 
-            if sbo == "179":
-                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
-            elif sbo == "183":
-                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
-            elif sbo == "184":
-                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
-            else:
-                r = CustomFormula(helper.convert_ast_to_string(reaction_rate_function), parameters)
+            # if sbo == "179":
+            #     r = CustomFormula(rate_function, parameters, symbols)
+            # elif sbo == "183":
+            #     r = CustomFormula(rate_function, parameters, symbols)
+            # elif sbo == "184":
+            #     r = CustomFormula(rate_function, parameters, symbols)
+            # else:
+            #     r = CustomFormula(rate_function, parameters, symbols)
 
+            r = CustomFormula(rate_function, parameters, symbols)
             reactions.append(Reaction(left, right, r))
         return reactions
 
@@ -104,11 +108,13 @@ class SbmlParser:
         model: libsbml.Model = parsed.getModel()
 
         # Initialise species and their initial amounts
-        net.species = SbmlParser._get_species_(model)
+        net.species = SbmlParser._get_species(model)
+
         # Evaluate and store global parameters in a symbol table
-        net.symbols = SbmlParser._get_symbols_(model)
+        symbols = SbmlParser._get_symbols(model)
+
         # Parse reactions and create CustomReaction objects
-        net.reactions = SbmlParser._get_reactions_(model)
+        net.reactions = SbmlParser._get_reactions(model, symbols)
 
         return net
 

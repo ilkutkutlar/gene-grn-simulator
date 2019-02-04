@@ -95,7 +95,7 @@ class CustomFormula(Formula):
         self.symbols = symbols
 
     def formula_function(self, state: Dict[str, float]) -> float:
-        return helper.evaluate_ast_string(self.rate_function_ast,
-                                          symbols=self.symbols,
-                                          species=state,
-                                          parameters=self.parameters)
+        return helper.eval_string_as_equation(self.rate_function_ast,
+                                              symbols=self.symbols,
+                                              species=state,
+                                              parameters=self.parameters)

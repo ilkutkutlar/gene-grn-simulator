@@ -12,10 +12,10 @@ class Reaction:
         self.right = right
         self.rate_fn = rate_fn
 
-    def rate_function(self, n: Network) -> float:
+    def rate_function(self, n: Dict[str, float]) -> float:
         return self.rate_fn.formula_function(n)
 
-    def change_vector(self, n: Network) -> NamedVector:
+    def change_vector(self, n: Dict[str, float]) -> NamedVector:
         # fpm + MmyR -> [k1] fpm:MmyR
         # ---------------------------
         # MmyR -= k1[MmyR][fpm]     | General: if MmyR in left, then MmyR -= (k) * (left1) * (left2)
@@ -30,7 +30,7 @@ class Reaction:
 
         change: Dict[str, float] = dict()
 
-        for x in n.species:
+        for x in n:
 
             if x not in change:
                 change[x] = 0

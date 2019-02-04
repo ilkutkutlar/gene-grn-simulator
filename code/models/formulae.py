@@ -9,7 +9,7 @@ from models.regulation import Regulation
 
 class Formula(ABC):
     @abstractmethod
-    def formula_function(self, state: Dict[str, float]) -> float:
+    def compute(self, state: Dict[str, float]) -> float:
         pass
 
 
@@ -53,7 +53,7 @@ class TranscriptionFormula(Formula):
         c = 1 + pow(tf / kd, n)
         return 1 / c
 
-    def formula_function(self, state: Dict[str, float]):
+    def compute(self, state: Dict[str, float]):
         # Protein regulates mRNA
         the_regulation = self.regulators[0] if self.regulators else None
 
@@ -74,7 +74,7 @@ class TranslationFormula(Formula):
         self.rate = rate
         self.mrna_species = mrna_species
 
-    def formula_function(self, state: Dict[str, float]) -> float:
+    def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.mrna_species]
 
 
@@ -83,19 +83,19 @@ class DegradationFormula(Formula):
         self.rate = rate
         self.decaying_species = decaying_species
 
-    def formula_function(self, state: Dict[str, float]) -> float:
+    def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.decaying_species]
 
 
 class CustomFormula(Formula):
-    def __init__(self, rate_function_ast: str,
+    def __init__(self, rate_function: str,
                  parameters: Dict[str, float], symbols: Dict[str, float]):
-        self.rate_function_ast = rate_function_ast
+        self.rate_function = rate_function
         self.parameters = parameters
         self.symbols = symbols
 
-    def formula_function(self, state: Dict[str, float]) -> float:
-        return helper.eval_string_as_equation(self.rate_function_ast,
-                                              symbols=self.symbols,
-                                              species=state,
-                                              parameters=self.parameters)
+    def compute(self, state: Dict[str, float]) -> float:
+        return helper.eval_equation(self.rate_function,
+                                    symbols=self.symbols,
+                                    species=state,
+                                    parameters=self.parameters)

@@ -10,10 +10,10 @@ class Reaction:
                  rate_fn: Formula):
         self.left = left
         self.right = right
-        self.rate_fn = rate_fn
+        self.rate_function = rate_fn
 
-    def rate_function(self, n: Dict[str, float]) -> float:
-        return self.rate_fn.formula_function(n)
+    def rate(self, n: Dict[str, float]) -> float:
+        return self.rate_function.compute(n)
 
     def change_vector(self, n: Dict[str, float]) -> NamedVector:
         # fpm + MmyR -> [k1] fpm:MmyR
@@ -36,10 +36,10 @@ class Reaction:
                 change[x] = 0
 
             if x in self.left:
-                change[x] -= self.rate_function(n)
+                change[x] -= self.rate(n)
 
             if x in self.right:
-                change[x] += self.rate_function(n)
+                change[x] += self.rate(n)
 
         return change
 
@@ -47,32 +47,32 @@ class Reaction:
         left = self.left[0] if self.left else "∅"
         right = self.right[0] if self.right else "∅"
 
-        if isinstance(self.rate_fn, TranscriptionFormula):
+        if isinstance(self.rate_function, TranscriptionFormula):
             # left = "∅"
             # right = self.rate_fn.transcribed_species if self.rate_fn.transcribed_species else "∅"
 
-            trans_rate = str(self.rate_fn.rate)
-            kd = str(self.rate_fn.kd)
-            hill_coeff = str(self.rate_fn.hill_coeff)
+            trans_rate = str(self.rate_function.rate)
+            kd = str(self.rate_function.kd)
+            hill_coeff = str(self.rate_function.hill_coeff)
 
             return "Transcription: " + left + " -> " + right \
                    + "\n   ↳ Tr. Rate: " + trans_rate + " | Kd: " + kd + " | n: " + hill_coeff
 
-        elif isinstance(self.rate_fn, TranslationFormula):
-            rate = str(self.rate_fn.rate)
+        elif isinstance(self.rate_function, TranslationFormula):
+            rate = str(self.rate_function.rate)
 
             return "Translation: " + left + " -> " + right \
                    + "\n   ↳ Tr. Rate: " + rate
-        elif isinstance(self.rate_fn, DegradationFormula):
-            rate = str(self.rate_fn.rate)
+        elif isinstance(self.rate_function, DegradationFormula):
+            rate = str(self.rate_function.rate)
             return "Degradation: " + left + " -> " + right \
                    + "\n   ↳ Decay Rate: " + rate
-        elif isinstance(self.rate_fn, CustomFormula):
-            rate_function_ast = str(self.rate_fn.rate_function_ast)
+        elif isinstance(self.rate_function, CustomFormula):
+            rate_function_ast = str(self.rate_function.rate_function)
 
             params = ""
-            for p in self.rate_fn.parameters:
-                params += "\n       • " + p + ": " + str(self.rate_fn.parameters[p])
+            for p in self.rate_function.parameters:
+                params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
 
             return "Reaction (" + left + " -> " + right + "): " + rate_function_ast \
                    + "\n  ↳ Parameters: " + params

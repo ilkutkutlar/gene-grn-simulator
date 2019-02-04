@@ -5,25 +5,21 @@ import libsbml
 from libsbml._libsbml import formulaToL3String
 
 
-def eval_string_as_equation(string: str, symbols: Dict[str, float],
-                            species: Dict[str, float] = None, parameters: Dict[str, float] = None):
-    if symbols:
-        temp = symbols.copy()
-    else:
-        temp = dict()
+def eval_equation(string: str, symbols: Dict[str, float],
+                  species: Dict[str, float] = None, parameters: Dict[str, float] = None):
+
+    temp = symbols.copy() if symbols else dict()
 
     if species is not None:
-        for x in species:
-            temp[x] = species[x]
+        temp.update(species)
 
     if parameters is not None:
-        for x in parameters:
-            temp[x] = parameters[x]
+        temp.update(parameters)
 
     return eval(string, temp)
 
 
-def convert_ast_to_string(ast_node: libsbml.ASTNode):
+def ast_to_string(ast_node: libsbml.ASTNode):
     raw: str = formulaToL3String(ast_node)
     raw = raw.replace("^", "**")
     return raw
@@ -34,7 +30,7 @@ Only evaluates nodes which contain constants.
 """
 
 
-def evaluate_ast_node(node: libsbml.ASTNode, symbols: Dict[str, float], species: Dict[str, float] = None) -> float:
+def evaluate_ast(node: libsbml.ASTNode, symbols: Dict[str, float], species: Dict[str, float] = None) -> float:
     node_type = node.getType()
 
     # Base cases
@@ -50,11 +46,11 @@ def evaluate_ast_node(node: libsbml.ASTNode, symbols: Dict[str, float], species:
         else:
             value = 0  # TODO: Error!
     elif node_type == libsbml.AST_FUNCTION_LN:
-        val = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
+        val = evaluate_ast(node.getLeftChild(), symbols, species=species)
         value = math.log(val, math.e)
     else:
-        left = evaluate_ast_node(node.getLeftChild(), symbols, species=species)
-        right = evaluate_ast_node(node.getRightChild(), symbols, species=species)
+        left = evaluate_ast(node.getLeftChild(), symbols, species=species)
+        right = evaluate_ast(node.getRightChild(), symbols, species=species)
 
         if node_type == libsbml.AST_PLUS:
             value = left + right

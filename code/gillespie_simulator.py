@@ -20,7 +20,7 @@ class GillespieSimulator:
     def _calculate_r0(net: Network):
         r0: float = 0
         for reaction in net.reactions:
-            t = reaction.rate_function(net)
+            t = reaction.rate(net)
             r0 += t
 
         return r0
@@ -122,9 +122,9 @@ class GillespieSimulator:
         propensities: List[float] = []
         for reaction in net.reactions:
             try:
-                div_result = reaction.rate_function(net) / r0
+                div_result = reaction.rate(net) / r0
             except ZeroDivisionError:
-                div_result = reaction.rate_function(net) / 1
+                div_result = reaction.rate(net) / 1
             propensities.append(div_result)
 
         return GillespieSimulator._pick_weighted_random(net.reactions, propensities) \

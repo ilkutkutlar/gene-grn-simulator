@@ -16,9 +16,7 @@ from models.reaction import Reaction
 class SbmlParser:
     @staticmethod
     def _get_species(model):
-        species: Dict[str, float] = {}
-        for s in model.getListOfSpecies():
-            species[s.getId()] = s.getInitialAmount()
+        species: Dict[str, float] = {s.getId(): s.getInitialAmount() for s in model.getListOfSpecies()}
         return species
 
     @staticmethod
@@ -41,7 +39,7 @@ class SbmlParser:
         """
 
         for r in model.getListOfRules():
-            val = helper.evaluate_ast_node(r.getMath(), symbols)
+            val = helper.evaluate_ast(r.getMath(), symbols)
             symbols[r.getId()] = val
 
         for c in model.getListOfCompartments():
@@ -53,18 +51,14 @@ class SbmlParser:
     def _get_reactions(model, symbols):
         reactions: List[Reaction] = []
         for x in model.getListOfReactions():
-            rate_function = helper.convert_ast_to_string(
-                x.getKineticLaw().getMath().deepCopy())
-            parameters = {}
+            rate_function = helper.ast_to_string(x.getKineticLaw().getMath().deepCopy())
 
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
 
             left: List[str] = [y.getSpecies() for y in reactants]
             right: List[str] = [y.getSpecies() for y in products]
-
-            for p in x.getKineticLaw().getListOfParameters():
-                parameters[p.getId()] = p.getValue()
+            parameters = {p.getId(): p.getValue() for p in x.getKineticLaw().getListOfParameters()}
 
             sbo: str = x.getSBOTerm()
 

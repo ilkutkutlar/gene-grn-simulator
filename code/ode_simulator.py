@@ -41,7 +41,7 @@ class OdeSimulator:
             i += 1
 
         for r in self.net.reactions:
-            rate = r.rate_function(unpacked)
+            rate = r.rate(unpacked)
 
             if r.left:
                 for x in r.left:

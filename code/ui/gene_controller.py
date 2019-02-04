@@ -6,7 +6,6 @@ class GeneController:
 
     def __init__(self):
         self.network = Network()
-        self.symbols = dict()
 
     @staticmethod
     def get_instance():

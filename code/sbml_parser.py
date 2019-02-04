@@ -65,12 +65,6 @@ class SbmlParser:
             # left: List[str] = [y.getSpecies() for y in reactants]
             # right: List[str] = [y.getSpecies() for y in products]
 
-            if not reactants:
-                left.append("")
-
-            if not products:
-                right.append("")
-
             for y in reactants:
                 left.append(y.getSpecies())
 

@@ -5,9 +5,10 @@ import libsbml
 from libsbml._libsbml import formulaToL3String
 
 
-def eval_equation(string: str, symbols: Dict[str, float],
-                  species: Dict[str, float] = None, parameters: Dict[str, float] = None):
-
+def eval_equation(string_equation: str,
+                  species: Dict[str, float] = None,
+                  symbols: Dict[str, float] = None,
+                  parameters: Dict[str, float] = None):
     temp = symbols.copy() if symbols else dict()
 
     if species is not None:
@@ -16,7 +17,7 @@ def eval_equation(string: str, symbols: Dict[str, float],
     if parameters is not None:
         temp.update(parameters)
 
-    return eval(string, temp)
+    return eval(string_equation, temp)
 
 
 def ast_to_string(ast_node: libsbml.ASTNode):

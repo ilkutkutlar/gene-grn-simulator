@@ -96,6 +96,6 @@ class CustomFormula(Formula):
 
     def compute(self, state: Dict[str, float]) -> float:
         return helper.eval_equation(self.rate_function,
-                                    symbols=self.symbols,
                                     species=state,
+                                    symbols=self.symbols,
                                     parameters=self.parameters)

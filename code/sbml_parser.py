@@ -48,8 +48,11 @@ class SbmlParser:
         return symbols
 
     @staticmethod
-    def _get_reactions(model, symbols):
+    def _get_reactions(model):
+        # Evaluate and store global parameters in a symbol table
+        symbols = SbmlParser._get_symbols(model)
         reactions: List[Reaction] = []
+
         for x in model.getListOfReactions():
             rate_function = helper.ast_to_string(x.getKineticLaw().getMath().deepCopy())
 
@@ -90,11 +93,8 @@ class SbmlParser:
         # Initialise species and their initial amounts
         net.species = SbmlParser._get_species(model)
 
-        # Evaluate and store global parameters in a symbol table
-        symbols = SbmlParser._get_symbols(model)
-
         # Parse reactions and create CustomReaction objects
-        net.reactions = SbmlParser._get_reactions(model, symbols)
+        net.reactions = SbmlParser._get_reactions(model)
 
         return net
 

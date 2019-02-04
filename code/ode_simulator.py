@@ -87,7 +87,7 @@ class OdeSimulator:
         for s in self.sim.plotted_species:
             plt.plot(self.time_space, values[s], label=s)
 
-        plt.xlabel("Time")
+        plt.xlabel("Time (s)")
         plt.ylabel("Concentration")
         plt.legend(loc=0)
         plt.title("Results")

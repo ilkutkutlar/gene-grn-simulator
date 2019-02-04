@@ -180,7 +180,7 @@ class GillespieSimulator:
         for species in sim.plotted_species:
             plt.plot(times, plottings[species], label=species)
 
-        plt.xlabel("Time")
+        plt.xlabel("Time (s)")
         plt.ylabel("Concentration")
         plt.legend(loc=0)
         plt.title("Results")

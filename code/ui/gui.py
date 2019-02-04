@@ -9,6 +9,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QM
     QFileDialog
 
 from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
 from gillespie_simulator import GillespieSimulator
 from models.network import Network
@@ -348,21 +349,93 @@ class GeneWindow(QMainWindow):
             self._refresh_species_list(self.species_panel.m_list)
 
     def _handler_deterministic_clicked(self):
-        print("Not implemented yet")
+        dia = QDialog()
+        main = QVBoxLayout()
+
+        info = QLabel()
+        info.setText("Species are comma separated")
+
+        time_field = QLineEdit()
+        time_field.setPlaceholderText("Simulation time")
+
+        sampling_field = QLineEdit()
+        sampling_field.setPlaceholderText("Sampling rate")
+
+        species_field = QLineEdit()
+        species_field.setPlaceholderText("Which species to show")
+
+        ok_button = QPushButton()
+        ok_button.setText("Ok")
+
+        def dialog_ok_button_clicked_handler():
+            time_text = time_field.text().strip()
+            species_text = species_field.text().strip()
+            sampling_text = sampling_field.text().strip()
+
+            end_time = int(time_text) if time_text else 1
+            species = species_text.split(",")
+            sampling_rate = int(sampling_text)
+
+            s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
+            o = OdeSimulator(GeneController.get_instance().network, s)
+            o.visualise(o.simulate())
+
+            dia.close()
+
+        ok_button.clicked.connect(dialog_ok_button_clicked_handler)
+
+        main.addWidget(info)
+        main.addWidget(time_field)
+        main.addWidget(sampling_field)
+        main.addWidget(species_field)
+        main.addWidget(ok_button)
+        dia.setFixedHeight(180)
+        dia.setMinimumWidth(200)
+        dia.setWindowTitle("Simulation settings")
+        dia.setLayout(main)
+        dia.exec_()
 
     def _handler_stochastic_clicked(self):
-        (time, ok) = QInputDialog.getText(self, 'Simulation Settings', 'Simulation Time (s)')
+        dia = QDialog()
+        main = QVBoxLayout()
 
-        if ok:
-            end_time = int(time) if time else 1
+        info = QLabel()
+        info.setText("Species are comma separated")
 
-            net = GeneController.get_instance().network
-            labels = []
-            for species in net.species:
-                labels.append((species, species))
+        time_field = QLineEdit()
+        time_field.setPlaceholderText("Simulation time")
 
-            s = SimulationSettings(0, end_time, 100, net.species)
-            GillespieSimulator.visualise(GillespieSimulator.simulate(net, s), s)
+        species_field = QLineEdit()
+        species_field.setPlaceholderText("Which species to show")
+
+        ok_button = QPushButton()
+        ok_button.setText("Ok")
+
+        def dialog_ok_button_clicked_handler():
+            time_text = time_field.text().strip()
+            species_text = species_field.text().strip()
+
+            end_time = int(time_text) if time_text else 1
+            species = species_text.split(",")
+
+            # Precision field does not apply to stochastic simulation!
+            s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
+            GillespieSimulator.visualise(GillespieSimulator.simulate(GeneController.get_instance().network, s), s)
+
+            dia.close()
+
+        ok_button.clicked.connect(dialog_ok_button_clicked_handler)
+
+        main.addWidget(info)
+        main.addWidget(time_field)
+        main.addWidget(species_field)
+        main.addWidget(ok_button)
+        dia.setFixedHeight(140)
+        dia.setMinimumWidth(200)
+        dia.setWindowTitle("Simulation settings")
+        dia.setLayout(main)
+        dia.exec_()
+
 
     def _handler_add_reactions_button(self):
         dialog = AddReactionDialog()

@@ -60,16 +60,8 @@ class SbmlParser:
             reactants = x.getListOfReactants()
             products = x.getListOfProducts()
 
-            left: List[str] = list()
-            right: List[str] = list()
-            # left: List[str] = [y.getSpecies() for y in reactants]
-            # right: List[str] = [y.getSpecies() for y in products]
-
-            for y in reactants:
-                left.append(y.getSpecies())
-
-            for y in products:
-                right.append(y.getSpecies())
+            left: List[str] = [y.getSpecies() for y in reactants]
+            right: List[str] = [y.getSpecies() for y in products]
 
             for p in x.getKineticLaw().getListOfParameters():
                 parameters[p.getId()] = p.getValue()

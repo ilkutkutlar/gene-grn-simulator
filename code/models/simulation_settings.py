@@ -1,5 +1,7 @@
 from typing import List, Tuple
 
+import numpy as np
+
 
 class SimulationSettings:
     # Tuple[species_name, label]
@@ -9,3 +11,6 @@ class SimulationSettings:
         self.start_time = start_time
         self.end_time = end_time
         self.precision = precision
+
+    def generate_time_space(self):
+        return np.linspace(self.start_time, self.end_time, self.precision)

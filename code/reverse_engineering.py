@@ -1,6 +1,6 @@
 from typing import List, Tuple, Callable
 from models.network import Network
-
+import numpy as np
 
 # Inputs:
 #   Mutable variables
@@ -20,6 +20,9 @@ from models.network import Network
 #   species name
 #   Desired value: Min (val), Max (val), between (val1, val2)
 #   Between times: t1, t2
+from models.simulation_settings import SimulationSettings
+from ode_simulator import OdeSimulator
+from structured_results import StructuredResults
 
 
 class Constraint:
@@ -42,8 +45,17 @@ class Constraint:
         self.time_period = time_period
 
 
-def evaluate(net: Network, constraints: List[Constraint]):
+def evaluate(results: StructuredResults,
+             constraints: List[Constraint]):
     # Ok that's how min/man will work: filter all values which do NOT obey the constraints, if empty list,
     # then obeys constraints
 
-    pass
+    # results = StructuredResults(raw_results, list(net.species.keys()), sim.generate_time_space())
+
+    for c in constraints:
+        vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
+        does_not_obey = filter(lambda v: not c.value_constraint(v), vals)
+        if does_not_obey:
+            return False
+
+    return True

@@ -4,11 +4,10 @@ from typing import List, Tuple, Dict, Any
 
 import matplotlib.pyplot as plt
 
-from models.models import NamedVector
 from models.network import Network
 from models.simulation_settings import SimulationSettings
 
-SimulationResults = List[Tuple[float, NamedVector]]
+SimulationResults = List[Tuple[float, Dict[str, float]]]
 
 
 class GillespieSimulator:
@@ -93,13 +92,13 @@ class GillespieSimulator:
         return cumilative[0][0]
 
     """
-    returns a NamedVector representing the
+    returns a Dict[str, float] representing the
     change vector of the reaction chosen randomly,
     which will happen next
     """
 
     @staticmethod
-    def _pick_next_reaction(net: Network, r0: float) -> NamedVector:
+    def _pick_next_reaction(net: Network, r0: float) -> Dict[str, float]:
         propensities: List[float] = []
         for reaction in net.reactions:
             try:

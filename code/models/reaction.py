@@ -1,7 +1,6 @@
 from typing import List, Dict
 
 from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
-from models.models import NamedVector
 
 
 class Reaction:
@@ -15,7 +14,7 @@ class Reaction:
     def rate(self, n: Dict[str, float]) -> float:
         return self.rate_function.compute(n)
 
-    def change_vector(self, n: Dict[str, float]) -> NamedVector:
+    def change_vector(self, n: Dict[str, float]) -> Dict[str, float]:
         # fpm + MmyR -> [k1] fpm:MmyR
         # ---------------------------
         # MmyR -= k1[MmyR][fpm]     | General: if MmyR in left, then MmyR -= (k) * (left1) * (left2)

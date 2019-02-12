@@ -22,7 +22,6 @@ from models.network import Network
 #   Between times: t1, t2
 
 
-
 class Constraint:
     species: str
     value_constraint: Callable[[float], bool]

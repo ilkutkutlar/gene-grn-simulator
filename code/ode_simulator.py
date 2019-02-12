@@ -22,7 +22,6 @@ class OdeSimulator:
 
         # time grid -> The time space for which the equations will be solved
         self.time_space: list = np.linspace(sim.start_time, sim.end_time, sim.precision)
-        print(self.time_space)
 
     """
     Calculate the change in the values of species of the network
@@ -211,8 +210,10 @@ def test():
 
     s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
 
+    time_space = np.linspace(s.start_time, s.end_time, s.precision)
     ode = OdeSimulator(net, s)
-    ode.visualise(ode.simulate())
+    res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
+    # ode.visualise(ode.simulate())
 
 
 if __name__ == '__main__':

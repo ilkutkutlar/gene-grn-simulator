@@ -497,7 +497,6 @@ class GeneWindow(QMainWindow):
         m_list.clear()
         for reaction in GeneController.get_instance().network.reactions:
             m_list.addItem(reaction.__str__())
-        print(GeneController.get_instance().network.reactions)
 
     @staticmethod
     def _refresh_species_list(m_list):
@@ -507,7 +506,6 @@ class GeneWindow(QMainWindow):
             m_list.addItem(species + ": " + str(GeneController.get_instance().network.species[species]))
             m_list.setProperty("id" + str(i), species)
             i += 1
-        print(GeneController.get_instance().network.species)
 
 
 app = QApplication([])

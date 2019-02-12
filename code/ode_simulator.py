@@ -11,6 +11,7 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
+from reverse_engineering import evaluate, Constraint
 from structured_results import StructuredResults
 
 
@@ -213,7 +214,10 @@ def test():
     time_space = s.generate_time_space()
     ode = OdeSimulator(net, s)
     res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
+    c = Constraint("x", lambda x: x < 150, (0, 20))
+    evaluate(res, [c])
     # ode.visualise(ode.simulate())
+
 
 
 if __name__ == '__main__':

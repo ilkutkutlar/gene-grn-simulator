@@ -1,28 +1,23 @@
 from typing import List, Tuple, Callable
-from models.network import Network
-import numpy as np
+
+# Constraint:
+#   species name
+#   Desired value: Min (val), Max (val), between (val1, val2)
+#   Between times: t1, t2
+from structured_results import StructuredResults
+
 
 # Inputs:
 #   Mutable variables
 #   Range for mutable variables
 #   Constraints
 #   Network
-
 # Mutable variables - 2 types:
 #   Species
 #   reaction parameters: Reaction name, parameter name
 #       Can be done easily since we're using eval now.
-
 # Range:
 #   Simply a list of floats
-
-# Constraint:
-#   species name
-#   Desired value: Min (val), Max (val), between (val1, val2)
-#   Between times: t1, t2
-from models.simulation_settings import SimulationSettings
-from ode_simulator import OdeSimulator
-from structured_results import StructuredResults
 
 
 class Constraint:
@@ -45,16 +40,11 @@ class Constraint:
         self.time_period = time_period
 
 
-def evaluate(results: StructuredResults,
-             constraints: List[Constraint]):
-    # Ok that's how min/man will work: filter all values which do NOT obey the constraints, if empty list,
-    # then obeys constraints
-
-    # results = StructuredResults(raw_results, list(net.species.keys()), sim.generate_time_space())
-
+def evaluate(results: StructuredResults, constraints: List[Constraint]):
     for c in constraints:
         vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
-        does_not_obey = filter(lambda v: not c.value_constraint(v), vals)
+        does_not_obey = list(filter(lambda v: not c.value_constraint(v), vals))
+        print(does_not_obey)
         if does_not_obey:
             return False
 

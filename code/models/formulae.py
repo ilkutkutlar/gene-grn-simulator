@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 
 import helper
-from models.network import Network
 from models.reg_type import RegType
 from models.regulation import Regulation
 

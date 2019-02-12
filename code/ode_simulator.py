@@ -11,6 +11,7 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
+from structured_results import StructuredResults
 
 
 class OdeSimulator:
@@ -21,6 +22,7 @@ class OdeSimulator:
 
         # time grid -> The time space for which the equations will be solved
         self.time_space: list = np.linspace(sim.start_time, sim.end_time, sim.precision)
+        print(self.time_space)
 
     """
     Calculate the change in the values of species of the network
@@ -31,12 +33,11 @@ class OdeSimulator:
     """
 
     def dy_dt(self, y, t):
-        changes = dict()
+        changes = {s: 0 for s in self.net.species}
         unpacked = dict()
 
         i = 0
         for x in self.net.species:
-            changes[x] = 0
             unpacked[x] = y[i]
             i += 1
 
@@ -51,9 +52,7 @@ class OdeSimulator:
                 for x in r.right:
                     changes[x] += rate
 
-        new_y = list()
-        for s in changes:
-            new_y.append(changes[s])
+        new_y = [changes[s] for s in changes]
 
         return new_y
 
@@ -73,14 +72,8 @@ class OdeSimulator:
     """
 
     def visualise(self, results: np.ndarray):
-        values: Dict[str, float] = dict()
-
-        # Attach species names to results
-        i = 0
-        for s in self.net.species:
-            # Syntax meaning: a list consisting of the ith element of each list in results
-            values[s] = results[:, i]
-            i += 1
+        values: Dict[str, float] = \
+            StructuredResults.label_results(results, self.net.species)
 
         plt.figure()
 
@@ -137,8 +130,8 @@ def main():
 
     # endregion
 
-    species = {"laci_mrna": 0, "tetr_mrna": 20, "cl_mrna": 0,
-               "laci_p": 0, "tetr_p": 0, "cl_p": 0}
+    species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
+               "laci_p": 10, "tetr_p": 10, "cl_p": 10}
 
     laci_reg = Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION)
     tetr_reg = Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION)
@@ -187,6 +180,42 @@ def simpler():
     ode.visualise(ode.simulate())
 
 
+def test():
+    species = {"px": 100, "py": 100, "pz": 30, "x": 100, "y": 25, "z": 20}
+
+    x_trans = TranscriptionFormula(5, 2, 40, "x", [])
+    y_trans = TranscriptionFormula(60, 1, 40, "y", [
+        Regulation(from_gene="px", to_gene="y", reg_type=RegType.REPRESSION)])
+    z_trans = TranscriptionFormula(20, 2, 40, "z", [
+        Regulation(from_gene="py", to_gene="z", reg_type=RegType.ACTIVATION)])
+
+    reactions = [Reaction([], ["x"], x_trans),
+                 Reaction([], ["y"], y_trans),
+                 Reaction([], ["z"], z_trans),
+
+                 Reaction(["x"], [], DegradationFormula(0.01, "x")),
+                 Reaction(["y"], [], DegradationFormula(0.01, "y")),
+                 Reaction(["z"], [], DegradationFormula(0.1, "z")),
+
+                 Reaction(["px"], [], DegradationFormula(0.01, "px")),
+                 Reaction(["py"], [], DegradationFormula(0.01, "py")),
+                 Reaction(["pz"], [], DegradationFormula(0.01, "pz")),
+
+                 Reaction([], ["px"], TranslationFormula(0.2, "x")),
+                 Reaction([], ["py"], TranslationFormula(5, "y")),
+                 Reaction([], ["pz"], TranslationFormula(1, "z"))]
+
+    net: Network = Network()
+    net.species = species
+    net.reactions = reactions
+
+    s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
+
+    ode = OdeSimulator(net, s)
+    ode.visualise(ode.simulate())
+
+
 if __name__ == '__main__':
     # simpler()
-    main()
+    # main()
+    test()

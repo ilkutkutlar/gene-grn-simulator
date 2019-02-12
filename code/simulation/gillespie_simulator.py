@@ -55,25 +55,6 @@ class GillespieSimulator:
         vj = GillespieSimulator._pick_next_reaction(net, r0)
         return GillespieSimulator._apply_change_vector(net.species, vj) if vj else net.species
 
-    # TODO: This would probably be more efficient!
-    #  Mostly memory efficiency, as we are building a list of tuples
-    #  with all the reactions, etc.
-    # def _get_weighted_int_(self, weights: List[float]):
-    #     cumilative: List[float] = []
-    #
-    #     for i in range(0, len(weights)):
-    #         prev_cumilative: float = 0 if (not cumilative) \
-    #             else (cumilative[len(cumilative) - 1])
-    #
-    #         cumilative_prob = prev_cumilative + weights[i]
-    #         item = items[i]
-    #         cumilative.append((item, cumilative_prob))
-    #
-    #     Always returns a value
-    # for y in cumilative:
-    #     if s2 < y[1]:
-    #         return y[0]
-
     """
     Given a list of items and their associated probabilities of being picked,
     picks an item randomly at a rate dictated by its given probability

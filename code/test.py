@@ -7,7 +7,7 @@ from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 from simulation.ode_simulator import OdeSimulator
-from reverse_engineering.reverse_engineering import Constraint, evaluate
+from reverse_engineering.reverse_engineering import Constraint, is_satisfied
 from structured_results import StructuredResults
 
 
@@ -137,7 +137,7 @@ def test():
     ode = OdeSimulator(net, s)
     res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
     c = Constraint("x", lambda x: x < 150, (0, 20))
-    evaluate(res, [c])
+    is_satisfied(res, [c])
     # ode.visualise(ode.simulate())
 
 

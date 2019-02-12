@@ -68,6 +68,7 @@ class TranscriptionFormula(Formula):
             return self.rate
 
 
+
 class TranslationFormula(Formula):
     def __init__(self, rate: float, mrna_species: str):
         self.rate = rate
@@ -90,8 +91,9 @@ class CustomFormula(Formula):
     def __init__(self, rate_function: str,
                  parameters: Dict[str, float], symbols: Dict[str, float]):
         self.rate_function = rate_function
-        self.parameters = parameters
         self.symbols = symbols
+        self.parameters = parameters
+
 
     def compute(self, state: Dict[str, float]) -> float:
         return helper.eval_equation(self.rate_function,

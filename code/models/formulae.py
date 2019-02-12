@@ -11,6 +11,10 @@ class Formula(ABC):
     def compute(self, state: Dict[str, float]) -> float:
         pass
 
+    @abstractmethod
+    def mutate(self, mutation: Dict[str, float]):
+        pass
+
 
 class TranscriptionFormula(Formula):
     def __init__(self, rate: float, hill_coeff: float, kd: float,
@@ -67,6 +71,14 @@ class TranscriptionFormula(Formula):
         else:
             return self.rate
 
+    def mutate(self, mutation: Dict[str, float]):
+        for m in mutation:
+            if m == "rate":
+                self.rate = mutation[m]
+            elif m == "hill_coeff":
+                self.hill_coeff = mutation[m]
+            else:  # m == "kd"
+                self.kd = mutation[m]
 
 
 class TranslationFormula(Formula):
@@ -77,6 +89,11 @@ class TranslationFormula(Formula):
     def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.mrna_species]
 
+    def mutate(self, mutation: Dict[str, float]):
+        for m in mutation:
+            if m == "rate":
+                self.rate = mutation[m]
+
 
 class DegradationFormula(Formula):
     def __init__(self, rate: float, decaying_species: str):
@@ -86,6 +103,11 @@ class DegradationFormula(Formula):
     def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.decaying_species]
 
+    def mutate(self, mutation: Dict[str, float]):
+        for m in mutation:
+            if m == "rate":
+                self.rate = mutation[m]
+
 
 class CustomFormula(Formula):
     def __init__(self, rate_function: str,
@@ -94,9 +116,11 @@ class CustomFormula(Formula):
         self.symbols = symbols
         self.parameters = parameters
 
-
     def compute(self, state: Dict[str, float]) -> float:
         return helper.eval_equation(self.rate_function,
                                     species=state,
                                     symbols=self.symbols,
                                     parameters=self.parameters)
+
+    def mutate(self, mutation: Dict[str, float]):
+        self.parameters.update(mutation)

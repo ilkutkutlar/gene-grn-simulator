@@ -1,5 +1,4 @@
 import random
-from datetime import date
 from math import e, ceil
 from typing import List, Tuple, Callable, Dict
 
@@ -11,7 +10,7 @@ import numpy as np
 
 from models.network import Network
 from models.simulation_settings import SimulationSettings
-from simulation.gillespie_simulator import SimulationResults
+from reverse_engineering.constraint import Constraint
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
@@ -27,28 +26,6 @@ from structured_results import StructuredResults
 #       Can be done easily since we're using eval now.
 # Range:
 #   Simply a list of floats
-
-
-class Constraint:
-    species: str
-    value_constraint: Callable[[float], bool]
-    time_period: Tuple[float, float]
-
-    """
-    :param str species: The name of the species for which the constraint applies
-    :param Callable[[float], float] value_constraint: A function which, given the current value, evaluates how
-        close/far it is from the desired value e.g. f = lambda v: v - 100, places a constraint for value
-        to be below 100. If v = 120, then this will give a result which is > 0, indicating that the constraint
-        has not been satisfied.
-    :param Tuple[float, float] time_period: defines the time period for which the given value constraint
-        be satisfied
-    """
-
-    def __init__(self, species: str, value_constraint: Callable[[float], float], time_period: Tuple[float, float]):
-        self.species = species
-        self.value_constraint = value_constraint
-        self.time_period = time_period
-
 
 def is_satisfied(results: StructuredResults, constraints: List[Constraint]):
     for c in constraints:
@@ -74,14 +51,20 @@ def evaluate(results: StructuredResults, constraints: List[Constraint]):
 
 
 def annealing(net: Network, sim: SimulationSettings,
-              mutables: Dict[str, Tuple[float, float]],
+              mutables: Dict[str, Tuple[float, float, float, str]],
               constraints: List[Constraint],
               schedule: Callable[[float], float]):
-
     # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-    current = {name: mutables[name][0] for name in mutables}
+    current = {name: (mutables[name][0], mutables[name][3]) for name in mutables}
     ode = OdeSimulator(net, sim)
 
+    def generate_neighbour():
+        _neighbour = current.copy()
+        r: int = random.randrange(len(mutables))
+        rand_mutable: Tuple[float, float, float] = list(mutables.keys())[r]
+        _neighbour[rand_mutable] += rand_mutable[2]
+
+        return _neighbour
 
     for t in range(1, 100):
         T = schedule(t)
@@ -89,11 +72,11 @@ def annealing(net: Network, sim: SimulationSettings,
         if T == 0:
             return current
         else:
-            my_next = current.copy()
-            r = random.randrange(len(mutables))
-
+            neighbour = generate_neighbour()
+            net.mutate(neighbour)
 
             # Todo: Modify network
+
             res = StructuredResults(ode.simulate(), list(ode.net.species.keys()), sim.generate_time_space())
 
             delta_e = evaluate(res, constraints) - evaluate()
@@ -102,7 +85,7 @@ def annealing(net: Network, sim: SimulationSettings,
             if delta_e < 0:
                 current = my_next
             else:
-                p = e**(-delta_e/T)
+                p = e ** (-delta_e / T)
 
                 # Since using integers for random generation, some precision of p, which is a float,
                 # will be lost (e.g. 0.387 would give 2.58397... for 1/p, and no = 3 in this case. Thus
@@ -116,7 +99,7 @@ def annealing(net: Network, sim: SimulationSettings,
                 random.seed(0)
 
                 precision = 100
-                no = ceil(1/p)*precision                  # Total number of possible
+                no = ceil(1 / p) * precision  # Total number of possible
                 rand = random.randrange(no)
 
                 # rand has a 'p' probability of being 0 <= rand < precision, thus this effectively

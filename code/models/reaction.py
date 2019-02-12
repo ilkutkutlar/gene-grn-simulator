@@ -2,12 +2,12 @@ from typing import List, Dict
 
 from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from models.models import NamedVector
-from models.network import Network
 
 
 class Reaction:
-    def __init__(self, left: List[str], right: List[str],
+    def __init__(self, name: str, left: List[str], right: List[str],
                  rate_fn: Formula):
+        self.name = name
         self.left = left
         self.right = right
         self.rate_function = rate_fn

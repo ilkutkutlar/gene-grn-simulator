@@ -1,13 +1,13 @@
 from math import log, e
 
-from models.formulae import DegradationFormula, TranslationFormula, TranscriptionFormula
+from models.formulae import DegradationFormula, TranslationFormula, TranscriptionFormula, CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
-from simulation.ode_simulator import OdeSimulator
 from reverse_engineering.reverse_engineering import Constraint, is_satisfied
+from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
 
@@ -59,21 +59,21 @@ def main():
     tetr_reg = Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION)
     cl_reg = Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)
 
-    reactions = [Reaction([], ["laci_mrna"], TranscriptionFormula(alpha, 2, 40, "laci_mrna", [laci_reg])),
-                 Reaction([], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna", [tetr_reg])),
-                 Reaction([], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna", [cl_reg])),
+    reactions = [Reaction("", [], ["laci_mrna"], TranscriptionFormula(alpha, 2, 40, "laci_mrna", [laci_reg])),
+                 Reaction("", [], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna", [tetr_reg])),
+                 Reaction("", [], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna", [cl_reg])),
 
-                 Reaction(["laci_mrna"], [], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
-                 Reaction(["tetr_mrna"], [], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
-                 Reaction(["cl_mrna"], [], DegradationFormula(mRNA_decay_rate, "cl_mrna")),
+                 Reaction("", ["laci_mrna"], [], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
+                 Reaction("", ["tetr_mrna"], [], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
+                 Reaction("", ["cl_mrna"], [], DegradationFormula(mRNA_decay_rate, "cl_mrna")),
 
-                 Reaction(["laci_mrna"], ["laci_p"], TranslationFormula(beta, "laci_mrna")),
-                 Reaction(["tetr_mrna"], ["tetr_p"], TranslationFormula(beta, "tetr_mrna")),
-                 Reaction(["cl_mrna"], ["cl_p"], TranslationFormula(beta, "cl_mrna")),
+                 Reaction("", ["laci_mrna"], ["laci_p"], TranslationFormula(beta, "laci_mrna")),
+                 Reaction("", ["tetr_mrna"], ["tetr_p"], TranslationFormula(beta, "tetr_mrna")),
+                 Reaction("", ["cl_mrna"], ["cl_p"], TranslationFormula(beta, "cl_mrna")),
 
-                 Reaction(["laci_p"], [], DegradationFormula(protein_decay_rate, "laci_p")),
-                 Reaction(["tetr_p"], [], DegradationFormula(protein_decay_rate, "tetr_p")),
-                 Reaction(["cl_p"], [], DegradationFormula(protein_decay_rate, "cl_p"))]
+                 Reaction("", ["laci_p"], [], DegradationFormula(protein_decay_rate, "laci_p")),
+                 Reaction("", ["tetr_p"], [], DegradationFormula(protein_decay_rate, "tetr_p")),
+                 Reaction("", ["cl_p"], [], DegradationFormula(protein_decay_rate, "cl_p"))]
 
     net = Network()
     net.species = species
@@ -88,9 +88,9 @@ def main():
 def simpler():
     species = {"x": 0, "y": 20}
 
-    reactions = [Reaction([], ["x"], TranscriptionFormula(5, 2, 40, "x", [
+    reactions = [Reaction("", [], ["x"], TranscriptionFormula(5, 2, 40, "x", [
         Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)])),
-                 Reaction(["y"], [], DegradationFormula(0.3, "y"))]
+                 Reaction("", ["y"], [], DegradationFormula(0.3, "y"))]
 
     net: Network = Network()
     net.species = species
@@ -111,21 +111,21 @@ def test():
     z_trans = TranscriptionFormula(20, 2, 40, "z", [
         Regulation(from_gene="py", to_gene="z", reg_type=RegType.ACTIVATION)])
 
-    reactions = [Reaction([], ["x"], x_trans),
-                 Reaction([], ["y"], y_trans),
-                 Reaction([], ["z"], z_trans),
+    reactions = [Reaction("", [], ["x"], x_trans),
+                 Reaction("", [], ["y"], y_trans),
+                 Reaction("", [], ["z"], z_trans),
 
-                 Reaction(["x"], [], DegradationFormula(0.01, "x")),
-                 Reaction(["y"], [], DegradationFormula(0.01, "y")),
-                 Reaction(["z"], [], DegradationFormula(0.1, "z")),
+                 Reaction("", ["x"], [], DegradationFormula(0.01, "x")),
+                 Reaction("", ["y"], [], DegradationFormula(0.01, "y")),
+                 Reaction("", ["z"], [], DegradationFormula(0.1, "z")),
 
-                 Reaction(["px"], [], DegradationFormula(0.01, "px")),
-                 Reaction(["py"], [], DegradationFormula(0.01, "py")),
-                 Reaction(["pz"], [], DegradationFormula(0.01, "pz")),
+                 Reaction("", ["px"], [], DegradationFormula(0.01, "px")),
+                 Reaction("", ["py"], [], DegradationFormula(0.01, "py")),
+                 Reaction("", ["pz"], [], DegradationFormula(0.01, "pz")),
 
-                 Reaction([], ["px"], TranslationFormula(0.2, "x")),
-                 Reaction([], ["py"], TranslationFormula(5, "y")),
-                 Reaction([], ["pz"], TranslationFormula(1, "z"))]
+                 Reaction("", [], ["px"], TranslationFormula(0.2, "x")),
+                 Reaction("", [], ["py"], TranslationFormula(5, "y")),
+                 Reaction("", [], ["pz"], TranslationFormula(1, "z"))]
 
     net: Network = Network()
     net.species = species
@@ -139,6 +139,31 @@ def test():
     c = Constraint("x", lambda x: x < 150, (0, 20))
     is_satisfied(res, [c])
     # ode.visualise(ode.simulate())
+
+
+def individual_mutation_test():
+    t = TranscriptionFormula(10, 2, 40, "x", [])
+    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.kd))
+    t.mutate({"kd": 10, "rate": 3})
+    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.kd))
+    y = CustomFormula("4*x", {"x": 10}, {})
+    y.mutate({"x": 20})
+    print(str(y.compute({})))
+
+
+def mutation_network_test():
+    species = {"x": 0, "y": 20}
+
+    reactions = [Reaction("", [], ["x"], TranscriptionFormula(5, 2, 40, "x", [
+        Regulation(from_gene="y", to_gene="x", reg_type=RegType.REPRESSION)])),
+                 Reaction("", ["y"], [], DegradationFormula(0.3, "y"))]
+
+    net: Network = Network()
+    net.species = species
+    net.reactions = reactions
+    print(net)
+    net.mutate({"x": (10.0, "")})
+    print(net)
 
 
 if __name__ == '__main__':

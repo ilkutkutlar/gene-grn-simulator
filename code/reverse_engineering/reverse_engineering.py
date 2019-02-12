@@ -1,6 +1,7 @@
 import random
+from collections import namedtuple
 from math import e, ceil
-from typing import List, Tuple, Callable, Dict
+from typing import List, Tuple, Callable, Dict, NamedTuple
 
 # Constraint:
 #   species name
@@ -50,24 +51,49 @@ def evaluate(results: StructuredResults, constraints: List[Constraint]):
     return total
 
 
+"""
+    :param str name: the name of the parameter/species which can be mutated during the annealing process. 
+    value -> (lower_bound, upper_bound, increments, reaction_name)
+    where lower_bound & upper_bound define the interval of values to be tried for this parameter.
+    increments define the step between lower_bound & upper_bound, e.g. l = 10, u = 11, increment = 0.5 would
+    produce 10, 10.5 and 11 as the values to be tried for this parameter. reaction_name -> If the parameter
+    is defined in a reaction, this is the reaction_name where the parameter is. Else, it is empty string ("")
+"""
+
+Mutable = namedtuple("Mutable", ["name", "lower_bound", "upper_bound", "increments", "reaction_name"])
+
+"""
+:param Network net: The network to modify
+:param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
+:param Dict[str, Tuple[float, float, float, str]] mutables: 
+:param List[Constraint] constraints: The list of constraints which the network must satisfy.
+:param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
+"""
+
+
 def annealing(net: Network, sim: SimulationSettings,
               mutables: Dict[str, Tuple[float, float, float, str]],
               constraints: List[Constraint],
-              schedule: Callable[[float], float]):
+              schedule: Dict[float, float]):
     # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-    current = {name: (mutables[name][0], mutables[name][3]) for name in mutables}
+    # TODO: The whole tuple thing is kind of a mess, use a class? Or a named tuple?
+    current: Dict[str, Tuple[float, str]] = \
+        {name: (mutables[name][0], mutables[name][3]) for name in mutables}
     ode = OdeSimulator(net, sim)
-
+    namedtuple
     def generate_neighbour():
-        _neighbour = current.copy()
+        nbour: Dict[str, Tuple[float, str]] = current.copy()
         r: int = random.randrange(len(mutables))
-        rand_mutable: Tuple[float, float, float] = list(mutables.keys())[r]
-        _neighbour[rand_mutable] += rand_mutable[2]
+        # Choose a random mutable from the mutables list
+        rand_mutable: Tuple[float, float, float, str] = list(mutables.keys())[r]
+        # Increment mutable by its increment to create a new network,
+        # i.e. current network's neighbour
+        nbour[rand_mutable] += rand_mutable[2]
 
-        return _neighbour
+        return nbour
 
-    for t in range(1, 100):
-        T = schedule(t)
+    for t in range(1, len(schedule)):
+        T = schedule[t]
 
         if T == 0:
             return current

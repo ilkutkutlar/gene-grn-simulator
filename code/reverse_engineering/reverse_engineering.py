@@ -52,15 +52,14 @@ def evaluate(results: StructuredResults, constraints: List[Constraint]):
 
 
 """
-    :param str name: the name of the parameter/species which can be mutated during the annealing process. 
-    value -> (lower_bound, upper_bound, increments, reaction_name)
-    where lower_bound & upper_bound define the interval of values to be tried for this parameter.
-    increments define the step between lower_bound & upper_bound, e.g. l = 10, u = 11, increment = 0.5 would
-    produce 10, 10.5 and 11 as the values to be tried for this parameter. reaction_name -> If the parameter
-    is defined in a reaction, this is the reaction_name where the parameter is. Else, it is empty string ("")
+    :param float lower_bound, upper_bound: defines the interval of values to be tried for this parameter.
+    :param float increments: increments define the step between lower_bound & upper_bound, 
+        e.g. l = 10, u = 11, increment = 0.5 would produce 10, 10.5 and 11 as the values to be tried for this parameter. 
+    :param str reaction_name: If the parameter is defined in a reaction, this is the reaction_name where 
+        the parameter is. Else, it is empty string ("")
 """
 
-Mutable = namedtuple("Mutable", ["name", "lower_bound", "upper_bound", "increments", "reaction_name"])
+Mutable = namedtuple("Mutable", ["lower_bound", "upper_bound", "increments", "reaction_name"])
 
 """
 :param Network net: The network to modify
@@ -68,27 +67,41 @@ Mutable = namedtuple("Mutable", ["name", "lower_bound", "upper_bound", "incremen
 :param Dict[str, Tuple[float, float, float, str]] mutables: 
 :param List[Constraint] constraints: The list of constraints which the network must satisfy.
 :param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
+:param Dict[str, Mutable] name: key -> the name of the parameter/species which can be mutated during 
+    the annealing process. value -> the mutable corresponding to the given name.
+
 """
 
 
 def annealing(net: Network, sim: SimulationSettings,
-              mutables: Dict[str, Tuple[float, float, float, str]],
+              mutables: Dict[str, Mutable],
               constraints: List[Constraint],
               schedule: Dict[float, float]):
     # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
     # TODO: The whole tuple thing is kind of a mess, use a class? Or a named tuple?
     current: Dict[str, Tuple[float, str]] = \
-        {name: (mutables[name][0], mutables[name][3]) for name in mutables}
+        {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
     ode = OdeSimulator(net, sim)
-    namedtuple
+
     def generate_neighbour():
         nbour: Dict[str, Tuple[float, str]] = current.copy()
-        r: int = random.randrange(len(mutables))
-        # Choose a random mutable from the mutables list
-        rand_mutable: Tuple[float, float, float, str] = list(mutables.keys())[r]
-        # Increment mutable by its increment to create a new network,
-        # i.e. current network's neighbour
-        nbour[rand_mutable] += rand_mutable[2]
+
+        # reached_upperboud = lambda m: nbour[rand_mutable] > mutables[m].upper_bound
+        will_reach_upperbound = lambda m: nbour[rand_mutable] + mutables[m].increments > mutables[m].upper_bound
+
+
+        available_mutables = filter(lambda x: not will_reach_upperbound, mutables)
+
+        if available_mutables:
+            # rand_mutable: str = ""
+            # while will_reach_upperbound(rand_mutable):
+
+            r: int = random.randrange(len(mutables))
+            # Choose a random mutable from the mutables list
+            rand_mutable: str = list(mutables.keys())[r]
+            # Increment mutable by its increment to create a new network,
+            # i.e. current network's neighbour
+            nbour[rand_mutable] += mutables[rand_mutable].increments
 
         return nbour
 

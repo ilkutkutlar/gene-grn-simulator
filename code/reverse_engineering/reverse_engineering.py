@@ -3,10 +3,6 @@ from collections import namedtuple
 from math import e, ceil
 from typing import List, Tuple, Dict
 
-# Constraint:
-#   species name
-#   Desired value: Min (val), Max (val), between (val1, val2)
-#   Between times: t1, t2
 import numpy as np
 
 from models.network import Network
@@ -14,28 +10,6 @@ from models.simulation_settings import SimulationSettings
 from reverse_engineering.constraint import Constraint
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
-
-
-# Inputs:
-#   Mutable variables
-#   Range for mutable variables
-#   Constraints
-#   Network
-# Mutable variables - 2 types:
-#   Species
-#   reaction parameters: Reaction name, parameter name
-#       Can be done easily since we're using eval now.
-# Range:
-#   Simply a list of floats
-
-def is_satisfied(results: StructuredResults, constraints: List[Constraint]):
-    for c in constraints:
-        vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
-        does_not_obey = list(filter(lambda v: c.value_constraint(v) > 0, vals))
-        if does_not_obey:
-            return False
-
-    return True
 
 
 def evaluate(results: StructuredResults, constraints: List[Constraint]):

@@ -44,8 +44,27 @@ def evaluate(results: StructuredResults, constraints: List[Constraint]):
     for c in constraints:
         vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
         does_not_obey = list(filter(lambda v: not c.value_constraint(v), vals))
-        print(does_not_obey)
         if does_not_obey:
             return False
 
     return True
+
+# def annealing(problem, schedule: Callable[[float], float]):
+#
+#     # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
+#     current = dict()
+#
+#     for t in range(1, 100):
+#         T = schedule(t)
+#
+#         if T == 0:
+#             return current
+#         else:
+#             next = random successor of current
+#
+#             delta_e = value[next] - value[current]
+#
+#             if delta_e > 0:
+#                 current = next
+#             else:
+#                 current = next, only with probability e**(delta_e/T)

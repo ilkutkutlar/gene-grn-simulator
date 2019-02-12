@@ -5,17 +5,17 @@ from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QComboBox
 from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
-from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QInputDialog, QMainWindow, QAction, QMessageBox, \
+from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
 from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
-from ode_simulator import OdeSimulator
+from simulation.ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
-from gillespie_simulator import GillespieSimulator
+from simulation.gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
-from sbml_parser import SbmlParser
+from io.sbml_parser import SbmlParser
 
 
 def validate_species(species):

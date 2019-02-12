@@ -1,7 +1,7 @@
 import random
 from collections import namedtuple
 from math import e, ceil
-from typing import List, Tuple, Callable, Dict, NamedTuple
+from typing import List, Tuple, Dict
 
 # Constraint:
 #   species name
@@ -78,30 +78,25 @@ def annealing(net: Network, sim: SimulationSettings,
               constraints: List[Constraint],
               schedule: Dict[float, float]):
     # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-    # TODO: The whole tuple thing is kind of a mess, use a class? Or a named tuple?
     current: Dict[str, Tuple[float, str]] = \
         {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
     ode = OdeSimulator(net, sim)
 
-    def generate_neighbour():
+    def generate_neighbour() -> Dict[str, Tuple[float, str]]:
         nbour: Dict[str, Tuple[float, str]] = current.copy()
 
-        # reached_upperboud = lambda m: nbour[rand_mutable] > mutables[m].upper_bound
         will_reach_upperbound = lambda m: nbour[rand_mutable] + mutables[m].increments > mutables[m].upper_bound
-
-
-        available_mutables = filter(lambda x: not will_reach_upperbound, mutables)
+        # These are the mutables which still have not reached their upperbound value, so they are
+        # available for incrementing
+        available_mutables: List[str] = filter(lambda x: not will_reach_upperbound, mutables.keys())
 
         if available_mutables:
-            # rand_mutable: str = ""
-            # while will_reach_upperbound(rand_mutable):
-
-            r: int = random.randrange(len(mutables))
+            r: int = random.randrange(len(available_mutables))
             # Choose a random mutable from the mutables list
-            rand_mutable: str = list(mutables.keys())[r]
+            rand_mutable: str = list(available_mutables)[r]
             # Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
-            nbour[rand_mutable] += mutables[rand_mutable].increments
+            nbour[rand_mutable][0] += mutables[rand_mutable].increments
 
         return nbour
 
@@ -111,18 +106,23 @@ def annealing(net: Network, sim: SimulationSettings,
         if T == 0:
             return current
         else:
+            net.mutate(current)
+            resCurrent = StructuredResults(ode.simulate(),
+                                           list(ode.net.species.keys()),
+                                           sim.generate_time_space())
+
             neighbour = generate_neighbour()
             net.mutate(neighbour)
+            resNeighbour = StructuredResults(ode.simulate(),
+                                             list(ode.net.species.keys()),
+                                             sim.generate_time_space())
 
-            # Todo: Modify network
-
-            res = StructuredResults(ode.simulate(), list(ode.net.species.keys()), sim.generate_time_space())
-
-            delta_e = evaluate(res, constraints) - evaluate()
+            delta_e = evaluate(resCurrent, constraints) \
+                      - evaluate(resNeighbour, constraints)
 
             # We want to minimise rather than maximise
             if delta_e < 0:
-                current = my_next
+                current = neighbour
             else:
                 p = e ** (-delta_e / T)
 
@@ -144,4 +144,4 @@ def annealing(net: Network, sim: SimulationSettings,
                 # rand has a 'p' probability of being 0 <= rand < precision, thus this effectively
                 # ensures current = next only with probability p
                 if 0 <= rand < precision:
-                    current = my_next
+                    current = neighbour

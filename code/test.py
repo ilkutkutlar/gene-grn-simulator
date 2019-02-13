@@ -6,7 +6,8 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
-from reverse_engineering.reverse_engineering import Constraint, Mutable, annealing
+from reverse_engineering.constraint import Constraint
+from reverse_engineering.reverse_engineering import Mutable, ReverseEngineering
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
@@ -200,10 +201,14 @@ def t():
         time_space = s.generate_time_space()
         ode = OdeSimulator(net, s)
         res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
-        c = Constraint("y", lambda y: 100 - y, (40, 60))
-        m = Mutable(0.5, 100, 0.1, "one")
-        t = annealing(net, s, {"rate": m}, [c], {z: (1000 - z) for z in range(0, 1001)})
+        # 100 - y => min is 100
+        # y - 100 => max is 100
+        c1 = Constraint("y", lambda y: 200 - y, (40, 60))
+        c2 = Constraint("z", lambda x: x - 150, (0, 20))
 
+        m = Mutable(0.5, 50, 0.5, "one")
+        t = ReverseEngineering.find_network(net, s, {"rate": m}, [c1, c2], {z: (100 - z) for z in range(0, 101)})
+        print(t)
         ode.visualise(ode.simulate())
 
 

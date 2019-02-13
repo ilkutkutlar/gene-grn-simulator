@@ -11,20 +11,6 @@ from reverse_engineering.constraint import Constraint
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
-
-def evaluate(results: StructuredResults, constraints: List[Constraint]):
-    total = 0
-
-    for c in constraints:
-        vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
-        not_sat = list(filter(lambda v: c.value_constraint(v) > 0, vals))
-
-        if not_sat:
-            total += np.mean(not_sat)
-
-    return total
-
-
 """
     :param float lower_bound, upper_bound: defines the interval of values to be tried for this parameter.
     :param float increments: increments define the step between lower_bound & upper_bound, 
@@ -35,28 +21,25 @@ def evaluate(results: StructuredResults, constraints: List[Constraint]):
 
 Mutable = namedtuple("Mutable", ["lower_bound", "upper_bound", "increments", "reaction_name"])
 
-"""
-:param Network net: The network to modify
-:param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
-:param Dict[str, Tuple[float, float, float, str]] mutables: 
-:param List[Constraint] constraints: The list of constraints which the network must satisfy.
-:param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
-:param Dict[str, Mutable] name: key -> the name of the parameter/species which can be mutated during 
-    the annealing process. value -> the mutable corresponding to the given name.
 
-"""
+class ReverseEngineering:
 
+    @staticmethod
+    def _evaluate_network(results: StructuredResults, constraints: List[Constraint]):
+        total = 0
 
-def annealing(net: Network, sim: SimulationSettings,
-              mutables: Dict[str, Mutable],
-              constraints: List[Constraint],
-              schedule: Dict[float, float]):
-    # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-    current: Dict[str, Tuple[float, str]] = \
-        {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
-    ode = OdeSimulator(net, sim)
+        for c in constraints:
+            vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
+            not_sat = list(filter(lambda v: c.value_constraint(v) > 0, vals))
 
-    def generate_neighbour() -> Dict[str, Tuple[float, str]]:
+            if not_sat:
+                total += np.mean(not_sat)
+
+        return total
+
+    @staticmethod
+    def _generate_network_neighbour(current: Dict[str, Tuple[float, str]],
+                                    mutables: Dict[str, Mutable]) -> Dict[str, Tuple[float, str]]:
         nbour: Dict[str, Tuple[float, str]] = current.copy()
 
         will_reach_upperbound = lambda m: nbour[m][0] + mutables[m].increments > mutables[m].upper_bound
@@ -75,48 +58,71 @@ def annealing(net: Network, sim: SimulationSettings,
 
         return nbour
 
-    for t in range(1, len(schedule)):
-        T = schedule[t]
+    # @staticmethod
+    # def coin_toss_with_probability(self):
 
-        if T == 0:
-            return current
-        else:
+    """
+    :param Network net: The network to modify
+    :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
+    :param Dict[str, Tuple[float, float, float, str]] mutables:
+    :param List[Constraint] constraints: The list of constraints which the network must satisfy.
+    :param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
+    :param Dict[str, Mutable] name: key -> the name of the parameter/species which can be mutated during
+        the annealing process. value -> the mutable corresponding to the given name.
+
+    """
+
+    @staticmethod
+    def find_network(net: Network, sim: SimulationSettings,
+                     mutables: Dict[str, Mutable],
+                     constraints: List[Constraint],
+                     schedule: Dict[float, float]):
+        # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
+        current: Dict[str, Tuple[float, str]] = \
+            {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
+        ode = OdeSimulator(net, sim)
+
+        for t in range(1, len(schedule) - 1):
+            T = schedule[t]
+
             net.mutate(current)
-            resCurrent = StructuredResults(ode.simulate(),
-                                           list(ode.net.species.keys()),
-                                           sim.generate_time_space())
+            resCurrent = StructuredResults(ode.simulate(), list(ode.net.species.keys()), sim.generate_time_space())
+            evalCurrent = ReverseEngineering._evaluate_network(resCurrent, constraints)
 
-            neighbour = generate_neighbour()
-            net.mutate(neighbour)
-            resNeighbour = StructuredResults(ode.simulate(),
-                                             list(ode.net.species.keys()),
-                                             sim.generate_time_space())
-
-            delta_e = evaluate(resCurrent, constraints) \
-                      - evaluate(resNeighbour, constraints)
-
-            # We want to minimise rather than maximise
-            if delta_e < 0:
-                current = neighbour
+            if T == 0 or (evalCurrent <= 0):
+                return current
             else:
-                p = e ** (-delta_e / T)
+                neighbour = ReverseEngineering._generate_network_neighbour(current, mutables)
 
-                # Since using integers for random generation, some precision of p, which is a float,
-                # will be lost (e.g. 0.387 would give 2.58397... for 1/p, and no = 3 in this case. Thus
-                # rather than the actual probability being 0.387, it will be 0.33.) To avoid this,
-                # multiply 2.58397... with precision (say, 100) to get the integer 258. In this case,
-                # each number has a probability of being picked 1/258 = 0.00387596, or the first
-                # set of 'precision' many values have a probability of 0.387596..., which is accurate
-                # to 3 decimal places.
+                net.mutate(neighbour)
+                resNeighbour = StructuredResults(ode.simulate(), list(ode.net.species.keys()),
+                                                 sim.generate_time_space())
+                evalNeighbour = ReverseEngineering._evaluate_network(resNeighbour, constraints)
 
-                # TODO: use now
-                random.seed(0)
+                delta_e = evalCurrent - evalNeighbour
 
-                precision = 100
-                no = ceil(1 / p) * precision  # Total number of possible
-                rand = random.randrange(no)
-
-                # rand has a 'p' probability of being 0 <= rand < precision, thus this effectively
-                # ensures current = next only with probability p
-                if 0 <= rand < precision:
+                # We want to minimise rather than maximise
+                if delta_e < 0:
                     current = neighbour
+                else:
+                    p = e ** (-delta_e / T)
+
+                    # Since using integers for random generation, some precision of p, which is a float,
+                    # will be lost (e.g. 0.387 would give 2.58397... for 1/p, and no = 3 in this case. Thus
+                    # rather than the actual probability being 0.387, it will be 0.33.) To avoid this,
+                    # multiply 2.58397... with precision (say, 100) to get the integer 258. In this case,
+                    # each number has a probability of being picked 1/258 = 0.00387596, or the first
+                    # set of 'precision' many values have a probability of 0.387596..., which is accurate
+                    # to 3 decimal places.
+
+                    random.seed()
+                    precision = 100
+                    no = ceil(1 / p) * precision  # Total number of possible
+                    rand = random.randrange(no)
+
+                    # rand has a 'p' probability of being 0 <= rand < precision, thus this effectively
+                    # ensures current = next only with probability p
+                    if 0 <= rand < precision:
+                        current = neighbour
+
+        return None

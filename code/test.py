@@ -6,7 +6,7 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
-from reverse_engineering.reverse_engineering import Constraint, is_satisfied
+from reverse_engineering.reverse_engineering import Constraint, Mutable, annealing
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
@@ -137,7 +137,6 @@ def test():
     ode = OdeSimulator(net, s)
     res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
     c = Constraint("x", lambda x: x < 150, (0, 20))
-    is_satisfied(res, [c])
     # ode.visualise(ode.simulate())
 
 
@@ -166,7 +165,49 @@ def mutation_network_test():
     print(net)
 
 
+def t():
+    if __name__ == '__main__':
+        species = {"px": 100, "py": 100, "pz": 30, "x": 100, "y": 25, "z": 20}
+
+        x_trans = TranscriptionFormula(5, 2, 40, "x", [])
+        y_trans = TranscriptionFormula(60, 1, 40, "y", [
+            Regulation(from_gene="px", to_gene="y", reg_type=RegType.REPRESSION)])
+        z_trans = TranscriptionFormula(20, 2, 40, "z", [
+            Regulation(from_gene="py", to_gene="z", reg_type=RegType.ACTIVATION)])
+
+        reactions = [Reaction("one", [], ["x"], x_trans),
+                     Reaction("", [], ["y"], y_trans),
+                     Reaction("", [], ["z"], z_trans),
+
+                     Reaction("", ["x"], [], DegradationFormula(0.01, "x")),
+                     Reaction("", ["y"], [], DegradationFormula(0.01, "y")),
+                     Reaction("", ["z"], [], DegradationFormula(0.1, "z")),
+
+                     Reaction("", ["px"], [], DegradationFormula(0.01, "px")),
+                     Reaction("", ["py"], [], DegradationFormula(0.01, "py")),
+                     Reaction("", ["pz"], [], DegradationFormula(0.01, "pz")),
+
+                     Reaction("", [], ["px"], TranslationFormula(0.2, "x")),
+                     Reaction("", [], ["py"], TranslationFormula(5, "y")),
+                     Reaction("", [], ["pz"], TranslationFormula(1, "z"))]
+
+        net: Network = Network()
+        net.species = species
+        net.reactions = reactions
+
+        s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
+
+        time_space = s.generate_time_space()
+        ode = OdeSimulator(net, s)
+        res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
+        c = Constraint("y", lambda y: 100 - y, (40, 60))
+        m = Mutable(0.5, 100, 0.1, "one")
+        t = annealing(net, s, {"rate": m}, [c], {z: (1000 - z) for z in range(0, 1001)})
+
+        ode.visualise(ode.simulate())
+
+
 if __name__ == '__main__':
     # simpler()
     # main()
-    test()
+    t()

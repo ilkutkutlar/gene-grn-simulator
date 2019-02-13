@@ -59,10 +59,10 @@ def annealing(net: Network, sim: SimulationSettings,
     def generate_neighbour() -> Dict[str, Tuple[float, str]]:
         nbour: Dict[str, Tuple[float, str]] = current.copy()
 
-        will_reach_upperbound = lambda m: nbour[rand_mutable] + mutables[m].increments > mutables[m].upper_bound
+        will_reach_upperbound = lambda m: nbour[m][0] + mutables[m].increments > mutables[m].upper_bound
         # These are the mutables which still have not reached their upperbound value, so they are
         # available for incrementing
-        available_mutables: List[str] = filter(lambda x: not will_reach_upperbound, mutables.keys())
+        available_mutables: List[str] = list(filter(lambda x: not will_reach_upperbound(x), list(mutables.keys())))
 
         if available_mutables:
             r: int = random.randrange(len(available_mutables))
@@ -70,7 +70,8 @@ def annealing(net: Network, sim: SimulationSettings,
             rand_mutable: str = list(available_mutables)[r]
             # Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
-            nbour[rand_mutable][0] += mutables[rand_mutable].increments
+            nbour[rand_mutable] = (nbour[rand_mutable][0] + mutables[rand_mutable].increments,
+                                   nbour[rand_mutable][1])
 
         return nbour
 

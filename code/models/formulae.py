@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import helper
 from models.reg_type import RegType
@@ -71,14 +71,14 @@ class TranscriptionFormula(Formula):
         else:
             return self.rate
 
-    def mutate(self, mutation: Dict[str, float]):
+    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
         for m in mutation:
             if m == "rate":
-                self.rate = mutation[m]
+                self.rate = mutation[m][0]
             elif m == "hill_coeff":
-                self.hill_coeff = mutation[m]
+                self.hill_coeff = mutation[m][0]
             else:  # m == "kd"
-                self.kd = mutation[m]
+                self.kd = mutation[m][0]
 
 
 class TranslationFormula(Formula):
@@ -89,10 +89,10 @@ class TranslationFormula(Formula):
     def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.mrna_species]
 
-    def mutate(self, mutation: Dict[str, float]):
+    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
         for m in mutation:
             if m == "rate":
-                self.rate = mutation[m]
+                self.rate = mutation[m][0]
 
 
 class DegradationFormula(Formula):
@@ -103,10 +103,10 @@ class DegradationFormula(Formula):
     def compute(self, state: Dict[str, float]) -> float:
         return self.rate * state[self.decaying_species]
 
-    def mutate(self, mutation: Dict[str, float]):
+    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
         for m in mutation:
             if m == "rate":
-                self.rate = mutation[m]
+                self.rate = mutation[m][0]
 
 
 class CustomFormula(Formula):
@@ -122,5 +122,6 @@ class CustomFormula(Formula):
                                     symbols=self.symbols,
                                     parameters=self.parameters)
 
-    def mutate(self, mutation: Dict[str, float]):
-        self.parameters.update(mutation)
+    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
+        for m in mutation:
+            self.parameters.update({m: mutation[m][0]})

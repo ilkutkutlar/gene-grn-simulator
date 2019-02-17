@@ -2,12 +2,13 @@ from typing import List
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QComboBox
+from PyQt5.QtWidgets import QComboBox, QTabWidget
 from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
 from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
+from input_output.sbml_parser import SbmlParser
 from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from simulation.ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
@@ -15,7 +16,8 @@ from simulation.gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
-from io.sbml_parser import SbmlParser
+from ui.multiple_input_dialog import QMultipleInputDialog
+from ui.species_tab import SpeciesTab
 
 
 def validate_species(species):
@@ -284,24 +286,29 @@ class GeneWindow(QMainWindow):
 
     def _init_ui(self):
         layout = QHBoxLayout()
+        layout.addWidget(SpeciesTab())
+        # self.species_panel = AddRemoveListLayout(
+        #     "Species",
+        #     self._refresh_species_list,
+        #     self._handler_add_species_button,
+        #     self._handler_remove_species_button)
+        # self.reactions_panel = AddRemoveListLayout(
+        #     "Reactions",
+        #     self._refresh_reactions_list,
+        #     self._handler_add_reactions_button,
+        #     self._handler_remove_reactions_button)
+        #
+        # layout.addLayout(self.species_panel)
+        # layout.addLayout(self.reactions_panel)
+        # self._init_menubar()
 
-        self.species_panel = AddRemoveListLayout(
-            "Species",
-            self._refresh_species_list,
-            self._handler_add_species_button,
-            self._handler_remove_species_button)
-        self.reactions_panel = AddRemoveListLayout(
-            "Reactions",
-            self._refresh_reactions_list,
-            self._handler_add_reactions_button,
-            self._handler_remove_reactions_button)
-
-        layout.addLayout(self.species_panel)
-        layout.addLayout(self.reactions_panel)
-        self._init_menubar()
+        # t = QTabWidget()
 
         central_widget = QWidget()
         central_widget.setLayout(layout)
+        m = QMultipleInputDialog(["test"])
+        m.exec_()
+        # layout.addItem(m)
 
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Gene")

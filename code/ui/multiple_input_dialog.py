@@ -1,17 +1,42 @@
-from PyQt5.QtWidgets import QWidget, QFormLayout, QLineEdit, QLabel, QDialog
+from PyQt5.QtWidgets import QWidget, QFormLayout, QLineEdit, QLabel, QDialog, QPushButton
+
+"""
+A simple input dialog which allows multiple 
+"""
 
 
 class QMultipleInputDialog(QDialog):
 
-    def __init__(self, labels):
+    def __init__(self, labels, handler, button_text="OK"):
         super().__init__()
-        self.main_layout = QFormLayout()
+
+        self.handler = handler
+        (self.main, self.edits) = self._make_form(labels)
+        self.main.addWidget(self._make_button(button_text, handler))
+
+        self.setLayout(self.main)
+        self.show()
+
+    def _make_form(self, labels):
+        form = QFormLayout()
+        edits = []
 
         for l in labels:
             label = QLabel()
             label.setText(l)
             edit = QLineEdit()
-            self.main_layout.addRow(label, edit)
+            edits.append(edit)
+            form.addRow(label, edit)
 
-        self.setLayout(self.main_layout)
-        self.show()
+        return form, edits
+
+    def _make_button(self, button_text, click_handler):
+        ok_button = QPushButton()
+        ok_button.setText(button_text)
+        ok_button.clicked.connect(self.ok_button_clicked)
+        return ok_button
+
+    def ok_button_clicked(self):
+        inputs = [str(e.text()) for e in self.edits]
+        self.handler(inputs)
+        self.close()

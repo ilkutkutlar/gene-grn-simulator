@@ -17,6 +17,7 @@ from models.network import Network
 from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
 from ui.multiple_input_dialog import QMultipleInputDialog
+from ui.reactions_tab import ReactionsTab
 from ui.species_tab import SpeciesTab
 
 
@@ -285,31 +286,16 @@ class GeneWindow(QMainWindow):
         self._init_ui()
 
     def _init_ui(self):
-        layout = QHBoxLayout()
-        layout.addWidget(SpeciesTab())
-        # self.species_panel = AddRemoveListLayout(
-        #     "Species",
-        #     self._refresh_species_list,
-        #     self._handler_add_species_button,
-        #     self._handler_remove_species_button)
-        # self.reactions_panel = AddRemoveListLayout(
-        #     "Reactions",
-        #     self._refresh_reactions_list,
-        #     self._handler_add_reactions_button,
-        #     self._handler_remove_reactions_button)
-        #
-        # layout.addLayout(self.species_panel)
-        # layout.addLayout(self.reactions_panel)
-        # self._init_menubar()
+        layout = QVBoxLayout()
 
-        # t = QTabWidget()
+        tabs = QTabWidget()
+        tabs.addTab(SpeciesTab(), "Species")
+        tabs.addTab(ReactionsTab(), "Reactions")
+        self._init_menubar()
 
+        layout.addWidget(tabs)
         central_widget = QWidget()
         central_widget.setLayout(layout)
-        m = QMultipleInputDialog(["test"])
-        m.exec_()
-        # layout.addItem(m)
-
         self.setCentralWidget(central_widget)
         self.setWindowTitle("Gene")
         self.show()

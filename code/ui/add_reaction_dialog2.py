@@ -40,49 +40,41 @@ class AddReactionDialog2(QDialog):
     def _init_translation_fields(self):
         self.translation_fields = QFormLayout()
 
-        l1 = QLabel()
-        l1.setText("Translation rate: ")
+        l1 = QLabel("Translation rate: ")
         self.translation_rate = QLineEdit()
         self.translation_fields.addRow(l1, self.translation_rate)
 
-        l2 = QLabel()
-        l2.setText("Translated mRNA: ")
+        l2 = QLabel("Translated mRNA: ")
         self.translated_mrna = QLineEdit()
         self.translation_fields.addRow(l2, self.translated_mrna)
 
-        l3 = QLabel()
-        l3.setText("Produced protein: ")
+        l3 = QLabel("Produced protein: ")
         self.produced_protein = QLineEdit()
         self.translation_fields.addRow(l3, self.produced_protein)
 
     def _init_degradation_fields(self):
         self.degradation_fields = QFormLayout()
 
-        l1 = QLabel()
-        l1.setText("Decay rate: ")
+        l1 = QLabel("Decay rate: ")
         self.decay_rate = QLineEdit()
         self.degradation_fields.addRow(l1, self.decay_rate)
 
-        l2 = QLabel()
-        l2.setText("Decaying species: ")
+        l2 = QLabel("Decaying species: ")
         self.decaying_species = QLineEdit()
         self.translation_fields.addRow(l2, self.decaying_species)
 
     def _init_custom_reaction_fields(self):
         self.custom_reaction_fields = QFormLayout()
 
-        l1 = QLabel()
-        l1.setText("Reactant: ")
+        l1 = QLabel("Reactant: ")
         self.reactant = QLineEdit()
         self.custom_reaction_fields.addRow(l1, self.decay_rate)
 
-        l2 = QLabel()
-        l2.setText("Product: ")
+        l2 = QLabel("Product: ")
         self.product = QLineEdit()
         self.custom_reaction_fields.addRow(l2, self.decaying_species)
 
-        l3 = QLabel()
-        l3.setText("Equation: ")
+        l3 = QLabel("Equation: ")
         self.equation = QLineEdit()
         self.custom_reaction_fields.addRow(l3, self.equation)
 

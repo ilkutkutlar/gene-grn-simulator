@@ -48,8 +48,7 @@ class AddRemoveListLayout(QVBoxLayout):
     def __init__(self, label, refresh_function, add_function, remove_function):
         super().__init__()
 
-        self.m_label = QLabel()
-        self.m_label.setText(label)
+        self.m_label = QLabel(label)
 
         self.m_list = QListWidget()
 
@@ -146,8 +145,7 @@ class AddReactionDialog(QDialog):
         self.decay_rate_field = add_number_field_to_form("Decay Rate")
 
         # Custom reaction
-        self.rp_info_field = QLabel()
-        self.rp_info_field.setText("Reactants and products must be comma separated names of species")
+        self.rp_info_field = QLabel("Reactants and products must be comma separated names of species")
         self.form.addWidget(self.rp_info_field)
         self.rp_info_field.setVisible(False)
 
@@ -352,8 +350,7 @@ class GeneWindow(QMainWindow):
         dia = QDialog()
         main = QVBoxLayout()
 
-        info = QLabel()
-        info.setText("Species are comma separated")
+        info = QLabel("Species are comma separated")
 
         time_field = QLineEdit()
         time_field.setPlaceholderText("Simulation time")
@@ -364,8 +361,7 @@ class GeneWindow(QMainWindow):
         species_field = QLineEdit()
         species_field.setPlaceholderText("Which species to show")
 
-        ok_button = QPushButton()
-        ok_button.setText("Ok")
+        ok_button = QPushButton("Ok")
 
         def dialog_ok_button_clicked_handler():
             time_text = time_field.text().strip()
@@ -399,8 +395,7 @@ class GeneWindow(QMainWindow):
         dia = QDialog()
         main = QVBoxLayout()
 
-        info = QLabel()
-        info.setText("Species are comma separated")
+        info = QLabel("Species are comma separated")
 
         time_field = QLineEdit()
         time_field.setPlaceholderText("Simulation time")
@@ -408,8 +403,7 @@ class GeneWindow(QMainWindow):
         species_field = QLineEdit()
         species_field.setPlaceholderText("Which species to show")
 
-        ok_button = QPushButton()
-        ok_button.setText("Ok")
+        ok_button = QPushButton("Ok")
 
         def dialog_ok_button_clicked_handler():
             time_text = time_field.text().strip()
@@ -459,8 +453,7 @@ class GeneWindow(QMainWindow):
         init_con.setPlaceholderText("Initial amount")
         init_con.setValidator(validator)
 
-        ok_button = QPushButton()
-        ok_button.setText("Ok")
+        ok_button = QPushButton("Ok")
 
         def dialog_ok_button_clicked_handler():
             name_text = name.text().strip()

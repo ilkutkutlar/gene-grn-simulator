@@ -88,8 +88,7 @@ class AddReactionDialog(QDialog):
         self.decay_rate_field = add_number_field_to_form("Decay Rate")
 
         # Custom reaction
-        self.rp_info_field = QLabel()
-        self.rp_info_field.setText("Reactants and products must be comma separated names of species")
+        self.rp_info_field = QLabel("Reactants and products must be comma separated names of species")
         self.form.addWidget(self.rp_info_field)
         self.rp_info_field.setVisible(False)
 

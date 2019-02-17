@@ -40,70 +40,96 @@ class AddReactionDialog2(QDialog):
     def _init_translation_fields(self):
         self.translation_fields = QFormLayout()
 
-        l1 = QLabel("Translation rate: ")
         self.translation_rate = QLineEdit()
-        self.translation_fields.addRow(l1, self.translation_rate)
+        self.translation_fields.addRow(
+            QLabel("Translation rate: "),
+            self.translation_rate)
 
-        l2 = QLabel("Translated mRNA: ")
         self.translated_mrna = QLineEdit()
-        self.translation_fields.addRow(l2, self.translated_mrna)
+        self.translation_fields.addRow(
+            QLabel("Translated mRNA: "),
+            self.translated_mrna)
 
-        l3 = QLabel("Produced protein: ")
         self.produced_protein = QLineEdit()
-        self.translation_fields.addRow(l3, self.produced_protein)
+        self.translation_fields.addRow(
+            QLabel("Produced protein: "),
+            self.produced_protein)
 
     def _init_degradation_fields(self):
         self.degradation_fields = QFormLayout()
 
-        l1 = QLabel("Decay rate: ")
         self.decay_rate = QLineEdit()
-        self.degradation_fields.addRow(l1, self.decay_rate)
+        self.degradation_fields.addRow(
+            QLabel("Decay rate: "),
+            self.decay_rate)
 
-        l2 = QLabel("Decaying species: ")
         self.decaying_species = QLineEdit()
-        self.translation_fields.addRow(l2, self.decaying_species)
+        self.translation_fields.addRow(
+            QLabel("Decaying species: "),
+            self.decaying_species)
 
     def _init_custom_reaction_fields(self):
         self.custom_reaction_fields = QFormLayout()
 
-        l1 = QLabel("Reactant: ")
         self.reactant = QLineEdit()
-        self.custom_reaction_fields.addRow(l1, self.decay_rate)
+        self.custom_reaction_fields.addRow(
+            QLabel("Reactant: "),
+            self.decay_rate)
 
-        l2 = QLabel("Product: ")
         self.product = QLineEdit()
-        self.custom_reaction_fields.addRow(l2, self.decaying_species)
+        self.custom_reaction_fields.addRow(
+            QLabel("Product: "),
+            self.decaying_species)
 
-        l3 = QLabel("Equation: ")
         self.equation = QLineEdit()
-        self.custom_reaction_fields.addRow(l3, self.equation)
+        self.custom_reaction_fields.addRow(
+            QLabel("Equation: "),
+            self.equation)
 
     def _init_transcription_reaction_fields(self):
         self.transcription_reaction_fields = QFormLayout()
 
-        l1 = QLabel("Transcription rate")
         self.transcription_rate = QLineEdit()
-        self.transcription_reaction_fields.addRow(l1, self.transcription_rate)
+        self.transcription_reaction_fields.addRow(
+            QLabel("Transcription rate"),
+            self.transcription_rate)
 
-        l2 = QLabel("Hill coefficient: ")
         self.hill = QLineEdit()
-        self.transcription_reaction_fields.addRow(l2, self.hill)
+        self.transcription_reaction_fields.addRow(
+            QLabel("Hill coefficient: "),
+            self.hill)
 
-        l3 = QLabel("Kd: ")
         self.kd = QLineEdit()
-        self.transcription_reaction_fields.addRow(l3, self.kd)
+        self.transcription_reaction_fields.addRow(
+            QLabel("Kd: "),
+            self.kd)
 
-        l4 = QLabel("Transcribed species: ")
         self.transcribed_species = QLineEdit()
-        self.transcription_reaction_fields.addRow(l4, self.transcribed_species)
+        self.transcription_reaction_fields.addRow(
+            QLabel("Transcribed species: "),
+            self.transcribed_species)
+
+        def is_regulated_state_changed():
+            if self.is_regulated.isChecked():
+                self.activation_radio.setDisabled(False)
+                self.repression_radio.setDisabled(False)
+                self.regulator.setDisabled(False)
+            else:
+                self.activation_radio.setDisabled(True)
+                self.repression_radio.setDisabled(True)
+                self.regulator.setDisabled(True)
 
         self.is_regulated = QCheckBox("Is Regulated")
+        self.is_regulated.stateChanged.connect(is_regulated_state_changed)
         self.transcription_reaction_fields.addRow(self.is_regulated)
 
         self.activation_radio = QRadioButton("Activation")
-        self.repression_radio = QRadioButton("Repression")
+        self.activation_radio.setDisabled(True)
         self.activation_radio.setChecked(True)
+        self.repression_radio = QRadioButton("Repression")
+        self.repression_radio.setDisabled(True)
         self.transcription_reaction_fields.addRow(self.activation_radio, self.repression_radio)
 
         self.regulator = QLineEdit()
+        self.regulator.setDisabled(True)
         self.transcription_reaction_fields.addRow(self.regulator)

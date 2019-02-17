@@ -22,8 +22,7 @@ class QMultipleInputDialog(QDialog):
         edits = []
 
         for l in labels:
-            label = QLabel()
-            label.setText(l)
+            label = QLabel(l)
             edit = QLineEdit()
             edits.append(edit)
             form.addRow(label, edit)
@@ -31,8 +30,7 @@ class QMultipleInputDialog(QDialog):
         return form, edits
 
     def _make_button(self, button_text, click_handler):
-        ok_button = QPushButton()
-        ok_button.setText(button_text)
+        ok_button = QPushButton(button_text)
         ok_button.clicked.connect(self.ok_button_clicked)
         return ok_button
 

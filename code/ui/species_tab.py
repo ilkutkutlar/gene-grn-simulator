@@ -18,11 +18,9 @@ class SpeciesTab(QWidget):
         self.setLayout(self.main_layout)
 
     def _init_buttons(self):
-        self.add_button = QPushButton()
-        self.add_button.setText("Add")
+        self.add_button = QPushButton("Add")
         self.add_button.clicked.connect(self._add_species_click_handler)
-        self.remove_button = QPushButton()
-        self.remove_button.setText("Remove")
+        self.remove_button = QPushButton("Remove")
         self.remove_button.clicked.connect(self._remove_species_click_handler)
         self.buttons_layout.addWidget(self.add_button)
         self.buttons_layout.addWidget(self.remove_button)

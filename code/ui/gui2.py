@@ -5,18 +5,18 @@ from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QComboBox, QTabWidget
 from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
-from PyQt5.QtWidgets import QWidget, QApplication, QHBoxLayout, QMainWindow, QAction, QMessageBox, \
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
 from input_output.sbml_parser import SbmlParser
 from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
-from simulation.ode_simulator import OdeSimulator
-from ui.gene_controller import GeneController
-from simulation.gillespie_simulator import GillespieSimulator
 from models.network import Network
 from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
-from ui.multiple_input_dialog import QMultipleInputDialog
+from simulation.gillespie_simulator import GillespieSimulator
+from simulation.ode_simulator import OdeSimulator
+from ui.add_reaction_dialog2 import AddReactionDialog2
+from ui.gene_controller import GeneController
 from ui.reactions_tab import ReactionsTab
 from ui.species_tab import SpeciesTab
 
@@ -51,8 +51,7 @@ class AddRemoveListLayout(QVBoxLayout):
     def __init__(self, label, refresh_function, add_function, remove_function):
         super().__init__()
 
-        self.m_label = QLabel()
-        self.m_label.setText(label)
+        self.m_label = QLabel(label)
 
         self.m_list = QListWidget()
 
@@ -292,6 +291,9 @@ class GeneWindow(QMainWindow):
         tabs.addTab(SpeciesTab(), "Species")
         tabs.addTab(ReactionsTab(), "Reactions")
         self._init_menubar()
+
+        a = AddReactionDialog2()
+        a.exec_()
 
         layout.addWidget(tabs)
         central_widget = QWidget()

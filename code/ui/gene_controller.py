@@ -21,3 +21,6 @@ class GeneController:
 
     def add_species(self, key, value):
         self.network.species[key] = value
+
+    def add_reaction(self, reaction):
+        self.network.reactions.append(reaction)

@@ -2,6 +2,9 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
     QVBoxLayout
 
+from ui.add_reaction_dialog2 import AddReactionDialog2
+from ui.gene_controller import GeneController
+
 
 class ReactionsTab(QWidget):
     def __init__(self):
@@ -28,12 +31,23 @@ class ReactionsTab(QWidget):
         self.reaction_details.setWordWrap(True)
         self.aux.setWidget(self.reaction_details)
 
+    def _add_reaction_click_handler(self):
+        dialog = AddReactionDialog2()
+        dialog.finished.connect(lambda: self._update_list())
+        dialog.exec_()
+
+    def _remove_reaction_click_handler(self):
+        pass
+
     def _init_buttons(self):
         self.buttons_layout = QHBoxLayout()
+
         self.add_button = QPushButton("Add")
-        # self.add_button.clicked.connect(self._add_species_click_handler)
+        self.add_button.clicked.connect(self._add_reaction_click_handler)
+
         self.remove_button = QPushButton("Remove")
-        # self.remove_button.clicked.connect(self._remove_species_click_handler)
+        self.remove_button.clicked.connect(self._remove_reaction_click_handler)
+
         self.buttons_layout.addWidget(self.add_button)
         self.buttons_layout.addWidget(self.remove_button)
 
@@ -41,3 +55,7 @@ class ReactionsTab(QWidget):
         self.reactions_list = QListWidget()
         self.reactions_list.setMinimumWidth(200)
         self.reactions_list.setMaximumWidth(200)
+
+    def _update_list(self):
+        for s in GeneController.get_instance().get_reactions():
+            self.reactions_list.addItem(s.name)

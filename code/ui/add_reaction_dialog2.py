@@ -1,6 +1,10 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
     QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget, QCheckBox, QRadioButton, QComboBox
 
+from models.formulae import TranscriptionFormula
+from models.reaction import Reaction
+from models.reg_type import RegType
+from models.regulation import Regulation
 from ui.gene_controller import GeneController
 
 
@@ -50,7 +54,28 @@ class AddReactionDialog2(QDialog):
             self.custom_fields.show()
 
     def _ok_button_clicked_handler(self):
-        pass
+        index = self.reaction_types_list.currentRow()
+
+        if index == 0:  # Transcription
+            rate = float(self.transcription_rate.text())
+            n = float(self.hill.text())
+            kd = float(self.kd.text())
+            speices = str(self.transcribed_species.currentText())
+
+            regs = []
+            if self.is_regulated.isChecked():
+                reg_type = RegType.ACTIVATION if self.activation_radio.isChecked() else RegType.REPRESSION
+                regs.append(Regulation(self.regulator.currentText(), self.transcribed_species, reg_type))
+            formula = TranscriptionFormula(rate, n, kd, speices, regs)
+            GeneController.get_instance().add_reaction(Reaction("", [], [], formula))
+
+            self.close()
+        elif index == 1:  # Translation
+            rate = float(self.translation_rate.text())
+        elif index == 2:  # Degradation
+            self.degradation_fields.show()
+        else:  # Custom
+            self.custom_fields.show()
 
     def _init_reaction_types(self):
         self.reaction_types_list = QListWidget()

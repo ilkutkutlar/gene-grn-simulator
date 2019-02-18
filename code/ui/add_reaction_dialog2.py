@@ -1,5 +1,7 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
-    QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget, QCheckBox, QRadioButton
+    QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget, QCheckBox, QRadioButton, QComboBox
+
+from ui.gene_controller import GeneController
 
 
 class AddReactionDialog2(QDialog):
@@ -7,24 +9,50 @@ class AddReactionDialog2(QDialog):
         super().__init__()
         self.main_layout = QVBoxLayout()
         self.grid = QGridLayout()
-        self.reaction_properties_base = QWidget()
+        self.properties = QWidget()
+        self.properties_layout = QVBoxLayout()
+        self.properties.setLayout(self.properties_layout)
 
-        self._init_transcription_reaction_fields()
+        self._init_transcription_fields()
+        self._init_translation_fields()
+        self._init_degradation_fields()
+        self._init_custom_reaction_fields()
 
-        self._init_reaction_types_list()
-        self.grid.addWidget(self.reaction_properties_base, 0, 1)
-        self.reaction_properties_base.setLayout(self.transcription_reaction_fields)
-        self._init_ok_button()
+        self._init_reaction_types()
+        self.grid.addWidget(self.properties, 0, 1)
 
         self.main_layout.addLayout(self.grid)
         self.setLayout(self.main_layout)
+        self._init_ok_button()
+        self.setWindowTitle("Add Reaction")
 
-    def _init_ok_button(self):
-        self.ok_button = QPushButton("Add reaction")
-        # self.add_button.clicked.connect(self._add_species_click_handler)
-        self.main_layout.addWidget(self.ok_button)
+    def _make_species_combo(self):
+        combo = QComboBox()
+        for x in GeneController.get_instance().get_species():
+            combo.addItem(x)
+        return combo
 
-    def _init_reaction_types_list(self):
+    def _reaction_type_changed_handler(self):
+        index = self.reaction_types_list.currentRow()
+
+        self.transcription_fields.hide()
+        self.translation_fields.hide()
+        self.degradation_fields.hide()
+        self.custom_fields.hide()
+
+        if index == 0:  # Transcription
+            self.transcription_fields.show()
+        elif index == 1:  # Translation
+            self.translation_fields.show()
+        elif index == 2:  # Degradation
+            self.degradation_fields.show()
+        else:  # Custom
+            self.custom_fields.show()
+
+    def _ok_button_clicked_handler(self):
+        pass
+
+    def _init_reaction_types(self):
         self.reaction_types_list = QListWidget()
 
         self.reaction_types_list.setMinimumWidth(200)
@@ -36,100 +64,101 @@ class AddReactionDialog2(QDialog):
         self.reaction_types_list.addItem("Custom Reaction")
 
         self.grid.addWidget(self.reaction_types_list, 0, 0)
+        self.reaction_types_list.itemClicked.connect(self._reaction_type_changed_handler)
 
-    def _init_translation_fields(self):
-        self.translation_fields = QFormLayout()
+    def _init_ok_button(self):
+        self.ok_button = QPushButton("Add reaction")
+        self.ok_button.clicked.connect(self._ok_button_clicked_handler)
+        self.main_layout.addWidget(self.ok_button)
 
-        self.translation_rate = QLineEdit()
-        self.translation_fields.addRow(
-            QLabel("Translation rate: "),
-            self.translation_rate)
-
-        self.translated_mrna = QLineEdit()
-        self.translation_fields.addRow(
-            QLabel("Translated mRNA: "),
-            self.translated_mrna)
-
-        self.produced_protein = QLineEdit()
-        self.translation_fields.addRow(
-            QLabel("Produced protein: "),
-            self.produced_protein)
-
-    def _init_degradation_fields(self):
-        self.degradation_fields = QFormLayout()
-
-        self.decay_rate = QLineEdit()
-        self.degradation_fields.addRow(
-            QLabel("Decay rate: "),
-            self.decay_rate)
-
-        self.decaying_species = QLineEdit()
-        self.translation_fields.addRow(
-            QLabel("Decaying species: "),
-            self.decaying_species)
-
-    def _init_custom_reaction_fields(self):
-        self.custom_reaction_fields = QFormLayout()
-
-        self.reactant = QLineEdit()
-        self.custom_reaction_fields.addRow(
-            QLabel("Reactant: "),
-            self.decay_rate)
-
-        self.product = QLineEdit()
-        self.custom_reaction_fields.addRow(
-            QLabel("Product: "),
-            self.decaying_species)
-
-        self.equation = QLineEdit()
-        self.custom_reaction_fields.addRow(
-            QLabel("Equation: "),
-            self.equation)
-
-    def _init_transcription_reaction_fields(self):
-        self.transcription_reaction_fields = QFormLayout()
+    def _init_transcription_fields(self):
+        fields = QFormLayout()
 
         self.transcription_rate = QLineEdit()
-        self.transcription_reaction_fields.addRow(
-            QLabel("Transcription rate"),
-            self.transcription_rate)
-
+        fields.addRow(QLabel("Transcription rate"), self.transcription_rate)
         self.hill = QLineEdit()
-        self.transcription_reaction_fields.addRow(
-            QLabel("Hill coefficient: "),
-            self.hill)
-
+        fields.addRow(QLabel("Hill coefficient: "), self.hill)
         self.kd = QLineEdit()
-        self.transcription_reaction_fields.addRow(
-            QLabel("Kd: "),
-            self.kd)
-
-        self.transcribed_species = QLineEdit()
-        self.transcription_reaction_fields.addRow(
-            QLabel("Transcribed species: "),
-            self.transcribed_species)
+        fields.addRow(QLabel("Kd: "), self.kd)
+        self.transcribed_species = self._make_species_combo()
+        fields.addRow(QLabel("Transcribed species: "), self.transcribed_species)
 
         def is_regulated_state_changed():
             if self.is_regulated.isChecked():
                 self.activation_radio.setDisabled(False)
                 self.repression_radio.setDisabled(False)
                 self.regulator.setDisabled(False)
+                self.reg_label.setDisabled(False)
             else:
                 self.activation_radio.setDisabled(True)
                 self.repression_radio.setDisabled(True)
                 self.regulator.setDisabled(True)
+                self.reg_label.setDisabled(True)
 
         self.is_regulated = QCheckBox("Is Regulated")
         self.is_regulated.stateChanged.connect(is_regulated_state_changed)
-        self.transcription_reaction_fields.addRow(self.is_regulated)
 
         self.activation_radio = QRadioButton("Activation")
         self.activation_radio.setDisabled(True)
         self.activation_radio.setChecked(True)
+
         self.repression_radio = QRadioButton("Repression")
         self.repression_radio.setDisabled(True)
-        self.transcription_reaction_fields.addRow(self.activation_radio, self.repression_radio)
 
-        self.regulator = QLineEdit()
+        self.reg_label = QLabel("Regulating species:")
+        self.regulator = self._make_species_combo()
         self.regulator.setDisabled(True)
-        self.transcription_reaction_fields.addRow(self.regulator)
+        self.reg_label.setDisabled(True)
+
+        fields.addRow(self.is_regulated)
+        fields.addRow(self.activation_radio, self.repression_radio)
+        fields.addRow(self.reg_label, self.regulator)
+
+        self.transcription_fields = QWidget()
+        self.transcription_fields.setLayout(fields)
+        self.properties_layout.addWidget(self.transcription_fields)
+
+    def _init_translation_fields(self):
+        fields = QFormLayout()
+
+        self.translation_rate = QLineEdit()
+        fields.addRow(QLabel("Translation rate: "), self.translation_rate)
+
+        self.translated_mrna = self._make_species_combo()
+        fields.addRow(QLabel("Translated mRNA: "), self.translated_mrna)
+
+        self.produced_protein = self._make_species_combo()
+        fields.addRow(QLabel("Produced protein: "), self.produced_protein)
+
+        self.translation_fields = QWidget()
+        self.translation_fields.setLayout(fields)
+        self.properties_layout.addWidget(self.translation_fields)
+        self.translation_fields.hide()
+
+    def _init_degradation_fields(self):
+        fields = QFormLayout()
+
+        self.decay_rate = QLineEdit()
+        fields.addRow(QLabel("Decay rate: "), self.decay_rate)
+        self.decaying_species = self._make_species_combo()
+        fields.addRow(QLabel("Decaying species: "), self.decaying_species)
+
+        self.degradation_fields = QWidget()
+        self.degradation_fields.setLayout(fields)
+        self.properties_layout.addWidget(self.degradation_fields)
+        self.degradation_fields.hide()
+
+    def _init_custom_reaction_fields(self):
+        fields = QFormLayout()
+
+        self.equation = QLineEdit()
+        fields.addRow(QLabel("Equation: "), self.equation)
+        self.reactant = self._make_species_combo()
+        fields.addRow(QLabel("Reactant: "), self.reactant)
+        self.product = self._make_species_combo()
+        fields.addRow(QLabel("Product: "), self.product)
+
+        self.custom_fields = QWidget()
+        self.custom_fields.setLayout(fields)
+        self.properties_layout.addWidget(self.custom_fields)
+        self.custom_fields.hide()

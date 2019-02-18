@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
     QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget, QCheckBox, QRadioButton, QComboBox
 
-from models.formulae import TranscriptionFormula
+from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
@@ -57,25 +57,42 @@ class AddReactionDialog2(QDialog):
         index = self.reaction_types_list.currentRow()
 
         if index == 0:  # Transcription
+            name = str(self.reaction_name1.text())
             rate = float(self.transcription_rate.text())
             n = float(self.hill.text())
             kd = float(self.kd.text())
-            speices = str(self.transcribed_species.currentText())
+            species = str(self.transcribed_species.currentText())
 
             regs = []
             if self.is_regulated.isChecked():
                 reg_type = RegType.ACTIVATION if self.activation_radio.isChecked() else RegType.REPRESSION
-                regs.append(Regulation(self.regulator.currentText(), self.transcribed_species, reg_type))
-            formula = TranscriptionFormula(rate, n, kd, speices, regs)
-            GeneController.get_instance().add_reaction(Reaction("", [], [], formula))
+                regs.append(Regulation(self.regulator.currentText(), species, reg_type))
+            formula = TranscriptionFormula(rate, n, kd, species, regs)
+            GeneController.get_instance().add_reaction(Reaction(name, [], [species], formula))
 
-            self.close()
         elif index == 1:  # Translation
+            name = str(self.reaction_name2.text())
             rate = float(self.translation_rate.text())
+            translated_mrna = str(self.translated_mrna.currentText())
+            produced_protein = str(self.produced_protein.currentText())
+            formula = TranslationFormula(rate, translated_mrna)
+            GeneController.get_instance().add_reaction(Reaction(name, [translated_mrna], [produced_protein], formula))
+
         elif index == 2:  # Degradation
-            self.degradation_fields.show()
+            name = str(self.reaction_name3.text())
+            rate = float(self.decay_rate.text())
+            decaying_species = str(self.decaying_species.currentText())
+            formula = DegradationFormula(rate, decaying_species)
+            GeneController.get_instance().add_reaction(Reaction(name, [decaying_species], [], formula))
         else:  # Custom
-            self.custom_fields.show()
+            name = str(self.reaction_name4.text())
+            reactant = str(self.reactant.currentText())
+            product = str(self.product.currentText())
+            equation = str(self.equation.text())
+            formula = CustomFormula(equation, {}, {})
+            GeneController.get_instance().add_reaction(Reaction(name, [reactant], [product], formula))
+
+        self.close()
 
     def _init_reaction_types(self):
         self.reaction_types_list = QListWidget()
@@ -99,6 +116,8 @@ class AddReactionDialog2(QDialog):
     def _init_transcription_fields(self):
         fields = QFormLayout()
 
+        self.reaction_name1 = QLineEdit()
+        fields.addRow(QLabel("Reaction name"), self.reaction_name1)
         self.transcription_rate = QLineEdit()
         fields.addRow(QLabel("Transcription rate"), self.transcription_rate)
         self.hill = QLineEdit()
@@ -146,12 +165,12 @@ class AddReactionDialog2(QDialog):
     def _init_translation_fields(self):
         fields = QFormLayout()
 
+        self.reaction_name2 = QLineEdit()
+        fields.addRow(QLabel("Reaction name"), self.reaction_name2)
         self.translation_rate = QLineEdit()
         fields.addRow(QLabel("Translation rate: "), self.translation_rate)
-
         self.translated_mrna = self._make_species_combo()
         fields.addRow(QLabel("Translated mRNA: "), self.translated_mrna)
-
         self.produced_protein = self._make_species_combo()
         fields.addRow(QLabel("Produced protein: "), self.produced_protein)
 
@@ -163,6 +182,8 @@ class AddReactionDialog2(QDialog):
     def _init_degradation_fields(self):
         fields = QFormLayout()
 
+        self.reaction_name3 = QLineEdit()
+        fields.addRow(QLabel("Reaction name"), self.reaction_name3)
         self.decay_rate = QLineEdit()
         fields.addRow(QLabel("Decay rate: "), self.decay_rate)
         self.decaying_species = self._make_species_combo()
@@ -176,6 +197,8 @@ class AddReactionDialog2(QDialog):
     def _init_custom_reaction_fields(self):
         fields = QFormLayout()
 
+        self.reaction_name4 = QLineEdit()
+        fields.addRow(QLabel("Reaction name"), self.reaction_name4)
         self.equation = QLineEdit()
         fields.addRow(QLabel("Equation: "), self.equation)
         self.reactant = self._make_species_combo()

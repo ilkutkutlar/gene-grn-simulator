@@ -57,5 +57,7 @@ class ReactionsTab(QWidget):
         self.reactions_list.setMaximumWidth(200)
 
     def _update_list(self):
+        self.reactions_list.clear()
+
         for s in GeneController.get_instance().get_reactions():
             self.reactions_list.addItem(s.name)

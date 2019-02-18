@@ -26,6 +26,7 @@ class SpeciesTab(QWidget):
         self.buttons_layout.addWidget(self.remove_button)
 
     def _update_list(self):
+        self.species_list.clear()
         for s in GeneController.get_instance().get_species():
             self.species_list.addItem(s + ": " + str(GeneController.get_instance().get_species()[s]))
 

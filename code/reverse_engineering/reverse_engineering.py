@@ -102,7 +102,7 @@ class ReverseEngineering:
                 delta_e = evalCurrent - evalNeighbour
 
                 # We want to minimise rather than maximise
-                if delta_e < 0:
+                if delta_e <= 0:
                     current = neighbour
                 else:
                     p = e ** (-delta_e / T)

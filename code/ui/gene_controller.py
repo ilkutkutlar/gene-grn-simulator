@@ -21,8 +21,20 @@ class GeneController:
     def get_reactions(self):
         return self.network.reactions
 
+    def get_mutables(self):
+        return self.mutables
+
+    def get_constraints(self):
+        return self.constraints
+
     def add_species(self, key, value):
         self.network.species[key] = value
 
     def add_reaction(self, reaction):
         self.network.reactions.append(reaction)
+
+    def add_mutable(self, species, mutable):
+        self.mutables[species] = mutable
+
+    def add_constraint(self, constraint):
+        self.constraints.append(constraint)

@@ -1,18 +1,12 @@
 # 100 - y => min is 100
 # y - 100 => max is 100
-import re
 
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QFormLayout, QLabel, QLineEdit, \
-    QWidget, QInputDialog
-
-# c1 = Constraint("y", lambda y: 200 - y, (40, 60))
-# c2 = Constraint("z", lambda x: x - 150, (0, 20))
+from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QWidget
 
 # m = Mutable(0.5, 50, 0.5, "one")
 # t = ReverseEngineering.find_network(net, s, {"rate": m}, [c1, c2], {z: (100 - z) for z in range(0, 101)})
 # ode.visualise(ode.simulate())
-from reverse_engineering.constraint import Constraint
-from reverse_engineering.reverse_engineering import Mutable
+from ui.add_constraint_dialog import AddConstraintDialog
 from ui.add_mutable_dialog import AddMutableDialog
 from ui.gene_controller import GeneController
 
@@ -30,8 +24,14 @@ class ReverseEngineeringModifyTab(QWidget):
     def _update_mutables_list(self):
         self.mutables_list.clear()
 
-        for m in GeneController.get_instance().mutables:
+        for m in GeneController.get_instance().get_mutables():
             self.mutables_list.addItem(m)
+
+    def _update_constraints_list(self):
+        self.constraints_list.clear()
+
+        for c in GeneController.get_instance().get_constraints():
+            self.constraints_list.addItem(c.species)
 
     def _add_mutable_clicked(self):
         dia = AddMutableDialog()
@@ -39,27 +39,9 @@ class ReverseEngineeringModifyTab(QWidget):
         dia.exec_()
 
     def _add_constraint_clicked(self):
-        dia = QDialog()
-
-        layout = QLabel()
-        fields = QFormLayout()
-
-
-        (text, ok) = QInputDialog.getText(self, "Add Constraint", "Format: x > 10")
-
-        if ok:
-            m = re.match("(.*)(< | > | <= | >=)(.*)", text)
-            species = m.group(1).strip()
-            sign = m.group(2).strip()
-            value = m.group(3).strip()
-
-            Constraint()
-
-            print(species)
-            print(sign)
-            print(value)
-
-        self._update_list()
+        dia = AddConstraintDialog()
+        dia.finished.connect(self._update_constraints_list)
+        dia.exec_()
 
     def _init_mutables(self):
         self.mutables_list = QListWidget()

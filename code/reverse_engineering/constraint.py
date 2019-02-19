@@ -5,6 +5,7 @@ class Constraint:
     species: str
     value_constraint: Callable[[float], bool]
     time_period: Tuple[float, float]
+    label: str
 
     """
     :param str species: The name of the species for which the constraint applies

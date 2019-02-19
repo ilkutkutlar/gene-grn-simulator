@@ -1,6 +1,7 @@
 from typing import List, Dict
 
 from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from models.reg_type import RegType
 
 
 class Reaction:
@@ -54,18 +55,41 @@ class Reaction:
             kd = str(self.rate_function.kd)
             hill_coeff = str(self.rate_function.hill_coeff)
 
-            return "Transcription: " + left + " -> " + right \
-                   + "\n   ↳ Tr. Rate: " + trans_rate + " | Kd: " + kd + " | n: " + hill_coeff
+            string = "Type: Transcription" + "\n"
+            string += "Reaction: " + left + " -> " + right + "\n\n"
+
+            string += "Rate: " + trans_rate + "\n"
+            string += "Kd: " + kd + "\n"
+            string += "n: " + hill_coeff + "\n\n"
+
+            string += "== Regulation == \n"
+
+            if self.rate_function.regulators:
+                from_gene = self.rate_function.regulators[0].from_gene
+                sign = " -> " if self.rate_function.regulators[0].reg_type == RegType.ACTIVATION else " -| "
+                to_gene = self.rate_function.regulators[0].to_gene
+                string += from_gene + sign + to_gene
+            else:
+                string += "Not regulated"
+
+            return string
 
         elif isinstance(self.rate_function, TranslationFormula):
             rate = str(self.rate_function.rate)
 
-            return "Translation: " + left + " -> " + right \
-                   + "\n   ↳ Tr. Rate: " + rate
+            string = "Type: Translation" + "\n"
+            string += "Reaction: " + left + " -> " + right + "\n\n"
+            string += "Rate: " + rate + "\n"
+
+            return string
         elif isinstance(self.rate_function, DegradationFormula):
             rate = str(self.rate_function.rate)
-            return "Degradation: " + left + " -> " + right \
-                   + "\n   ↳ Decay Rate: " + rate
+
+            string = "Type: Degradation" + "\n"
+            string += "Reaction: " + left + " -> " + right + "\n\n"
+            string += "Rate: " + rate + "\n"
+
+            return string
         elif isinstance(self.rate_function, CustomFormula):
             rate_function_ast = str(self.rate_function.rate_function)
 
@@ -73,5 +97,10 @@ class Reaction:
             for p in self.rate_function.parameters:
                 params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
 
-            return "Reaction (" + left + " -> " + right + "): " + rate_function_ast \
-                   + "\n  ↳ Parameters: " + params
+            string = "Type: Transcription" + "\n"
+            string += "Reaction: " + left + " -> " + right + "\n"
+            string += "Rate function: " + rate_function_ast + "\n\n"
+            string += "== Parameters == \n"
+            string += params
+
+            return string

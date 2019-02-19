@@ -6,6 +6,9 @@ from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, 
 # m = Mutable(0.5, 50, 0.5, "one")
 # t = ReverseEngineering.find_network(net, s, {"rate": m}, [c1, c2], {z: (100 - z) for z in range(0, 101)})
 # ode.visualise(ode.simulate())
+from models.simulation_settings import SimulationSettings
+from reverse_engineering.reverse_engineering import ReverseEngineering
+from simulation.ode_simulator import OdeSimulator
 from ui.add_constraint_dialog import AddConstraintDialog
 from ui.add_mutable_dialog import AddMutableDialog
 from ui.gene_controller import GeneController
@@ -70,7 +73,13 @@ class ReverseEngineeringModifyTab(QWidget):
         self.main_layout.addLayout(constraints_buttons_layout)
 
     def _run_button_click_handler(self):
-        pass
+        g = GeneController.get_instance()
+        s = SimulationSettings(0, 100, 100, g.network.species)
+        t = ReverseEngineering.find_network(g.network,
+                                            s, g.get_mutables(), g.get_constraints(),
+                                            {z: (100 - z) for z in range(0, 101)})
+        ode = OdeSimulator(g.network, s)
+        ode.visualise(ode.simulate())
 
     def _init_run_button(self):
         self.run_button = QPushButton("Run")

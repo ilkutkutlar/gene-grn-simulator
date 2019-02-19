@@ -24,12 +24,15 @@ class ReactionsTab(QWidget):
         self.setLayout(self.main_layout)
 
     def _init_reaction_details(self):
+
         self.aux = QScrollArea()
+        layout = QVBoxLayout()
         self.reaction_details = QLabel()
         self.reaction_details.setAlignment(Qt.AlignLeft)
         self.reaction_details.setMinimumWidth(200)
         self.reaction_details.setWordWrap(True)
-        self.aux.setWidget(self.reaction_details)
+        layout.addWidget(self.reaction_details)
+        self.aux.setLayout(layout)
 
     def _add_reaction_click_handler(self):
         dialog = AddReactionDialog()

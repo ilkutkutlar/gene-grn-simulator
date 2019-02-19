@@ -89,21 +89,6 @@ class GeneWindow(QMainWindow):
         simulate.addAction(deterministic)
         simulate.addAction(stochastic)
 
-        # Reverse Engineering menu
-        rev_eng = self.menubar.addMenu("Reverse Engineering")
-
-        modify = QAction("Modfiy", self)
-        modify.triggered.connect(self._handler_rev_eng_modify)
-
-        rev_eng.addAction(modify)
-
-    def _handler_rev_eng_modify(self):
-        dialog = ReverseEngineeringModifyTab()
-
-        # TODO: !!!
-        # dialog.finished.connect(lambda x: x)
-
-
     def _handler_open_sbml_clicked(self):
         file_dialog = QFileDialog()
         file_dialog.setFileMode(QFileDialog.AnyFile)

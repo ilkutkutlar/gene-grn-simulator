@@ -6,6 +6,8 @@ class GeneController:
 
     def __init__(self):
         self.network = Network()
+        self.mutables = {}
+        self.constraints = []
 
     @staticmethod
     def get_instance():

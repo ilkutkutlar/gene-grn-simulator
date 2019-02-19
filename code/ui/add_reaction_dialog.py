@@ -8,7 +8,7 @@ from models.regulation import Regulation
 from ui.gene_controller import GeneController
 
 
-class AddReactionDialog2(QDialog):
+class AddReactionDialog(QDialog):
     def __init__(self):
         super().__init__()
         self.main_layout = QVBoxLayout()

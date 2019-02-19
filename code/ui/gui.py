@@ -15,9 +15,10 @@ from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
 from simulation.gillespie_simulator import GillespieSimulator
 from simulation.ode_simulator import OdeSimulator
-from ui.add_reaction_dialog2 import AddReactionDialog2
+from ui.add_reaction_dialog import AddReactionDialog
 from ui.gene_controller import GeneController
 from ui.reactions_tab import ReactionsTab
+from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
 from ui.species_tab import SpeciesTab
 
 
@@ -57,6 +58,7 @@ class GeneWindow(QMainWindow):
         tabs = QTabWidget()
         tabs.addTab(SpeciesTab(), "Species")
         tabs.addTab(ReactionsTab(), "Reactions")
+        tabs.addTab(ReverseEngineeringModifyTab(), "Reverse Engineering")
         self._init_menubar()
 
         layout.addWidget(tabs)
@@ -86,6 +88,21 @@ class GeneWindow(QMainWindow):
 
         simulate.addAction(deterministic)
         simulate.addAction(stochastic)
+
+        # Reverse Engineering menu
+        rev_eng = self.menubar.addMenu("Reverse Engineering")
+
+        modify = QAction("Modfiy", self)
+        modify.triggered.connect(self._handler_rev_eng_modify)
+
+        rev_eng.addAction(modify)
+
+    def _handler_rev_eng_modify(self):
+        dialog = ReverseEngineeringModifyTab()
+
+        # TODO: !!!
+        # dialog.finished.connect(lambda x: x)
+
 
     def _handler_open_sbml_clicked(self):
         file_dialog = QFileDialog()

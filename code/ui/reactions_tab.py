@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
     QVBoxLayout
 
-from ui.add_reaction_dialog2 import AddReactionDialog2
+from ui.add_reaction_dialog import AddReactionDialog
 from ui.gene_controller import GeneController
 
 
@@ -32,12 +32,17 @@ class ReactionsTab(QWidget):
         self.aux.setWidget(self.reaction_details)
 
     def _add_reaction_click_handler(self):
-        dialog = AddReactionDialog2()
+        dialog = AddReactionDialog()
         dialog.finished.connect(lambda: self._update_list())
         dialog.exec_()
 
     def _remove_reaction_click_handler(self):
         pass
+
+    def _reaction_list_clicked(self):
+        index = self.reactions_list.currentRow()
+        chosen_reaction = GeneController.get_instance().get_reactions()[index]
+        self.reaction_details.setText(str(chosen_reaction))
 
     def _init_buttons(self):
         self.buttons_layout = QHBoxLayout()
@@ -55,9 +60,9 @@ class ReactionsTab(QWidget):
         self.reactions_list = QListWidget()
         self.reactions_list.setMinimumWidth(200)
         self.reactions_list.setMaximumWidth(200)
+        self.reactions_list.itemClicked.connect(self._reaction_list_clicked)
 
     def _update_list(self):
         self.reactions_list.clear()
-
         for s in GeneController.get_instance().get_reactions():
             self.reactions_list.addItem(s.name)

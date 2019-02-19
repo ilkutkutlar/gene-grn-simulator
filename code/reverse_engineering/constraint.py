@@ -5,7 +5,8 @@ class Constraint:
     species: str
     value_constraint: Callable[[float], bool]
     time_period: Tuple[float, float]
-    label: str
+
+    pretty_print: str
 
     """
     :param str species: The name of the species for which the constraint applies
@@ -21,3 +22,6 @@ class Constraint:
         self.species = species
         self.value_constraint = value_constraint
         self.time_period = time_period
+
+    def __str__(self):
+        return self.pretty_print

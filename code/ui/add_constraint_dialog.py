@@ -27,7 +27,7 @@ class AddConstraintDialog(QDialog):
             sign = m.group(2).strip()
             value = float(m.group(3).strip())
         else:
-            pass        # TODO: ERROR!
+            return      # TODO: Error!
 
         time = self.time.text().strip()
         time = time.split("-")
@@ -43,6 +43,7 @@ class AddConstraintDialog(QDialog):
             cons = lambda v: v
 
         c = Constraint(species, cons, (t0, t1))
+        c.pretty_print = species + sign + str(value) + " for time: " + str(t0) + "s - " + str(t1) + "s"
         GeneController.get_instance().add_constraint(c)
         self.close()
 

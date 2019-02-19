@@ -7,7 +7,8 @@ from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 from reverse_engineering.constraint import Constraint
-from reverse_engineering.reverse_engineering import Mutable, ReverseEngineering
+from reverse_engineering.reverse_engineering import ReverseEngineering
+from reverse_engineering.mutable import Mutable
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 

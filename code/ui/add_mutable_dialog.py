@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QFormLayout, QLineEdit, QLabel, QPushButton
 
-from reverse_engineering.reverse_engineering import Mutable
+from reverse_engineering.mutable import Mutable
 from ui.gene_controller import GeneController
 
 

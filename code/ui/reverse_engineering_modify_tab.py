@@ -28,13 +28,14 @@ class ReverseEngineeringModifyTab(QWidget):
         self.mutables_list.clear()
 
         for m in GeneController.get_instance().get_mutables():
-            self.mutables_list.addItem(m)
+            self.mutables_list.addItem(m + ": " +
+                                       str(GeneController.get_instance().get_mutables()[m]))
 
     def _update_constraints_list(self):
         self.constraints_list.clear()
 
         for c in GeneController.get_instance().get_constraints():
-            self.constraints_list.addItem(c.species)
+            self.constraints_list.addItem(str(c))
 
     def _add_mutable_clicked(self):
         dia = AddMutableDialog()

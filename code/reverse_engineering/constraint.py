@@ -1,12 +1,4 @@
-from typing import Callable, Tuple
-
-
 class Constraint:
-    species: str
-    value_constraint: Callable[[float], bool]
-    time_period: Tuple[float, float]
-    pretty_print: str
-
     """
     :param str species: The name of the species for which the constraint applies
     :param Callable[[float], float] value_constraint: A function which, given the current value, evaluates how
@@ -17,10 +9,11 @@ class Constraint:
         be satisfied
     """
 
-    def __init__(self, species: str, value_constraint: Callable[[float], float], time_period: Tuple[float, float]):
+    def __init__(self, species, value_constraint, time_period):
         self.species = species
         self.value_constraint = value_constraint
         self.time_period = time_period
+        self.pretty_print = ""
 
     def __str__(self):
         return self.pretty_print

@@ -1,32 +1,13 @@
-from PyQt5.QtWidgets import QDialog, QLineEdit
 from PyQt5.QtWidgets import QTabWidget
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QPushButton
-from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox, \
-    QFileDialog
+from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox
 
-from input_output.sbml_parser import SbmlParser
-from models.network import Network
-from models.simulation_settings import SimulationSettings
-from simulation.gillespie_simulator import GillespieSimulator
-from simulation.ode_simulator import OdeSimulator
 from ui.deterministic_simulation_dialog import DeterministicSimulationDialog
-from ui.gene_controller import GeneController
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions_tab import ReactionsTab
 from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
 from ui.species_tab import SpeciesTab
 from ui.stochastic_simulation_dialog import StochasticSimulationDialog
-
-
-def validate_species(species):
-    if species:
-        for s in species:
-            if s not in GeneController.get_instance().network.species:
-                return False
-        return True
-    else:
-        # To ensure that empty sets are accepted
-        return True
 
 
 def show_error_message(message) -> bool:

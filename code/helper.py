@@ -4,11 +4,19 @@ from typing import Dict
 import libsbml
 from libsbml._libsbml import formulaToL3String
 
+"""
+Return evaluation of the given string equation
+:param str string_equation:
+:param Dict[str, float] species: species concentrations
+:param Dict[str, float] symbols: symbols from SBML model
+:param Dict[str, float] parameters: parameters from SBML reaction
+:returns float of equation's evaluation
+"""
 
-def eval_equation(string_equation: str,
-                  species: Dict[str, float] = None,
-                  symbols: Dict[str, float] = None,
-                  parameters: Dict[str, float] = None):
+
+def eval_equation(string_equation,
+                  species=None, symbols=None,
+                  parameters=None):
     temp = symbols.copy() if symbols else dict()
 
     if species is not None:
@@ -20,18 +28,29 @@ def eval_equation(string_equation: str,
     return eval(string_equation, temp)
 
 
-def ast_to_string(ast_node: libsbml.ASTNode):
+"""
+Return a string representation of given AST node
+:param libsbml.ASTNode ast_node: libsml AST node
+:returns string representation of given AST node
+"""
+
+
+def ast_to_string(ast_node):
     raw: str = formulaToL3String(ast_node)
     raw = raw.replace("^", "**")
     return raw
 
 
 """
+:param Dict[str, float] symbols: symbols to use in evaluation
+:param Dict[str, float] species: species concentrations to be used to evaluate
+:param libsbml.ASTNode node: to evaluate
+:returns float of ast's evaluation
 Only evaluates nodes which contain constants.
 """
 
 
-def evaluate_ast(node: libsbml.ASTNode, symbols: Dict[str, float], species: Dict[str, float] = None) -> float:
+def evaluate_ast(node, symbols, species=None):
     node_type = node.getType()
 
     # Base cases

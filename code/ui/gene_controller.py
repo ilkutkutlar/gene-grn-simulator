@@ -3,8 +3,6 @@ from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
-from reverse_engineering.constraint import Constraint
-from reverse_engineering.mutable import Mutable
 
 
 def get_test():

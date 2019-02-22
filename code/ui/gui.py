@@ -11,6 +11,7 @@ from simulation.gillespie_simulator import GillespieSimulator
 from simulation.ode_simulator import OdeSimulator
 from ui.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.gene_controller import GeneController
+from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions_tab import ReactionsTab
 from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
 from ui.species_tab import SpeciesTab
@@ -73,42 +74,22 @@ class GeneWindow(QMainWindow):
 
         # File menu
         file = self.menubar.addMenu("File")
+
         open_file = QAction("Open SBML file", self)
-        open_file.triggered.connect(self._handler_open_sbml_clicked)
+        open_file.triggered.connect(lambda _: OpenSbmlDialog(self))
+
         file.addAction(open_file)
 
         # Simulate menu
         simulate = self.menubar.addMenu("Simulate")
 
         deterministic = QAction("Deterministic (ODE)", self)
-        stochastic = QAction("Stochastic (Gillespie Algorithm)", self)
-
         deterministic.triggered.connect(lambda _: DeterministicSimulationDialog())
-        stochastic.triggered.connect(lambda _: StochasticSimulationDialog())
-
         simulate.addAction(deterministic)
+
+        stochastic = QAction("Stochastic (Gillespie Algorithm)", self)
+        stochastic.triggered.connect(lambda _: StochasticSimulationDialog())
         simulate.addAction(stochastic)
-
-    def _handler_open_sbml_clicked(self):
-        file_dialog = QFileDialog()
-        file_dialog.setFileMode(QFileDialog.AnyFile)
-        # TODO: Why is the filter not working?
-        # file_dialog.setFilter("SBML files (*.xml)")
-
-        if file_dialog.exec_():
-            # selectedFiles returns all files, we only want to open one
-            filename: str = file_dialog.selectedFiles()[0]
-            net: Network = SbmlParser.parse(filename)
-            GeneController.get_instance().network = net
-
-            # Display a nice message showing the contents of the file loaded
-            message = QMessageBox()
-            message.setText("SBML file has been opened and this network has been loaded: \n\n" + net.__str__())
-            message.exec_()
-
-            self.species_tab.update_list()
-            self.reactions_tab.update_list()
-
 
     # def _handler_remove_reactions_button(self):
     #     del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]

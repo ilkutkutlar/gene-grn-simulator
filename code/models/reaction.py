@@ -5,17 +5,32 @@ from models.reg_type import RegType
 
 
 class Reaction:
-    def __init__(self, name: str, left: List[str], right: List[str],
-                 rate_fn: Formula):
+    """
+    :param str name:
+    :param List[str] left:
+    :param List[str] right:
+    :param Formula rate_fn:
+    """
+    def __init__(self, name, left, right, rate_fn):
         self.name = name
         self.left = left
         self.right = right
         self.rate_function = rate_fn
 
-    def rate(self, n: Dict[str, float]) -> float:
+    """
+    Return reaction rate in the given network state
+    :param Dict[str, float] n: network state
+    :returns float of reaction rate
+    """
+    def rate(self, n):
         return self.rate_function.compute(n)
 
-    def change_vector(self, n: Dict[str, float]) -> Dict[str, float]:
+    """
+    Return change vector of reaction
+    :param Dict[str, float] n: Network state
+    :returns Dict[str, float] of change vector of reaction
+    """
+    def change_vector(self, n):
         # fpm + MmyR -> [k1] fpm:MmyR
         # ---------------------------
         # MmyR -= k1[MmyR][fpm]     | General: if MmyR in left, then MmyR -= (k) * (left1) * (left2)
@@ -28,7 +43,7 @@ class Reaction:
         # fpm += k_1 [fpm:MmyR]
         # fpm:MmyR -= k_1[fpm:MmyR]
 
-        change: Dict[str, float] = dict()
+        change = dict()
 
         for x in n:
 

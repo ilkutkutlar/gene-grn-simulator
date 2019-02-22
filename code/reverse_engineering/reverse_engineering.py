@@ -1,21 +1,21 @@
 import random
 from math import e, ceil
-from typing import List, Tuple, Dict
 
 import numpy as np
 
-from models.network import Network
-from models.simulation_settings import SimulationSettings
-from reverse_engineering.constraint import Constraint
-from reverse_engineering.mutable import Mutable
 from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
 
 class ReverseEngineering:
+    """
+    :param StructuredResults results: results of network's simulation
+    :param List[Constraint] constraints: list of constraints to evaluate the results against
+    :returns float representing evaluating network given the constraints
+    """
 
     @staticmethod
-    def _evaluate_network(results: StructuredResults, constraints: List[Constraint]):
+    def _evaluate_network(results, constraints):
         total = 0
 
         for c in constraints:
@@ -27,20 +27,26 @@ class ReverseEngineering:
 
         return total
 
+    """
+    :param Dict[str, Tuple[float, str]] current: current state of the network's representation used by 
+        the simulated annealing algorithm
+    :param Dict[str, Mutable] mutables: Variables which can be mutated.
+    :returns Dict[str, Tuple[float, str]] of the network state
+    """
+
     @staticmethod
-    def _generate_network_neighbour(current: Dict[str, Tuple[float, str]],
-                                    mutables: Dict[str, Mutable]) -> Dict[str, Tuple[float, str]]:
-        nbour: Dict[str, Tuple[float, str]] = current.copy()
+    def _generate_network_neighbour(current, mutables):
+        nbour = current.copy()
 
         will_reach_upperbound = lambda m: nbour[m][0] + mutables[m].increments > mutables[m].upper_bound
         # These are the mutables which still have not reached their upperbound value, so they are
         # available for incrementing
-        available_mutables: List[str] = list(filter(lambda x: not will_reach_upperbound(x), list(mutables.keys())))
+        available_mutables = list(filter(lambda x: not will_reach_upperbound(x), list(mutables.keys())))
 
         if available_mutables:
-            r: int = random.randrange(len(available_mutables))
+            r = random.randrange(len(available_mutables))
             # Choose a random mutable from the mutables list
-            rand_mutable: str = list(available_mutables)[r]
+            rand_mutable = list(available_mutables)[r]
             # Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
             nbour[rand_mutable] = (nbour[rand_mutable][0] + mutables[rand_mutable].increments,
@@ -60,13 +66,9 @@ class ReverseEngineering:
     """
 
     @staticmethod
-    def find_network(net: Network, sim: SimulationSettings,
-                     mutables: Dict[str, Mutable],
-                     constraints: List[Constraint],
-                     schedule: Dict[float, float]):
+    def find_network(net, sim, mutables, constraints, schedule):
         # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-        current: Dict[str, Tuple[float, str]] = \
-            {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
+        current = {name: (mutables[name].lower_bound, mutables[name].reaction_name) for name in mutables}
         ode = OdeSimulator(net, sim)
 
         for t in range(1, len(schedule) - 1):

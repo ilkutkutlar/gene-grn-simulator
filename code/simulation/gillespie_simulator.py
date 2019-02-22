@@ -12,12 +12,13 @@ SimulationResults = List[Tuple[float, Dict[str, float]]]
 
 class GillespieSimulator:
     """
-    Calculates the sum of all reactions rates in the given network
+    Calculate the sum of all reactions rates in the given network
+    :param Network net: Network
     """
 
     @staticmethod
-    def _calculate_r0(net: Network):
-        r0: float = 0
+    def _calculate_r0(net):
+        r0 = 0
         for reaction in net.reactions:
             t = reaction.rate(net.species)
             r0 += t
@@ -25,43 +26,54 @@ class GillespieSimulator:
         return r0
 
     """
-    Calculates the time after which the next random reaction will occur
+    Calculate the time after which the next random reaction will occur
+    :param float r0: sum of all reaction rates
+    :returns float of time for the next random reaction
     """
 
     @staticmethod
-    def _get_theta(r0: float) -> float:
+    def _get_theta(r0):
         s1: float = random()  # To pick time
         epsilon = 0.001
         return (1 / (r0 + epsilon)) * log(1 / s1, e)
 
     """
     Adds a given change vector to the network's state vector
+    :param Dict[str, float] state: Current network state
+    :param Dict[str, float] change: Change vector
+    :returns Dict[str, float] of new network state
     """
 
     @staticmethod
-    def _apply_change_vector(state: Dict[str, float], change: Dict[str, float]) -> Dict[str, float]:
+    def _apply_change_vector(state, change):
         ret = state.copy()
         for x in state:
             ret[x] = state[x] + change[x]
         return ret
 
     """
-    Returns the next state of the network after a random reaction has occurred
+    Return the next state of the network after a random reaction has occurred
+    :param Network net: network for which to get next state
+    :param float r0: total of reaction propensities
+    :returns next network state
     """
 
     @staticmethod
-    def _get_next_state(net: Network, r0: float):
+    def _get_next_state(net, r0):
         vj = GillespieSimulator._pick_next_reaction(net, r0)
         return GillespieSimulator._apply_change_vector(net.species, vj) if vj else net.species
 
     """
     Given a list of items and their associated probabilities of being picked,
     picks an item randomly at a rate dictated by its given probability
+    :param List[Any] items: list of items
+    :param List[float] probabilities: probability of each item being selected
+    :returns randomly selected item
     """
 
     @staticmethod
-    def _pick_weighted_random(items: List[Any], probabilities: List[float]) -> Any:
-        s2: float = random()  # To pick reaction
+    def _pick_weighted_random(items, probabilities):
+        s2 = random()  # To pick reaction
 
         # This is what this does:
         # Say we have 3 reactions with propensities 0.2, 0.3 and 0.5.
@@ -73,14 +85,14 @@ class GillespieSimulator:
         # 0.77 falls inside the block that belongs to the reaction
         # with a propensity of 0.5, so we pick that.
 
-        cumilative: List[Tuple[Any, float]] = []
+        cumilative = []
 
         for i in range(0, len(items)):
-            prev_cumilative: float = 0 if (not cumilative) \
+            prev_cumilative = 0 if (not cumilative) \
                 else (cumilative[len(cumilative) - 1])[1]
 
-            cumilative_prob: float = prev_cumilative + probabilities[i]
-            item: Any = items[i]
+            cumilative_prob = prev_cumilative + probabilities[i]
+            item = items[i]
             cumilative.append((item, cumilative_prob))
 
         # Always returns a value
@@ -95,11 +107,14 @@ class GillespieSimulator:
     returns a Dict[str, float] representing the
     change vector of the reaction chosen randomly,
     which will happen next
+    :param Network net: network for which to pick next reaction
+    :param float r0: total reaction propensities
+    :returns Dict[str, float] of change vector of picked reaction
     """
 
     @staticmethod
-    def _pick_next_reaction(net: Network, r0: float) -> Dict[str, float]:
-        propensities: List[float] = []
+    def _pick_next_reaction(net, r0):
+        propensities = []
         for reaction in net.reactions:
             try:
                 div_result = reaction.rate(net.species) / r0
@@ -114,18 +129,21 @@ class GillespieSimulator:
     Performs a Gillespie simulation of the given network in the given
     interval (dictated by the simulation setting given) and returns
     a list of results.
+    :param Network net: to simulate
+    :param SimulationSettings sim: for simulation
+    :returns SimulationResults of the simulation
     """
 
     @staticmethod
-    def simulate(net: Network, sim: SimulationSettings) -> SimulationResults:
-        t: float = 0
-        results: SimulationResults = []
+    def simulate(net, sim):
+        t = 0
+        results = []
 
         while t <= int(sim.end_time):
-            r0: float = GillespieSimulator._calculate_r0(net)
+            r0 = GillespieSimulator._calculate_r0(net)
 
             # Advance time
-            t: float = t + GillespieSimulator._get_theta(r0)
+            t = t + GillespieSimulator._get_theta(r0)
             # Apply one reaction chosen randomly
             net.species = GillespieSimulator._get_next_state(net, r0)
 
@@ -137,15 +155,17 @@ class GillespieSimulator:
     Visualises a given set of Gillespie simulation results where
     simulation properties are dictated by the given simulation settings
     object
+    :param SimulationResults results: to be visualised
+    :param SimulationSettings sim: for the visualisation
     """
 
     @staticmethod
-    def visualise(results: SimulationResults, sim: SimulationSettings):
+    def visualise(results, sim):
         # plot results
         plt.figure()
 
-        times: List[float] = []
-        plottings: Dict[str, List[float]] = {}
+        times = []
+        plottings = {}
 
         # species: (species title, species name)
         for species in sim.plotted_species:

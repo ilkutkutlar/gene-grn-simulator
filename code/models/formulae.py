@@ -7,18 +7,37 @@ from models.regulation import Regulation
 
 
 class Formula(ABC):
-    @abstractmethod
-    def compute(self, state: Dict[str, float]) -> float:
-        pass
+    """
+    Return the result of computing the formula.
+    :param Dict[str, float] Network state: key: species name, value: concentration
+    :returns float of result
+    """
 
     @abstractmethod
-    def mutate(self, mutation: Dict[str, float]):
+    def compute(self, state):
+        pass
+
+    """
+    Change value of given variables in the formula
+    :param Dict[str, Tuple[float, str]] mutation: dictionary of variables to mutate
+    """
+
+    @abstractmethod
+    def mutate(self, mutation):
         pass
 
 
 class TranscriptionFormula(Formula):
-    def __init__(self, rate: float, hill_coeff: float, kd: float,
-                 transcribed_species: str, regulators: List[Regulation]):
+    """
+    :param float rate:
+    :param float hill_coeff:
+    :param float kd:
+    :param str transcribed_species:
+    :param List[Regulation] regulations:
+    """
+
+    def __init__(self, rate, hill_coeff, kd,
+                 transcribed_species, regulators):
         self.rate = rate
         self.hill_coeff = hill_coeff
         self.kd = kd
@@ -26,37 +45,49 @@ class TranscriptionFormula(Formula):
         self.regulators = regulators
 
     """
-        Based on an ODE model and uses the Hill equation to calculate
-        the promoter strength when being regulated by a TF:
+    :param float tf: transcription factor concentration
+    :param float n: Hill coefficient
+    :param float kd: Dissociation constant
+    :returns float of regulation factor
+    
+    Based on an ODE model and uses the Hill equation to calculate
+    the promoter strength when being regulated by a TF:
 
-        Hill equation for repressor bindings:
-        beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
+    Hill equation for repressor bindings:
+    beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
 
-        Hill equation for activator bindings:
-        beta * ([TF]^n / (Kd + [TF]^n) )
+    Hill equation for activator bindings:
+    beta * ([TF]^n / (Kd + [TF]^n) )
 
-        beta    : Maximal transcription rate (promoter strength)
-        [TF]    : The concentration of Transcript Factor that is regulating this promoter
-        Kd      : Dissociation constant, the probability that the TF will dissociate from the
-                    binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
-                    Kb = rate of TF unbinding.
-        n       : Hill coefficient. Assumed to be 1 by default.
+    beta    : Maximal transcription rate (promoter strength)
+    [TF]    : The concentration of Transcript Factor that is regulating this promoter
+    Kd      : Dissociation constant, the probability that the TF will dissociate from the
+                binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
+                Kb = rate of TF unbinding.
+    n       : Hill coefficient. Assumed to be 1 by default.
 
-        Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
-        """
+    Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
+    """
 
     @staticmethod
-    def _hill_activator(tf: float, n: float, kd: float):
+    def _hill_activator(tf, n, kd):
         a = pow(tf, n)
         b = kd + pow(tf, n)
         return a / b
 
+    """
+    :param float tf: transcription factor concentration
+    :param float n: Hill coefficient
+    :param float kd: Dissociation constant
+    :returns float of regulation factor
+    """
+
     @staticmethod
-    def _hill_repressor(tf: float, n: float, kd: float):
+    def _hill_repressor(tf, n, kd):
         c = 1 + pow(tf / kd, n)
         return 1 / c
 
-    def compute(self, state: Dict[str, float]):
+    def compute(self, state):
         # Protein regulates mRNA
         the_regulation = self.regulators[0] if self.regulators else None
 
@@ -71,7 +102,7 @@ class TranscriptionFormula(Formula):
         else:
             return self.rate
 
-    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
+    def mutate(self, mutation):
         for m in mutation:
             if m == "rate":
                 self.rate = mutation[m][0]
@@ -82,46 +113,61 @@ class TranscriptionFormula(Formula):
 
 
 class TranslationFormula(Formula):
-    def __init__(self, rate: float, mrna_species: str):
+    """
+    :param float rate:
+    :param str mrn_species:
+    """
+
+    def __init__(self, rate, mrna_species):
         self.rate = rate
         self.mrna_species = mrna_species
 
-    def compute(self, state: Dict[str, float]) -> float:
+    def compute(self, state):
         return self.rate * state[self.mrna_species]
 
-    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
+    def mutate(self, mutation):
         for m in mutation:
             if m == "rate":
                 self.rate = mutation[m][0]
 
 
 class DegradationFormula(Formula):
-    def __init__(self, rate: float, decaying_species: str):
+    """
+    :param float rate:
+    :param str decaying_species:
+    """
+
+    def __init__(self, rate, decaying_species):
         self.rate = rate
         self.decaying_species = decaying_species
 
-    def compute(self, state: Dict[str, float]) -> float:
+    def compute(self, state):
         return self.rate * state[self.decaying_species]
 
-    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
+    def mutate(self, mutation):
         for m in mutation:
             if m == "rate":
                 self.rate = mutation[m][0]
 
 
 class CustomFormula(Formula):
-    def __init__(self, rate_function: str,
-                 parameters: Dict[str, float], symbols: Dict[str, float]):
+    """
+    :param str rate_function:
+    :param Dict[str, float] parameters:
+    :param Dict[str, float] symbols:
+    """
+
+    def __init__(self, rate_function, parameters, symbols):
         self.rate_function = rate_function
         self.symbols = symbols
         self.parameters = parameters
 
-    def compute(self, state: Dict[str, float]) -> float:
+    def compute(self, state):
         return helper.eval_equation(self.rate_function,
                                     species=state,
                                     symbols=self.symbols,
                                     parameters=self.parameters)
 
-    def mutate(self, mutation: Dict[str, Tuple[float, str]]):
+    def mutate(self, mutation):
         for m in mutation:
             self.parameters.update({m: mutation[m][0]})

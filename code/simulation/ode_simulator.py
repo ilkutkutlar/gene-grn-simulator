@@ -9,8 +9,12 @@ from structured_results import StructuredResults
 
 
 class OdeSimulator:
+    """
+    :param Network net:
+    :param SimulationSettings sim:
+    """
 
-    def __init__(self, net, sim: SimulationSettings):
+    def __init__(self, net, sim):
         self.net = net
         self.sim = sim
 
@@ -49,24 +53,29 @@ class OdeSimulator:
 
         return new_y
 
-    def simulate(self) -> np.ndarray:
+    """
+    Simulate class network and return results
+    :returns np.ndarray of simulation results
+    """
+
+    def simulate(self):
         # Build the initial state
-        y0: list = [self.net.species[key] for key in self.net.species]
+        y0 = [self.net.species[key] for key in self.net.species]
 
         # solve the ODEs
-        solution: np.ndarray = odeint(self.dy_dt, y0, self.time_space)
+        solution = odeint(self.dy_dt, y0, self.time_space)
 
         return solution
 
     """
+    Visualise given results
     :param np.ndarray results: A two dimensional NumPy array containing results
         in the format where the ith array inside 'results' has the values
         for each species at time i. 
     """
 
-    def visualise(self, results: np.ndarray):
-        values: Dict[str, float] = \
-            StructuredResults.label_results(results, self.net.species)
+    def visualise(self, results):
+        values = StructuredResults.label_results(results, self.net.species)
 
         plt.figure()
 

@@ -1,38 +1,31 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QFormLayout, QLineEdit, QPushButton
 
 from models.simulation_settings import SimulationSettings
-from simulation.ode_simulator import OdeSimulator
+from simulation.gillespie_simulator import GillespieSimulator
 from ui.gene_controller import GeneController
 
 
-class DeterministicSimulationDialog(QDialog):
-
+class StochasticSimulationDialog(QDialog):
     def _ok_button_clicked(self):
         time_text = self.time_field.text().strip()
         species_text = self.species_field.text().strip()
-        sampling_text = self.sampling_field.text().strip()
 
         end_time = int(time_text) if time_text else 1
         species = species_text.split(",")
-        sampling_rate = int(sampling_text)
 
         self.close()
-        s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
-        o = OdeSimulator(GeneController.get_instance().network, s)
-        o.visualise(o.simulate())
+
+        # Precision field does not apply to stochastic simulation!
+        s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
+        GillespieSimulator.visualise(GillespieSimulator.simulate(GeneController.get_instance().network, s), s)
 
     def __init__(self):
         super().__init__()
-
         main = QVBoxLayout()
-
         fields = QFormLayout()
 
         self.time_field = QLineEdit()
         fields.addRow(QLabel("Simulation time"), self.time_field)
-
-        self.sampling_field = QLineEdit()
-        fields.addRow(QLabel("Sampling rate"), self.sampling_field)
 
         self.species_field = QLineEdit()
         fields.addRow(QLabel("Which species to show"), self.species_field)
@@ -44,8 +37,8 @@ class DeterministicSimulationDialog(QDialog):
         main.addLayout(fields)
         main.addWidget(self.ok_button)
 
-        self.setFixedHeight(180)
+        self.setLayout(main)
+        self.setFixedHeight(140)
         self.setMinimumWidth(200)
         self.setWindowTitle("Simulation settings")
-        self.setLayout(main)
         self.exec_()

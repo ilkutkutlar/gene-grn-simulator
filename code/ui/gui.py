@@ -14,6 +14,7 @@ from ui.gene_controller import GeneController
 from ui.reactions_tab import ReactionsTab
 from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
 from ui.species_tab import SpeciesTab
+from ui.stochastic_simulation_dialog import StochasticSimulationDialog
 
 
 def validate_species(species):
@@ -82,8 +83,8 @@ class GeneWindow(QMainWindow):
         deterministic = QAction("Deterministic (ODE)", self)
         stochastic = QAction("Stochastic (Gillespie Algorithm)", self)
 
-        deterministic.triggered.connect(self._handler_deterministic_clicked)
-        stochastic.triggered.connect(self._handler_stochastic_clicked)
+        deterministic.triggered.connect(lambda _: DeterministicSimulationDialog())
+        stochastic.triggered.connect(lambda _: StochasticSimulationDialog())
 
         simulate.addAction(deterministic)
         simulate.addAction(stochastic)
@@ -108,47 +109,6 @@ class GeneWindow(QMainWindow):
             self.species_tab.update_list()
             self.reactions_tab.update_list()
 
-    def _handler_deterministic_clicked(self):
-        DeterministicSimulationDialog()
-
-    def _handler_stochastic_clicked(self):
-        dia = QDialog()
-        main = QVBoxLayout()
-
-        info = QLabel("Species are comma separated")
-
-        time_field = QLineEdit()
-        time_field.setPlaceholderText("Simulation time")
-
-        species_field = QLineEdit()
-        species_field.setPlaceholderText("Which species to show")
-
-        ok_button = QPushButton("Ok")
-
-        def dialog_ok_button_clicked_handler():
-            time_text = time_field.text().strip()
-            species_text = species_field.text().strip()
-
-            end_time = int(time_text) if time_text else 1
-            species = species_text.split(",")
-
-            # Precision field does not apply to stochastic simulation!
-            s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
-            GillespieSimulator.visualise(GillespieSimulator.simulate(GeneController.get_instance().network, s), s)
-
-            dia.close()
-
-        ok_button.clicked.connect(dialog_ok_button_clicked_handler)
-
-        main.addWidget(info)
-        main.addWidget(time_field)
-        main.addWidget(species_field)
-        main.addWidget(ok_button)
-        dia.setFixedHeight(140)
-        dia.setMinimumWidth(200)
-        dia.setWindowTitle("Simulation settings")
-        dia.setLayout(main)
-        dia.exec_()
 
     # def _handler_remove_reactions_button(self):
     #     del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]

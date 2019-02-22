@@ -9,6 +9,7 @@ from models.network import Network
 from models.simulation_settings import SimulationSettings
 from simulation.gillespie_simulator import GillespieSimulator
 from simulation.ode_simulator import OdeSimulator
+from ui.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.gene_controller import GeneController
 from ui.reactions_tab import ReactionsTab
 from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
@@ -108,49 +109,7 @@ class GeneWindow(QMainWindow):
             self.reactions_tab.update_list()
 
     def _handler_deterministic_clicked(self):
-        dia = QDialog()
-        main = QVBoxLayout()
-
-        info = QLabel("Species are comma separated")
-
-        time_field = QLineEdit()
-        time_field.setPlaceholderText("Simulation time")
-
-        sampling_field = QLineEdit()
-        sampling_field.setPlaceholderText("Sampling rate")
-
-        species_field = QLineEdit()
-        species_field.setPlaceholderText("Which species to show")
-
-        ok_button = QPushButton("Ok")
-
-        def dialog_ok_button_clicked_handler():
-            time_text = time_field.text().strip()
-            species_text = species_field.text().strip()
-            sampling_text = sampling_field.text().strip()
-
-            end_time = int(time_text) if time_text else 1
-            species = species_text.split(",")
-            sampling_rate = int(sampling_text)
-
-            s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
-            o = OdeSimulator(GeneController.get_instance().network, s)
-            o.visualise(o.simulate())
-
-            dia.close()
-
-        ok_button.clicked.connect(dialog_ok_button_clicked_handler)
-
-        main.addWidget(info)
-        main.addWidget(time_field)
-        main.addWidget(sampling_field)
-        main.addWidget(species_field)
-        main.addWidget(ok_button)
-        dia.setFixedHeight(180)
-        dia.setMinimumWidth(200)
-        dia.setWindowTitle("Simulation settings")
-        dia.setLayout(main)
-        dia.exec_()
+        DeterministicSimulationDialog()
 
     def _handler_stochastic_clicked(self):
         dia = QDialog()

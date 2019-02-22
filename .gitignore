@@ -21,4 +21,13 @@ reports/specification/plan.txt
 code/venv
 code/.idea
 code/__pycache__
-
+gui
+code-legacy
+code/input_output/__pycache__
+code/models/__pycache__
+code/reverse_engineering/__pycache__
+code/simulation/__pycache__
+code/ui/__pycache__
+learning
+other_files
+reverse_engineering

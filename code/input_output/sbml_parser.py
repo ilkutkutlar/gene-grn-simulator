@@ -80,7 +80,7 @@ class SbmlParser:
             #     r = CustomFormula(rate_function, parameters, symbols)
 
             r = CustomFormula(rate_function, parameters, symbols)
-            reactions.append(Reaction(left, right, r))
+            reactions.append(Reaction(x.getName(), left, right, r))
         return reactions
 
     @staticmethod

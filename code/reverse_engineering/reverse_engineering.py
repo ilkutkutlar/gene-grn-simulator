@@ -48,9 +48,6 @@ class ReverseEngineering:
 
         return nbour
 
-    # @staticmethod
-    # def coin_toss_with_probability(self):
-
     """
     :param Network net: The network to modify
     :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering

@@ -1,7 +1,7 @@
 # 100 - y => min is 100
 # y - 100 => max is 100
 
-from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QWidget
+from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QWidget, QMessageBox
 
 # m = Mutable(0.5, 50, 0.5, "one")
 # t = ReverseEngineering.find_network(net, s, {"rate": m}, [c1, c2], {z: (100 - z) for z in range(0, 101)})
@@ -59,6 +59,7 @@ class ReverseEngineeringModifyTab(QWidget):
 
         self.main_layout.addWidget(self.mutables_list)
         self.main_layout.addLayout(mutables_buttons_layout)
+        self._update_mutables_list()
 
     def _init_constraints(self):
         self.constraints_list = QListWidget()
@@ -72,15 +73,26 @@ class ReverseEngineeringModifyTab(QWidget):
 
         self.main_layout.addWidget(self.constraints_list)
         self.main_layout.addLayout(constraints_buttons_layout)
+        self._update_constraints_list()
+
 
     def _run_button_click_handler(self):
         g = GeneController.get_instance()
-        s = SimulationSettings(0, 100, 100, g.network.species)
+        s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
         t = ReverseEngineering.find_network(g.network,
                                             s, g.get_mutables(), g.get_constraints(),
                                             {z: (100 - z) for z in range(0, 101)})
+        # if t:
         ode = OdeSimulator(g.network, s)
         ode.visualise(ode.simulate())
+        # else:
+        #     error_message = QMessageBox()
+        #     error_message.setIcon(QMessageBox.Warning)
+        #     error_message.setWindowTitle("Error")
+        #     error_message.setStandardButtons(QMessageBox.Ok)
+        #     error_message.setText("No matching network found within the given parameters.")
+        #     error_message.show()
+        #     print("Error")
 
     def _init_run_button(self):
         self.run_button = QPushButton("Run")

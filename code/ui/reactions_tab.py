@@ -15,6 +15,7 @@ class ReactionsTab(QWidget):
         self._init_reactions_list()
         self._init_reaction_details()
         self._init_buttons()
+        self.update_list()
 
         self.grid.addWidget(self.reactions_list, 0, 0)
         self.grid.addWidget(self.aux, 0, 1)
@@ -36,7 +37,7 @@ class ReactionsTab(QWidget):
 
     def _add_reaction_click_handler(self):
         dialog = AddReactionDialog()
-        dialog.finished.connect(lambda: self._update_list())
+        dialog.finished.connect(lambda: self.update_list())
         dialog.exec_()
 
     def _remove_reaction_click_handler(self):
@@ -65,7 +66,7 @@ class ReactionsTab(QWidget):
         self.reactions_list.setMaximumWidth(200)
         self.reactions_list.itemClicked.connect(self._reaction_list_clicked)
 
-    def _update_list(self):
+    def update_list(self):
         self.reactions_list.clear()
         for s in GeneController.get_instance().get_reactions():
             self.reactions_list.addItem(s.name)

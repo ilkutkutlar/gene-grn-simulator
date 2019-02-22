@@ -97,7 +97,7 @@ class Reaction:
             for p in self.rate_function.parameters:
                 params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
 
-            string = "Type: Transcription" + "\n"
+            string = "Type: Custom Reaction" + "\n"
             string += "Reaction: " + left + " -> " + right + "\n"
             string += "Rate function: " + rate_function_ast + "\n\n"
             string += "== Parameters == \n"

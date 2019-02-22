@@ -9,7 +9,7 @@ class SpeciesTab(QWidget):
         self.main_layout = QVBoxLayout()
 
         self.species_list = QListWidget()
-        self._update_list()
+        self.update_list()
         self.buttons_layout = QHBoxLayout()
         self._init_buttons()
 
@@ -25,7 +25,7 @@ class SpeciesTab(QWidget):
         self.buttons_layout.addWidget(self.add_button)
         self.buttons_layout.addWidget(self.remove_button)
 
-    def _update_list(self):
+    def update_list(self):
         self.species_list.clear()
         for s in GeneController.get_instance().get_species():
             self.species_list.addItem(s + ": " + str(GeneController.get_instance().get_species()[s]))
@@ -42,7 +42,7 @@ class SpeciesTab(QWidget):
                 species_concent = float(split[1].strip())
                 GeneController.get_instance().add_species(species_name, species_concent)
 
-        self._update_list()
+        self.update_list()
 
     def _remove_species_click_handler(self):
         pass

@@ -1,21 +1,14 @@
-from typing import List
-
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QDoubleValidator
-from PyQt5.QtWidgets import QComboBox, QTabWidget
 from PyQt5.QtWidgets import QDialog, QLineEdit
-from PyQt5.QtWidgets import QVBoxLayout, QLabel, QListWidget, QPushButton
+from PyQt5.QtWidgets import QTabWidget
+from PyQt5.QtWidgets import QVBoxLayout, QLabel, QPushButton
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox, \
     QFileDialog
 
 from input_output.sbml_parser import SbmlParser
-from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from models.network import Network
-from models.reaction import Reaction
 from models.simulation_settings import SimulationSettings
 from simulation.gillespie_simulator import GillespieSimulator
 from simulation.ode_simulator import OdeSimulator
-from ui.add_reaction_dialog import AddReactionDialog
 from ui.gene_controller import GeneController
 from ui.reactions_tab import ReactionsTab
 from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
@@ -56,9 +49,14 @@ class GeneWindow(QMainWindow):
         layout = QVBoxLayout()
 
         tabs = QTabWidget()
-        tabs.addTab(SpeciesTab(), "Species")
-        tabs.addTab(ReactionsTab(), "Reactions")
-        tabs.addTab(ReverseEngineeringModifyTab(), "Reverse Engineering")
+
+        self.species_tab = SpeciesTab()
+        self.reactions_tab = ReactionsTab()
+        self.rev_eng_modify_tab = ReverseEngineeringModifyTab()
+        tabs.addTab(self.species_tab, "Species")
+        tabs.addTab(self.reactions_tab, "Reactions")
+        tabs.addTab(self.rev_eng_modify_tab, "Reverse Engineering")
+
         self._init_menubar()
 
         layout.addWidget(tabs)
@@ -106,8 +104,8 @@ class GeneWindow(QMainWindow):
             message.setText("SBML file has been opened and this network has been loaded: \n\n" + net.__str__())
             message.exec_()
 
-            self._refresh_reactions_list(self.reactions_panel.m_list)
-            self._refresh_species_list(self.species_panel.m_list)
+            self.species_tab.update_list()
+            self.reactions_tab.update_list()
 
     def _handler_deterministic_clicked(self):
         dia = QDialog()
@@ -193,14 +191,14 @@ class GeneWindow(QMainWindow):
         dia.setLayout(main)
         dia.exec_()
 
-    def _handler_remove_reactions_button(self):
-        del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]
-        self._refresh_reactions_list(self.reactions_panel.m_list)
-
-    def _handler_remove_species_button(self):
-        species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
-        del GeneController.get_instance().network.species[species_id]
-        self._refresh_species_list(self.species_panel.m_list)
+    # def _handler_remove_reactions_button(self):
+    #     del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]
+    #     self._refresh_reactions_list(self.reactions_panel.m_list)
+    #
+    # def _handler_remove_species_button(self):
+    #     species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
+    #     del GeneController.get_instance().network.species[species_id]
+    #     self._refresh_species_list(self.species_panel.m_list)
 
 
 app = QApplication([])

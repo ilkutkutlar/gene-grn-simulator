@@ -5,7 +5,6 @@ class Constraint:
     species: str
     value_constraint: Callable[[float], bool]
     time_period: Tuple[float, float]
-
     pretty_print: str
 
     """

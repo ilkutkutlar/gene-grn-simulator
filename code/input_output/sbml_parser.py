@@ -1,21 +1,18 @@
-from typing import Dict, List
-
 import libsbml
+
 import helper
-
-# 1. Core objects of libsbml:
-# http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
-
-# 2. Classes:
-# http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
-
 from models.formulae import CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 
 
-class SbmlParser:
+# 1. Core objects of libsbml:
+# http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
+# 2. Classes:
+# http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
 
+
+class SbmlParser:
     """
     Return dictionary of species in a given model
     :param Any model: A libsbml network model
@@ -28,12 +25,12 @@ class SbmlParser:
         species = {s.getId(): s.getInitialAmount() for s in model.getListOfSpecies()}
         return species
 
-
     """
     Return all defined symbols in the given model
     :param Any model: a libsbml network model
     :returns Dict[str, float] where key: symbol name, value: symbol value
     """
+
     @staticmethod
     def _get_symbols(model):
         symbols = {}
@@ -108,6 +105,7 @@ class SbmlParser:
     :param str filename: Filename for SBML file
     :returns Network representing given filename
     """
+
     @staticmethod
     def parse(filename):
         net = Network()

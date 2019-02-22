@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Dict, List, Tuple
 
 import helper
 from models.reg_type import RegType
-from models.regulation import Regulation
 
 
 class Formula(ABC):

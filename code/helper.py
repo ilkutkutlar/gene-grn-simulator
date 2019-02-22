@@ -1,5 +1,4 @@
 import math
-from typing import Dict
 
 import libsbml
 from libsbml._libsbml import formulaToL3String

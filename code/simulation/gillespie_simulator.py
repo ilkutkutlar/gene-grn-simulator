@@ -1,11 +1,10 @@
 from math import *
 from random import *
-from typing import List, Tuple, Dict, Any
+from typing import List, Tuple, Dict
 
 import matplotlib.pyplot as plt
 
 from models.network import Network
-from models.simulation_settings import SimulationSettings
 
 SimulationResults = List[Tuple[float, Dict[str, float]]]
 

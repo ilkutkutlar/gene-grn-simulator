@@ -1,5 +1,3 @@
-from typing import List, Tuple
-
 import numpy as np
 
 
@@ -20,5 +18,6 @@ class SimulationSettings:
     """
     Return time space using the simulation settings
     """
+
     def generate_time_space(self):
         return np.linspace(self.start_time, self.end_time, self.precision)

@@ -1,8 +1,3 @@
-from typing import Dict, List, Tuple, Union
-
-from models.reaction import Reaction
-
-
 class Network:
 
     def __init__(self) -> None:

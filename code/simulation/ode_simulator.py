@@ -1,7 +1,4 @@
-from typing import Dict
-
 import matplotlib.pyplot as plt
-import numpy as np
 from scipy.integrate import odeint
 
 from models.simulation_settings import SimulationSettings

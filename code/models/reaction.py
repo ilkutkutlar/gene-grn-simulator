@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
 from models.reg_type import RegType
 

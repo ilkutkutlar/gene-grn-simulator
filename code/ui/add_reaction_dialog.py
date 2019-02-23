@@ -5,6 +5,7 @@ from models.formulae import TranscriptionFormula, TranslationFormula, Degradatio
 from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
+from ui import common_widgets
 from ui.gene_controller import GeneController
 
 
@@ -29,12 +30,6 @@ class AddReactionDialog(QDialog):
         self.setLayout(self.main_layout)
         self._init_ok_button()
         self.setWindowTitle("Add Reaction")
-
-    def _make_species_combo(self):
-        combo = QComboBox()
-        for x in GeneController.get_instance().get_species():
-            combo.addItem(x)
-        return combo
 
     def _reaction_type_changed_handler(self):
         index = self.reaction_types_list.currentRow()
@@ -124,7 +119,7 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Hill coefficient: "), self.hill)
         self.kd = QLineEdit()
         fields.addRow(QLabel("Kd: "), self.kd)
-        self.transcribed_species = self._make_species_combo()
+        self.transcribed_species = common_widgets.make_species_combo()
         fields.addRow(QLabel("Transcribed species: "), self.transcribed_species)
 
         def is_regulated_state_changed():
@@ -150,7 +145,7 @@ class AddReactionDialog(QDialog):
         self.repression_radio.setDisabled(True)
 
         self.reg_label = QLabel("Regulating species:")
-        self.regulator = self._make_species_combo()
+        self.regulator = common_widgets.make_species_combo()
         self.regulator.setDisabled(True)
         self.reg_label.setDisabled(True)
 
@@ -169,9 +164,9 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Reaction name"), self.reaction_name2)
         self.translation_rate = QLineEdit()
         fields.addRow(QLabel("Translation rate: "), self.translation_rate)
-        self.translated_mrna = self._make_species_combo()
+        self.translated_mrna = common_widgets.make_species_combo()
         fields.addRow(QLabel("Translated mRNA: "), self.translated_mrna)
-        self.produced_protein = self._make_species_combo()
+        self.produced_protein = common_widgets.make_species_combo()
         fields.addRow(QLabel("Produced protein: "), self.produced_protein)
 
         self.translation_fields = QWidget()
@@ -186,7 +181,7 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Reaction name"), self.reaction_name3)
         self.decay_rate = QLineEdit()
         fields.addRow(QLabel("Decay rate: "), self.decay_rate)
-        self.decaying_species = self._make_species_combo()
+        self.decaying_species = common_widgets.make_species_combo()
         fields.addRow(QLabel("Decaying species: "), self.decaying_species)
 
         self.degradation_fields = QWidget()
@@ -201,9 +196,9 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Reaction name"), self.reaction_name4)
         self.equation = QLineEdit()
         fields.addRow(QLabel("Equation: "), self.equation)
-        self.reactant = self._make_species_combo()
+        self.reactant = common_widgets.make_species_combo()
         fields.addRow(QLabel("Reactant: "), self.reactant)
-        self.product = self._make_species_combo()
+        self.product = common_widgets.make_species_combo()
         fields.addRow(QLabel("Product: "), self.product)
 
         self.custom_fields = QWidget()

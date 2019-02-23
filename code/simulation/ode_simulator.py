@@ -18,15 +18,15 @@ class OdeSimulator:
         # time grid -> The time space for which the equations will be solved
         self.time_space = sim.generate_time_space()
 
-    """
-    Calculate the change in the values of species of the network
-    
-    :param List[float] y: List of values
-    :param int t: Not used
-    :param Network net: The Network which acts as the context for the given values
-    """
+    def _dy_dt(self, y, t):
+        """
+        Calculate the change in the values of species of the network
 
-    def dy_dt(self, y, t):
+        :param List[float] y: List of values
+        :param int t: Not used
+        :param Network net: The Network which acts as the context for the given values
+        """
+
         changes = {s: 0 for s in self.net.species}
         unpacked = dict()
 
@@ -60,7 +60,7 @@ class OdeSimulator:
         y0 = [self.net.species[key] for key in self.net.species]
 
         # solve the ODEs
-        solution = odeint(self.dy_dt, y0, self.time_space)
+        solution = odeint(self._dy_dt, y0, self.time_space)
 
         return solution
 

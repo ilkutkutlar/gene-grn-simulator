@@ -25,6 +25,27 @@ class Formula(ABC):
         pass
 
 
+"""
+Based on an ODE model and uses the Hill equation to calculate
+    the promoter strength when being regulated by a TF:
+
+    Hill equation for repressor bindings:
+    beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
+
+    Hill equation for activator bindings:
+    beta * ([TF]^n / (Kd + [TF]^n) )
+
+    beta    : Maximal transcription rate (promoter strength)
+    [TF]    : The concentration of Transcript Factor that is regulating this promoter
+    Kd      : Dissociation constant, the probability that the TF will dissociate from the
+                binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
+                Kb = rate of TF unbinding.
+    n       : Hill coefficient. Assumed to be 1 by default.
+
+    Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
+"""
+
+
 class TranscriptionFormula(Formula):
     """
     :param float rate:
@@ -42,46 +63,28 @@ class TranscriptionFormula(Formula):
         self.transcribed_species = transcribed_species
         self.regulators = regulators
 
-    """
-    :param float tf: transcription factor concentration
-    :param float n: Hill coefficient
-    :param float kd: Dissociation constant
-    :returns float of regulation factor
-    
-    Based on an ODE model and uses the Hill equation to calculate
-    the promoter strength when being regulated by a TF:
-
-    Hill equation for repressor bindings:
-    beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
-
-    Hill equation for activator bindings:
-    beta * ([TF]^n / (Kd + [TF]^n) )
-
-    beta    : Maximal transcription rate (promoter strength)
-    [TF]    : The concentration of Transcript Factor that is regulating this promoter
-    Kd      : Dissociation constant, the probability that the TF will dissociate from the
-                binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
-                Kb = rate of TF unbinding.
-    n       : Hill coefficient. Assumed to be 1 by default.
-
-    Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
-    """
-
     @staticmethod
     def _hill_activator(tf, n, kd):
+        """
+        :param float tf: transcription factor concentration
+        :param float n: Hill coefficient
+        :param float kd: Dissociation constant
+        :returns float of regulation factor
+        """
+
         a = pow(tf, n)
         b = kd + pow(tf, n)
         return a / b
 
-    """
-    :param float tf: transcription factor concentration
-    :param float n: Hill coefficient
-    :param float kd: Dissociation constant
-    :returns float of regulation factor
-    """
-
     @staticmethod
     def _hill_repressor(tf, n, kd):
+        """
+        :param float tf: transcription factor concentration
+        :param float n: Hill coefficient
+        :param float kd: Dissociation constant
+        :returns float of regulation factor
+        """
+
         c = 1 + pow(tf / kd, n)
         return 1 / c
 

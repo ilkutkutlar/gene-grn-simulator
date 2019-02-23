@@ -10,13 +10,14 @@ SimulationResults = List[Tuple[float, Dict[str, float]]]
 
 
 class GillespieSimulator:
-    """
-    Calculate the sum of all reactions rates in the given network
-    :param Network net: Network
-    """
 
     @staticmethod
     def _calculate_r0(net):
+        """
+        Calculate the sum of all reactions rates in the given network
+        :param Network net: Network
+        """
+
         r0 = 0
         for reaction in net.reactions:
             t = reaction.rate(net.species)
@@ -24,54 +25,54 @@ class GillespieSimulator:
 
         return r0
 
-    """
-    Calculate the time after which the next random reaction will occur
-    :param float r0: sum of all reaction rates
-    :returns float of time for the next random reaction
-    """
-
     @staticmethod
     def _get_theta(r0):
+        """
+        Calculate the time after which the next random reaction will occur
+        :param float r0: sum of all reaction rates
+        :returns float of time for the next random reaction
+        """
+
         s1: float = random()  # To pick time
         epsilon = 0.001
         return (1 / (r0 + epsilon)) * log(1 / s1, e)
 
-    """
-    Adds a given change vector to the network's state vector
-    :param Dict[str, float] state: Current network state
-    :param Dict[str, float] change: Change vector
-    :returns Dict[str, float] of new network state
-    """
-
     @staticmethod
     def _apply_change_vector(state, change):
+        """
+        Adds a given change vector to the network's state vector
+        :param Dict[str, float] state: Current network state
+        :param Dict[str, float] change: Change vector
+        :returns Dict[str, float] of new network state
+        """
+
         ret = state.copy()
         for x in state:
             ret[x] = state[x] + change[x]
         return ret
 
-    """
-    Return the next state of the network after a random reaction has occurred
-    :param Network net: network for which to get next state
-    :param float r0: total of reaction propensities
-    :returns next network state
-    """
-
     @staticmethod
     def _get_next_state(net, r0):
+        """
+        Return the next state of the network after a random reaction has occurred
+        :param Network net: network for which to get next state
+        :param float r0: total of reaction propensities
+        :returns next network state
+        """
+
         vj = GillespieSimulator._pick_next_reaction(net, r0)
         return GillespieSimulator._apply_change_vector(net.species, vj) if vj else net.species
 
-    """
-    Given a list of items and their associated probabilities of being picked,
-    picks an item randomly at a rate dictated by its given probability
-    :param List[Any] items: list of items
-    :param List[float] probabilities: probability of each item being selected
-    :returns randomly selected item
-    """
-
     @staticmethod
     def _pick_weighted_random(items, probabilities):
+        """
+        Given a list of items and their associated probabilities of being picked,
+        picks an item randomly at a rate dictated by its given probability
+        :param List[Any] items: list of items
+        :param List[float] probabilities: probability of each item being selected
+        :returns randomly selected item
+        """
+
         s2 = random()  # To pick reaction
 
         # This is what this does:
@@ -102,17 +103,17 @@ class GillespieSimulator:
         # In case something goes wrong, at least return something
         return cumilative[0][0]
 
-    """
-    returns a Dict[str, float] representing the
-    change vector of the reaction chosen randomly,
-    which will happen next
-    :param Network net: network for which to pick next reaction
-    :param float r0: total reaction propensities
-    :returns Dict[str, float] of change vector of picked reaction
-    """
-
     @staticmethod
     def _pick_next_reaction(net, r0):
+        """
+        returns a Dict[str, float] representing the
+        change vector of the reaction chosen randomly,
+        which will happen next
+        :param Network net: network for which to pick next reaction
+        :param float r0: total reaction propensities
+        :returns Dict[str, float] of change vector of picked reaction
+        """
+
         propensities = []
         for reaction in net.reactions:
             try:

@@ -65,14 +65,12 @@ class Reaction:
             # right = self.rate_fn.transcribed_species if self.rate_fn.transcribed_species else "∅"
 
             trans_rate = str(self.rate_function.rate)
-            kd = str(self.rate_function.k)
             hill_coeff = str(self.rate_function.hill_coeff)
 
             string = "Type: Transcription" + "\n"
             string += "Reaction: " + left + " -> " + right + "\n\n"
 
             string += "Rate: " + trans_rate + "\n"
-            string += "Kd: " + kd + "\n"
             string += "n: " + hill_coeff + "\n\n"
 
             string += "== Regulation == \n"

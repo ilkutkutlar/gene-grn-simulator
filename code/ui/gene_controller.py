@@ -8,11 +8,13 @@ from models.regulation import Regulation
 def get_test():
     species = {"px": 100, "py": 100, "pz": 30, "x": 100, "y": 25, "z": 20}
 
-    x_trans = TranscriptionFormula(5, 2, 40, "x", [])
-    y_trans = TranscriptionFormula(60, 1, 40, "y", [
-        Regulation(from_gene="px", to_gene="y", reg_type=RegType.REPRESSION)])
-    z_trans = TranscriptionFormula(20, 2, 40, "z", [
-        Regulation(from_gene="py", to_gene="z", reg_type=RegType.ACTIVATION)])
+    x_trans = TranscriptionFormula(5, "x")
+
+    y_trans = TranscriptionFormula(60, "y")
+    y_trans.set_regulation(1, [Regulation("px", "y", RegType.REPRESSION, 40)])
+
+    z_trans = TranscriptionFormula(20, "z")
+    z_trans.set_regulation(2, [Regulation("py", "z", RegType.ACTIVATION, 40)])
 
     reactions = [Reaction("x_trans", [], ["x"], x_trans),
                  Reaction("y_trans", [], ["y"], y_trans),

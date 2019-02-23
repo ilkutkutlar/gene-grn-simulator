@@ -1,12 +1,12 @@
-from typing import NamedTuple
-
 from models.reg_type import RegType
 
 
-class Regulation(NamedTuple):
-    from_gene: str
-    to_gene: str
-    reg_type: RegType
+class Regulation:
+    def __init__(self, from_gene, to_gene, reg_type, k):
+        self.from_gene = from_gene
+        self.to_gene = to_gene
+        self.reg_type = reg_type
+        self.k = k
 
     def __str__(self) -> str:
         sign = " -> " if self.reg_type == RegType.ACTIVATION else " -| "

@@ -51,19 +51,20 @@ Based on an ODE model and uses the Hill equation to calculate
 class TranscriptionFormula(Formula):
     """
     :param float rate:
-    :param float hill_coeff:
-    :param float kd:
     :param str transcribed_species:
-    :param List[Regulation] regulations:
     """
 
-    def __init__(self, rate, hill_coeff, kd,
-                 transcribed_species, regulators,
-                 input_gate=InputGate.SUM):
+    def __init__(self, rate,
+                 transcribed_species):
         self.rate = rate
-        self.hill_coeff = hill_coeff
-        self.k = kd
         self.transcribed_species = transcribed_species
+
+        self.hill_coeff = None
+        self.regulators = None
+        self.input_gate = None
+
+    def set_regulation(self, hill_coeff, regulators, input_gate=InputGate.NONE):
+        self.hill_coeff = hill_coeff
         self.regulators = regulators
         self.input_gate = input_gate
 
@@ -116,9 +117,11 @@ class TranscriptionFormula(Formula):
             regulator_concent = state[the_regulation.from_gene]
 
             if the_regulation.reg_type == RegType.ACTIVATION:
-                h = self._hill_activator(regulator_concent, self.hill_coeff, self.k)
+                h = self._hill_activator(regulator_concent,
+                                         self.hill_coeff, the_regulation.k)
             else:
-                h = self._hill_repressor(regulator_concent, self.hill_coeff, self.k)
+                h = self._hill_repressor(regulator_concent,
+                                         self.hill_coeff, the_regulation.k)
 
             return h * self.rate
 

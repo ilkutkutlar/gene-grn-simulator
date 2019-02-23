@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 import helper
+from models.input_gate import InputGate
 from models.reg_type import RegType
 
 
@@ -30,19 +31,20 @@ Based on an ODE model and uses the Hill equation to calculate
     the promoter strength when being regulated by a TF:
 
     Hill equation for repressor bindings:
-    beta * ( 1 / ( 1 + ([TF]/Kd)^n) )
+    beta * ( 1 / ( 1 + ([TF]/K)^n) )
 
     Hill equation for activator bindings:
-    beta * ([TF]^n / (Kd + [TF]^n) )
+    beta * ([TF]^n / (K^n + [TF]^n) )
 
     beta    : Maximal transcription rate (promoter strength)
     [TF]    : The concentration of Transcript Factor that is regulating this promoter
-    Kd      : Dissociation constant, the probability that the TF will dissociate from the
+    K       : Dissociation constant, the probability that the TF will dissociate from the
                 binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
                 Kb = rate of TF unbinding.
     n       : Hill coefficient. Assumed to be 1 by default.
 
-    Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
+    Source: An introduction to systems biology : design principles of biological circuits, Uri Alon
+    Previous Source: https://link.springer.com/chapter/10.1007/978-94-017-9514-2_5
 """
 
 
@@ -56,37 +58,53 @@ class TranscriptionFormula(Formula):
     """
 
     def __init__(self, rate, hill_coeff, kd,
-                 transcribed_species, regulators):
+                 transcribed_species, regulators,
+                 input_gate=InputGate.SUM):
         self.rate = rate
         self.hill_coeff = hill_coeff
-        self.kd = kd
+        self.k = kd
         self.transcribed_species = transcribed_species
         self.regulators = regulators
+        self.input_gate = input_gate
 
     @staticmethod
-    def _hill_activator(tf, n, kd):
+    def _hill_activator(tf, n, k):
         """
         :param float tf: transcription factor concentration
         :param float n: Hill coefficient
-        :param float kd: Dissociation constant
+        :param float k: Dissociation constant
         :returns float of regulation factor
         """
 
         a = pow(tf, n)
-        b = kd + pow(tf, n)
+        b = pow(k, n) + pow(tf, n)
         return a / b
 
     @staticmethod
-    def _hill_repressor(tf, n, kd):
+    def _hill_repressor(tf, n, k):
         """
         :param float tf: transcription factor concentration
         :param float n: Hill coefficient
-        :param float kd: Dissociation constant
+        :param float k: Dissociation constant
         :returns float of regulation factor
         """
 
-        c = 1 + pow(tf / kd, n)
+        c = 1 + pow(tf / k, n)
         return 1 / c
+
+    def _and_gate(self):
+        if not filter(lambda x: x.reg_type == RegType.REPRESSION,
+                      self.regulators):
+            return True
+        else:
+            return False
+
+    def _or_gate(self):
+        if filter(lambda x: x.reg_type == RegType.ACTIVATION,
+                  self.regulators):
+            return True
+        else:
+            return False
 
     def compute(self, state):
         # Protein regulates mRNA
@@ -94,12 +112,14 @@ class TranscriptionFormula(Formula):
 
         if self.regulators:
             regulator_concent = state[the_regulation.from_gene]
+
             if the_regulation.reg_type == RegType.ACTIVATION:
-                h = self._hill_activator(regulator_concent, self.hill_coeff, self.kd)
+                h = self._hill_activator(regulator_concent, self.hill_coeff, self.k)
             else:
-                h = self._hill_repressor(regulator_concent, self.hill_coeff, self.kd)
+                h = self._hill_repressor(regulator_concent, self.hill_coeff, self.k)
 
             return h * self.rate
+
         else:
             return self.rate
 
@@ -110,7 +130,7 @@ class TranscriptionFormula(Formula):
             elif m == "hill_coeff":
                 self.hill_coeff = mutation[m][0]
             else:  # m == "kd"
-                self.kd = mutation[m][0]
+                self.k = mutation[m][0]
 
 
 class TranslationFormula(Formula):

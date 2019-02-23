@@ -144,9 +144,9 @@ def test():
 
 def individual_mutation_test():
     t = TranscriptionFormula(10, 2, 40, "x", [])
-    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.kd))
+    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.k))
     t.mutate({"kd": 10, "rate": 3})
-    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.kd))
+    print(str(t.rate) + " | " + str(t.hill_coeff) + " | " + str(t.k))
     y = CustomFormula("4*x", {"x": 10}, {})
     y.mutate({"x": 20})
     print(str(y.compute({})))

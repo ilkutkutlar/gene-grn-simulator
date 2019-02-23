@@ -37,7 +37,7 @@ Based on an ODE model and uses the Hill equation to calculate
     beta * ([TF]^n / (K^n + [TF]^n) )
 
     beta    : Maximal transcription rate (promoter strength)
-    [TF]    : The concentration of Transcript Factor that is regulating this promoter
+    [TF]    : The concentration of Transcription Factor that is regulating this promoter
     K       : Dissociation constant, the probability that the TF will dissociate from the
                 binding site it is now bound to. Equal to Kb/Kf where Kf = rate of TF binding and
                 Kb = rate of TF unbinding.
@@ -107,6 +107,8 @@ class TranscriptionFormula(Formula):
             return False
 
     def compute(self, state):
+        # https://www.pnas.org/content/pnas/100/21/11980.full.pdf
+
         # Protein regulates mRNA
         the_regulation = self.regulators[0] if self.regulators else None
 

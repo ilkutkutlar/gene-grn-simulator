@@ -55,18 +55,7 @@ class AddReactionDialog(QDialog):
         index = self.reaction_types_list.currentRow()
 
         if index == 0:  # Transcription
-            name = str(self.reaction_name1.text())
-            rate = float(self.transcription_rate.text())
-            n = float(self.hill.text())
-            kd = float(self.kd.text())
-            species = str(self.transcribed_species.currentText())
-
-            regs = []
-            if self.is_regulated.isChecked():
-                reg_type = RegType.ACTIVATION if self.activation_radio.isChecked() else RegType.REPRESSION
-                regs.append(Regulation(self.regulator.currentText(), species, reg_type))
-            formula = TranscriptionFormula(rate, n, kd, species, regs)
-            GeneController.get_instance().add_reaction(Reaction(name, [], [species], formula))
+            GeneController.get_instance().add_reaction(self.transcription_fields.get_transcription_reaction())
 
         elif index == 1:  # Translation
             name = str(self.reaction_name2.text())
@@ -111,13 +100,9 @@ class AddReactionDialog(QDialog):
         self.ok_button.clicked.connect(self._ok_button_clicked_handler)
         self.main_layout.addWidget(self.ok_button)
 
-    # region transcription
-
     def _init_transcription_fields(self):
         self.transcription_fields = TranscriptionFields()
         self.properties_layout.addWidget(self.transcription_fields)
-
-    # endregion
 
     def _init_translation_fields(self):
         fields = QFormLayout()

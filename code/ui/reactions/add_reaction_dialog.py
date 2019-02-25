@@ -1,7 +1,10 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
     QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget
 
-from models.formulae import TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from models.transcription_formula import TranscriptionFormula
+from models.translation_formula import TranslationFormula
+from models.degradation_formula import DegradationFormula
+from models.custom_formula import CustomFormula
 from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation

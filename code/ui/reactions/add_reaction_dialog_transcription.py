@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QFormLayout, QRadioButton, QGroupBox, QLabel, QLineEdit, QWidget, QComboBox, QCheckBox, \
     QListWidget, QPushButton
 
-from models.formulae import TranscriptionFormula
+from models.transcription_formula import TranscriptionFormula
 from models.input_gate import InputGate
 from models.reaction import Reaction
 from models.reg_type import RegType

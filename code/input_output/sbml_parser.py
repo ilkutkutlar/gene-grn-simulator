@@ -1,7 +1,7 @@
 import libsbml
 
 import helper
-from models.formulae import CustomFormula
+from models.custom_formula import CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 

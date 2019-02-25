@@ -1,4 +1,8 @@
-from models.formulae import Formula, TranscriptionFormula, TranslationFormula, DegradationFormula, CustomFormula
+from models.formula import Formula
+from models.transcription_formula import TranscriptionFormula
+from models.translation_formula import TranslationFormula
+from models.degradation_formula import DegradationFormula
+from models.custom_formula import CustomFormula
 from models.reg_type import RegType
 
 

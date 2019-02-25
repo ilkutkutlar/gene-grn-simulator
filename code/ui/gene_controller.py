@@ -1,4 +1,6 @@
-from models.formulae import TranscriptionFormula, DegradationFormula, TranslationFormula
+from models.transcription_formula import TranscriptionFormula
+from models.translation_formula import TranslationFormula
+from models.degradation_formula import DegradationFormula
 from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType

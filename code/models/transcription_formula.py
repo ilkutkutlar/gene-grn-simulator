@@ -1,30 +1,6 @@
-from abc import ABC, abstractmethod
-
-import helper
+from models.formula import Formula
 from models.input_gate import InputGate
 from models.reg_type import RegType
-
-
-class Formula(ABC):
-    """
-    Return the result of computing the formula.
-    :param Dict[str, float] Network state: key: species name, value: concentration
-    :returns float of result
-    """
-
-    @abstractmethod
-    def compute(self, state):
-        pass
-
-    """
-    Change value of given variables in the formula
-    :param Dict[str, Tuple[float, str]] mutation: dictionary of variables to mutate
-    """
-
-    @abstractmethod
-    def mutate(self, mutation):
-        pass
-
 
 """
 Based on an ODE model and uses the Hill equation to calculate
@@ -168,64 +144,3 @@ class TranscriptionFormula(Formula):
                 self.rate = mutation[m][0]
             else:  # m == "hill_coeff":
                 self.hill_coeff = mutation[m][0]
-
-
-class TranslationFormula(Formula):
-    """
-    :param float rate:
-    :param str mrn_species:
-    """
-
-    def __init__(self, rate, mrna_species):
-        self.rate = rate
-        self.mrna_species = mrna_species
-
-    def compute(self, state):
-        return self.rate * state[self.mrna_species]
-
-    def mutate(self, mutation):
-        for m in mutation:
-            if m == "rate":
-                self.rate = mutation[m][0]
-
-
-class DegradationFormula(Formula):
-    """
-    :param float rate:
-    :param str decaying_species:
-    """
-
-    def __init__(self, rate, decaying_species):
-        self.rate = rate
-        self.decaying_species = decaying_species
-
-    def compute(self, state):
-        return self.rate * state[self.decaying_species]
-
-    def mutate(self, mutation):
-        for m in mutation:
-            if m == "rate":
-                self.rate = mutation[m][0]
-
-
-class CustomFormula(Formula):
-    """
-    :param str rate_function:
-    :param Dict[str, float] parameters:
-    :param Dict[str, float] symbols:
-    """
-
-    def __init__(self, rate_function, parameters, symbols):
-        self.rate_function = rate_function
-        self.symbols = symbols
-        self.parameters = parameters
-
-    def compute(self, state):
-        return helper.eval_equation(self.rate_function,
-                                    species=state,
-                                    symbols=self.symbols,
-                                    parameters=self.parameters)
-
-    def mutate(self, mutation):
-        for m in mutation:
-            self.parameters.update({m: mutation[m][0]})

@@ -1,6 +1,9 @@
 from math import log, e
 
-from models.formulae import DegradationFormula, TranslationFormula, TranscriptionFormula, CustomFormula
+from models.transcription_formula import TranscriptionFormula
+from models.translation_formula import TranslationFormula
+from models.degradation_formula import DegradationFormula
+from models.custom_formula import CustomFormula
 from models.network import Network
 from models.reaction import Reaction
 from models.reg_type import RegType

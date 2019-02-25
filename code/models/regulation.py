@@ -8,6 +8,6 @@ class Regulation:
         self.reg_type = reg_type
         self.k = k
 
-    def __str__(self) -> str:
-        sign = " -> " if self.reg_type == RegType.ACTIVATION else " -| "
+    def __str__(self):
+        sign = " ⟶ " if self.reg_type == RegType.ACTIVATION else " ⊣ "
         return "Reg: " + self.from_gene + sign + self.to_gene

@@ -1,6 +1,6 @@
 class Network:
 
-    def __init__(self) -> None:
+    def __init__(self):
         self.species = dict()  # of Dict[str, float]
         self.reactions = list()  # of Reaction
 

@@ -56,7 +56,7 @@ class Reaction:
 
         return change
 
-    def __str__(self) -> str:
+    def __str__(self):
         left = self.left[0] if self.left else "∅"
         right = self.right[0] if self.right else "∅"
 
@@ -68,18 +68,20 @@ class Reaction:
             hill_coeff = str(self.rate_function.hill_coeff)
 
             string = "Type: Transcription" + "\n"
-            string += "Reaction: " + left + " -> " + right + "\n\n"
+            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
 
-            string += "Rate: " + trans_rate + "\n"
-            string += "n: " + hill_coeff + "\n\n"
+            string += "Rate: " + trans_rate + "\n\n"
 
             string += "== Regulation == \n"
+            string += "Hill coefficient: " + hill_coeff + "\n\n"
 
             if self.rate_function.regulators:
-                from_gene = self.rate_function.regulators[0].from_gene
-                sign = " -> " if self.rate_function.regulators[0].reg_type == RegType.ACTIVATION else " -| "
-                to_gene = self.rate_function.regulators[0].to_gene
-                string += from_gene + sign + to_gene
+                for r in self.rate_function.regulators:
+                    from_gene = r.from_gene
+                    sign = " ⟶ " if r.reg_type == RegType.ACTIVATION else " ⊣ "
+                    to_gene = r.to_gene
+                    string += from_gene + sign + to_gene + "\n"
+                    string += "    - K: " + str(r.k) + "\n\n"
             else:
                 string += "Not regulated"
 
@@ -89,7 +91,7 @@ class Reaction:
             rate = str(self.rate_function.rate)
 
             string = "Type: Translation" + "\n"
-            string += "Reaction: " + left + " -> " + right + "\n\n"
+            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
             string += "Rate: " + rate + "\n"
 
             return string
@@ -97,7 +99,7 @@ class Reaction:
             rate = str(self.rate_function.rate)
 
             string = "Type: Degradation" + "\n"
-            string += "Reaction: " + left + " -> " + right + "\n\n"
+            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
             string += "Rate: " + rate + "\n"
 
             return string
@@ -109,7 +111,7 @@ class Reaction:
                 params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
 
             string = "Type: Custom Reaction" + "\n"
-            string += "Reaction: " + left + " -> " + right + "\n"
+            string += "Reaction: " + left + " ⟶ " + right + "\n"
             string += "Rate function: " + rate_function_ast + "\n\n"
             string += "== Parameters == \n"
             string += params

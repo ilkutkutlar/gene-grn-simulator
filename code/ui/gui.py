@@ -10,7 +10,7 @@ from ui.species.species_tab import SpeciesTab
 from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialog
 
 
-def show_error_message(message) -> bool:
+def show_error_message(message):
     error_message = QMessageBox()
     error_message.setIcon(QMessageBox.Warning)
     error_message.setWindowTitle("Error")

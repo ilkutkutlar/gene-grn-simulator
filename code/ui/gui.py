@@ -2,12 +2,12 @@ from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox
 
-from ui.deterministic_simulation_dialog import DeterministicSimulationDialog
+from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.open_sbml_dialog import OpenSbmlDialog
-from ui.reactions_tab import ReactionsTab
-from ui.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
-from ui.species_tab import SpeciesTab
-from ui.stochastic_simulation_dialog import StochasticSimulationDialog
+from ui.reactions.reactions_tab import ReactionsTab
+from ui.reverse_engineering.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
+from ui.species.species_tab import SpeciesTab
+from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialog
 
 
 def show_error_message(message) -> bool:

@@ -2,7 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
     QVBoxLayout
 
-from ui.add_reaction_dialog import AddReactionDialog
+from ui.reactions.add_reaction_dialog import AddReactionDialog
 from ui.gene_controller import GeneController
 
 

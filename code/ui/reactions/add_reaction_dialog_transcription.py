@@ -126,15 +126,14 @@ class TranscriptionFields(QWidget):
             hill = float(self.hill.text())
             input_gate = self.input_gate.currentText()
 
-            f.hill_coeff = hill
             if input_gate == "AND":
-                f.input_gate = InputGate.AND
+                input_gate = InputGate.AND
             elif input_gate == "OR":
-                f.input_gate = InputGate.OR
+                input_gate = InputGate.OR
             else:
-                f.input_gate = InputGate.SUM
+                input_gate = InputGate.SUM
 
-            f.regulators = self.regulations
+            f.set_regulation(hill, self.regulations, input_gate)
 
         name = self.reaction_name.text()
         return Reaction(name, [], [species], f)

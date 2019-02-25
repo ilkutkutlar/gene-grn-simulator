@@ -71,6 +71,15 @@ class TranscriptionFormula(Formula):
 
     @staticmethod
     def _hill_or_gate(one, two, n, state):
+        """
+         Based on: https://www.pnas.org/content/pnas/100/21/11980.full.pdf
+        :param Regulation one: first regulation
+        :param Regulation two: second regulation
+        :param float n: Hill coefficient
+        :param Dict[str, float] state: Network state
+        :return: float result of running hill equation with the given parameters
+        """
+
         a = (pow(state[one.from_gene] / one.k, n))
         b = (pow(state[two.from_gene] / two.k, n))
         c = (1 + a + b)
@@ -86,6 +95,15 @@ class TranscriptionFormula(Formula):
 
     @staticmethod
     def _hill_and_gate(one, two, n, state):
+        """
+        Based on: https://www.pnas.org/content/pnas/100/21/11980.full.pdf
+        :param Regulation one: first regulation
+        :param Regulation two: second regulation
+        :param float n: Hill coefficient
+        :param Dict[str, float] state: Network state
+        :return: float result of running hill equation with the given parameters
+        """
+
         one_concent = state[one.from_gene]
         two_concent = state[two.from_gene]
 
@@ -105,38 +123,47 @@ class TranscriptionFormula(Formula):
             return one_rep * two_rep
 
     def compute(self, state):
-        # https://www.pnas.org/content/pnas/100/21/11980.full.pdf
-
         # Protein regulates mRNA
-
-        if self.regulators:
-            if len(self.regulators) == 1:
-                reg = self.regulators[0]
-                reg_concent = state[reg.from_gene]
-
-                if reg.reg_type == RegType.ACTIVATION:
-                    h = self._hill_activator(reg_concent, self.hill_coeff, reg.k)
-                else:
-                    h = self._hill_repressor(reg_concent, self.hill_coeff, reg.k)
-
-                return h * self.rate
-            elif len(self.regulators) == 2:
-                one = self.regulators[0]
-                two = self.regulators[1]
-
-                if self.input_gate == InputGate.AND:
-                    h = self._hill_and_gate(one, two, self.hill_coeff, state)
-                elif self.input_gate == InputGate.OR:
-                    h = self._hill_or_gate(one, two, self.hill_coeff, state)
-                else:
-                    h = 1
-
-                return h * self.rate
-            else:
-                pass
-
+        if not self.regulators:
+            h = 1
+        elif len(self.regulators) == 1:
+            h = self._h_single(state)
+        elif len(self.regulators) == 2:
+            h = self._h_combinatorial(state)
         else:
-            return self.rate
+            h = 0
+
+        return h * self.rate
+
+    """
+    Return regulation strength when species is regulated by a single TF
+    """
+    def _h_single(self, state):
+        reg = self.regulators[0]
+        reg_concent = state[reg.from_gene]
+
+        if reg.reg_type == RegType.ACTIVATION:
+            h = self._hill_activator(reg_concent, self.hill_coeff, reg.k)
+        else:
+            h = self._hill_repressor(reg_concent, self.hill_coeff, reg.k)
+
+        return h
+
+    """
+    Return regulation strength when species is regulated by multiple TFs
+    """
+    def _h_combinatorial(self, state):
+        one = self.regulators[0]
+        two = self.regulators[1]
+
+        if self.input_gate == InputGate.AND:
+            h = self._hill_and_gate(one, two, self.hill_coeff, state)
+        elif self.input_gate == InputGate.OR:
+            h = self._hill_or_gate(one, two, self.hill_coeff, state)
+        else:
+            h = 1
+
+        return h
 
     def mutate(self, mutation):
         for m in mutation:

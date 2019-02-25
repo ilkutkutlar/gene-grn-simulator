@@ -115,6 +115,7 @@ class Reaction:
                 params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
 
             string = "Type: Custom Reaction" + "\n"
+            # TODO: ➞ ?
             string += "Reaction: " + left + " ⟶ " + right + "\n"
             string += "Rate function: " + rate_function_ast + "\n\n"
             string += "== Parameters == \n"

@@ -123,3 +123,20 @@ class GeneController:
 
     def add_constraint(self, constraint):
         self.constraints.append(constraint)
+
+    def remove_species(self, name):
+        del self.network.species[name]
+
+    def remove_reaction_by_name(self, name):
+        r = list(filter(lambda x: x.name == name, self.network.reactions))[0]
+        self.network.reactions.remove(r)
+
+    def remove_reaction_by_index(self, index):
+        del self.network.reactions[index]
+
+    # TODO: NOT GUARANTEED TO WORK!!!
+    def remove_mutable_by_index(self, index):
+        del self.mutables[list(self.mutables.keys())[index]]
+
+    def remove_constraint(self, index):
+        del self.constraints[index]

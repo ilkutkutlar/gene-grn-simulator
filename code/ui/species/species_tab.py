@@ -45,4 +45,7 @@ class SpeciesTab(QWidget):
         self.update_list()
 
     def _remove_species_click_handler(self):
-        pass
+        text = self.species_list.item(self.species_list.currentRow()).text()
+        species = text.split(':')[0]
+        GeneController.get_instance().remove_species(species)
+        self.update_list()

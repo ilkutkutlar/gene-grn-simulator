@@ -72,15 +72,6 @@ class GeneWindow(QMainWindow):
         stochastic.triggered.connect(lambda _: StochasticSimulationDialog())
         simulate.addAction(stochastic)
 
-    # def _handler_remove_reactions_button(self):
-    #     del GeneController.get_instance().network.reactions[self.reactions_panel.m_list.currentRow()]
-    #     self._refresh_reactions_list(self.reactions_panel.m_list)
-    #
-    # def _handler_remove_species_button(self):
-    #     species_id = self.species_panel.m_list.property("id" + str(self.species_panel.m_list.currentRow()))
-    #     del GeneController.get_instance().network.species[species_id]
-    #     self._refresh_species_list(self.species_panel.m_list)
-
 
 app = QApplication([])
 g = GeneWindow()

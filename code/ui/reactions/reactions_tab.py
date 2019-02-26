@@ -41,7 +41,10 @@ class ReactionsTab(QWidget):
         dialog.exec_()
 
     def _remove_reaction_click_handler(self):
-        pass
+        i = self.reactions_list.currentRow()
+        GeneController.get_instance().remove_reaction_by_index(i)
+        self.update_list()
+        print(GeneController.get_instance().network)
 
     def _reaction_list_clicked(self):
         index = self.reactions_list.currentRow()

@@ -15,7 +15,8 @@ class ReverseEngineering:
     """
 
     @staticmethod
-    def _evaluate_network(results, constraints):
+    def _evaluate_network(net, sim, constraints):
+        results = StructuredResults(OdeSimulator.simulate(net, sim), list(net.species.keys()), sim.generate_time_space())
         total = 0
 
         for c in constraints:
@@ -97,14 +98,12 @@ class ReverseEngineering:
         current = {name:
                        (mutables[name].lower_bound,
                         mutables[name].reaction_name) for name in mutables}
-        ode = OdeSimulator(net, sim)
 
         for t in range(1, len(schedule) - 1):
             T = schedule[t]
 
             net.mutate(current)
-            resCurrent = StructuredResults(ode.simulate(), list(ode.net.species.keys()), sim.generate_time_space())
-            evalCurrent = ReverseEngineering._evaluate_network(resCurrent, constraints)
+            evalCurrent = ReverseEngineering._evaluate_network(net, sim, constraints)
 
             if T == 0 or (evalCurrent <= 0):
                 return current
@@ -112,9 +111,7 @@ class ReverseEngineering:
                 neighbour = ReverseEngineering._generate_network_neighbour(current, mutables)
 
                 net.mutate(neighbour)
-                resNeighbour = StructuredResults(ode.simulate(), list(ode.net.species.keys()),
-                                                 sim.generate_time_space())
-                evalNeighbour = ReverseEngineering._evaluate_network(resNeighbour, constraints)
+                evalNeighbour = ReverseEngineering._evaluate_network(net, sim, constraints)
 
                 delta_e = evalCurrent - evalNeighbour
 

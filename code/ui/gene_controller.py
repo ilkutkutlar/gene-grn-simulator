@@ -90,7 +90,7 @@ class GeneController:
         # c1 = Constraint("y", lambda y: 200 - y, (40, 60))
         # c2 = Constraint("z", lambda x: x - 150, (0, 20))
         # m = Mutable(0.5, 50, 0.5, "x_trans")
-        self.network = get_test2()
+        self.network = get_test()
         self.mutables = {}
         self.constraints = []
 

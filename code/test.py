@@ -95,8 +95,7 @@ def main():
 
     s = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
 
-    ode = OdeSimulator(net, s)
-    ode.visualise(ode.simulate())
+    OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
 
 def simpler():

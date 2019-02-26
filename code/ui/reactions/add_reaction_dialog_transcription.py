@@ -50,7 +50,7 @@ class TranscriptionFields(QWidget):
         from_gene = self.regulator.currentText()
         to_gene = self.transcribed_species.currentText()
         reg_type = RegType.ACTIVATION if self.activation_radio.isChecked() else RegType.REPRESSION
-        k = self.k.text()
+        k = float(self.k.text())
 
         r = Regulation(from_gene, to_gene, reg_type, k)
         self.regulations.append(r)

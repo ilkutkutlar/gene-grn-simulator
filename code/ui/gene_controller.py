@@ -52,7 +52,8 @@ def get_test2():
     z_trans = TranscriptionFormula(5, "z")
     z_trans.set_regulation(2,
                            [Regulation("py", "z", RegType.ACTIVATION, 40),
-                            Regulation("px", "z", RegType.ACTIVATION, 80)], InputGate.AND)
+                            Regulation("px", "z", RegType.ACTIVATION, 80)],
+                           InputGate.AND)
 
     reactions = [Reaction("x_trans", [], ["x"], x_trans),
                  Reaction("y_trans", [], ["y"], y_trans),

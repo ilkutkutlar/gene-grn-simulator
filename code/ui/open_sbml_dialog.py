@@ -16,7 +16,7 @@ class OpenSbmlDialog(QFileDialog):
 
         if self.exec_():
             # selectedFiles returns all files, we only want to open one
-            filename: str = self.selectedFiles()[0]
+            filename = self.selectedFiles()[0]
             net = SbmlParser.parse(filename)
             GeneController.get_instance().network = net
 

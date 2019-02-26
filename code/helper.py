@@ -35,7 +35,7 @@ Return a string representation of given AST node
 
 
 def ast_to_string(ast_node):
-    raw: str = formulaToL3String(ast_node)
+    raw = formulaToL3String(ast_node)
     raw = raw.replace("^", "**")
     return raw
 

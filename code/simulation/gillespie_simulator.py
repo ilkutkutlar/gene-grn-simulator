@@ -33,7 +33,7 @@ class GillespieSimulator:
         :returns float of time for the next random reaction
         """
 
-        s1: float = random()  # To pick time
+        s1 = random()  # To pick time
         epsilon = 0.001
         return (1 / (r0 + epsilon)) * log(1 / s1, e)
 

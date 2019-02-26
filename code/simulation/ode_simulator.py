@@ -28,12 +28,9 @@ class OdeSimulator:
         """
 
         changes = {s: 0 for s in self.net.species}
-        unpacked = dict()
 
-        i = 0
-        for x in self.net.species:
-            unpacked[x] = y[i]
-            i += 1
+        # This is just y with each value labelled with its corresponding species name
+        unpacked = {s: y[i] for i, s in enumerate(self.net.species)}
 
         for r in self.net.reactions:
             rate = r.rate(unpacked)
@@ -46,9 +43,7 @@ class OdeSimulator:
                 for x in r.right:
                     changes[x] += rate
 
-        new_y = [changes[s] for s in changes]
-
-        return new_y
+        return list(changes.values())
 
     """
     Simulate class network and return results

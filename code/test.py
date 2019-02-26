@@ -60,13 +60,22 @@ def main():
     species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
                "laci_p": 10, "tetr_p": 10, "cl_p": 10}
 
-    laci_reg = Regulation(from_gene="cl_p", to_gene="laci_mrna", reg_type=RegType.REPRESSION)
-    tetr_reg = Regulation(from_gene="laci_p", to_gene="tetr_mrna", reg_type=RegType.REPRESSION)
-    cl_reg = Regulation(from_gene="tetr_p", to_gene="cl_mrna", reg_type=RegType.REPRESSION)
+    laci_reg = Regulation("cl_p", "laci_mrna", RegType.REPRESSION, Km)
+    tetr_reg = Regulation("laci_p", "tetr_mrna", RegType.REPRESSION, Km)
+    cl_reg = Regulation("tetr_p", "cl_mrna", RegType.REPRESSION, Km)
 
-    reactions = [Reaction("", [], ["laci_mrna"], TranscriptionFormula(alpha, 2, 40, "laci_mrna", [laci_reg])),
-                 Reaction("", [], ["tetr_mrna"], TranscriptionFormula(alpha, 2, 40, "tetr_mrna", [tetr_reg])),
-                 Reaction("", [], ["cl_mrna"], TranscriptionFormula(alpha, 2, 40, "cl_mrna", [cl_reg])),
+    laci_trans = TranscriptionFormula(alpha, "laci_mrna")
+    laci_trans.set_regulation(hill_coeff, [laci_reg])
+
+    tetr_trans = TranscriptionFormula(alpha, "tetr_mrna")
+    tetr_trans.set_regulation(hill_coeff, [tetr_reg])
+
+    cl_trans = TranscriptionFormula(alpha, "cl_mrna")
+    cl_trans.set_regulation(hill_coeff, [cl_reg])
+
+    reactions = [Reaction("", [], ["laci_mrna"], laci_trans),
+                 Reaction("", [], ["tetr_mrna"], tetr_trans),
+                 Reaction("", [], ["cl_mrna"], cl_trans),
 
                  Reaction("", ["laci_mrna"], [], DegradationFormula(mRNA_decay_rate, "laci_mrna")),
                  Reaction("", ["tetr_mrna"], [], DegradationFormula(mRNA_decay_rate, "tetr_mrna")),
@@ -218,5 +227,5 @@ def t():
 
 if __name__ == '__main__':
     # simpler()
-    # main()
-    t()
+    main()
+    # t()

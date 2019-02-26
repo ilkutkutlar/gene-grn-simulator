@@ -111,8 +111,7 @@ def simpler():
 
     s = SimulationSettings(0, 100, 100, ["x", "y"])
 
-    ode = OdeSimulator(net, s)
-    ode.visualise(ode.simulate())
+    OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
 
 def test():
@@ -147,8 +146,8 @@ def test():
     s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
 
     time_space = s.generate_time_space()
-    ode = OdeSimulator(net, s)
-    res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
+
+    res = StructuredResults(OdeSimulator.simulate(net, s), list(net.species.keys()), time_space)
     c = Constraint("x", lambda x: x < 150, (0, 20))
     # ode.visualise(ode.simulate())
 
@@ -211,8 +210,7 @@ def t():
         s = SimulationSettings(0, 100, 100, ["x", "y", "z"])
 
         time_space = s.generate_time_space()
-        ode = OdeSimulator(net, s)
-        res = StructuredResults(ode.simulate(), list(net.species.keys()), time_space)
+        res = StructuredResults(OdeSimulator.simulate(net, s), list(net.species.keys()), time_space)
         # 100 - y => min is 100
         # y - 100 => max is 100
         c1 = Constraint("y", lambda y: 200 - y, (40, 60))
@@ -221,7 +219,7 @@ def t():
         m = Mutable(0.5, 50, 0.5, "one")
         t = ReverseEngineering.find_network(net, s, {"rate": m}, [c1, c2], {z: (100 - z) for z in range(0, 101)})
         print(t)
-        ode.visualise(ode.simulate())
+        OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
 
 if __name__ == '__main__':

@@ -24,8 +24,8 @@ class DeterministicSimulationDialog(QDialog):
 
         self.close()
         s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
-        o = OdeSimulator(GeneController.get_instance().network, s)
-        o.visualise(o.simulate())
+        net = GeneController.get_instance().network
+        OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
     def __init__(self):
         super().__init__()

@@ -42,10 +42,8 @@ class StructuredResults:
         labeled_results = dict()
 
         # Attach species names to results
-        i = 0
-        for s in labels:
+        for i, s in enumerate(labels):
             # Syntax meaning: a list consisting of the ith element of each list in results
             labeled_results[s] = results[:, i]
-            i += 1
 
         return labeled_results

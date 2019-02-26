@@ -57,8 +57,8 @@ def main():
 
     # endregion
 
-    species = {"laci_mrna": 100, "tetr_mrna": 80, "cl_mrna": 50,
-               "laci_p": 10, "tetr_p": 10, "cl_p": 10}
+    species = {"tetr_mrna": 80, "cl_mrna": 50,
+               "laci_p": 10, "cl_p": 10, "tetr_p": 10, "laci_mrna": 100}
 
     laci_reg = Regulation("cl_p", "laci_mrna", RegType.REPRESSION, Km)
     tetr_reg = Regulation("laci_p", "tetr_mrna", RegType.REPRESSION, Km)

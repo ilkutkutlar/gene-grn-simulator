@@ -138,6 +138,7 @@ class TranscriptionFormula(Formula):
     """
     Return regulation strength when species is regulated by a single TF
     """
+
     def _h_single(self, state):
         reg = self.regulators[0]
         reg_concent = state[reg.from_gene]
@@ -152,6 +153,7 @@ class TranscriptionFormula(Formula):
     """
     Return regulation strength when species is regulated by multiple TFs
     """
+
     def _h_combinatorial(self, state):
         one = self.regulators[0]
         two = self.regulators[1]
@@ -171,3 +173,6 @@ class TranscriptionFormula(Formula):
                 self.rate = mutation[m][0]
             else:  # m == "hill_coeff":
                 self.hill_coeff = mutation[m][0]
+
+    def get_params(self):
+        return ["rate", "hill_coeff"]

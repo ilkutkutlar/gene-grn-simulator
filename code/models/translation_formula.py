@@ -18,3 +18,6 @@ class TranslationFormula(Formula):
         for m in mutation:
             if m == "rate":
                 self.rate = mutation[m][0]
+
+    def get_params(self):
+        return ["rate"]

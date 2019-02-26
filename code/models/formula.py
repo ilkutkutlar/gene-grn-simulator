@@ -20,3 +20,7 @@ class Formula(ABC):
     @abstractmethod
     def mutate(self, mutation):
         pass
+
+    @abstractmethod
+    def get_params(self):
+        pass

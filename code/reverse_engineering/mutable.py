@@ -14,4 +14,9 @@ class Mutable:
         self.reaction_name = reaction_name
 
     def __str__(self):
-        return "(" + str(self.lower_bound) + " to " + str(self.upper_bound) + ") step: " + str(self.increments)
+        lo = str(self.lower_bound)
+        hi = str(self.upper_bound)
+        step = str(self.increments)
+        reaction = " in {}".format(self.reaction_name) \
+            if self.reaction_name != "" else ""
+        return "({} to {}) step: {}{}".format(lo, hi, step, reaction)

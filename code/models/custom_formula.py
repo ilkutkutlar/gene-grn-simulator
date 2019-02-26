@@ -23,3 +23,6 @@ class CustomFormula(Formula):
     def mutate(self, mutation):
         for m in mutation:
             self.parameters.update({m: mutation[m][0]})
+
+    def get_params(self):
+        return list(self.parameters.keys())

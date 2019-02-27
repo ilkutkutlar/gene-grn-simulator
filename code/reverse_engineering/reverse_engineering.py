@@ -7,6 +7,13 @@ from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
 
+class AnnealingState:
+    def __init__(self, mutables):
+        self.mutables = mutables
+        self.variables = {name: (mutables[name].lower_bound,
+                                 mutables[name].reaction_name) for name in mutables}
+
+
 class ReverseEngineering:
     """
     :param StructuredResults results: results of network's simulation
@@ -16,7 +23,8 @@ class ReverseEngineering:
 
     @staticmethod
     def _evaluate_network(net, sim, constraints):
-        results = StructuredResults(OdeSimulator.simulate(net, sim), list(net.species.keys()), sim.generate_time_space())
+        results = StructuredResults(OdeSimulator.simulate(net, sim), list(net.species.keys()),
+                                    sim.generate_time_space())
         total = 0
 
         for c in constraints:
@@ -95,9 +103,8 @@ class ReverseEngineering:
     @staticmethod
     def find_network(net, sim, mutables, constraints, schedule):
         # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-        current = {name:
-                       (mutables[name].lower_bound,
-                        mutables[name].reaction_name) for name in mutables}
+        current = {name: (mutables[name].lower_bound,
+                          mutables[name].reaction_name) for name in mutables}
 
         for t in range(1, len(schedule) - 1):
             T = schedule[t]

@@ -1,4 +1,4 @@
-from models.formula import Formula
+from models.formulae.formula import Formula
 
 
 class TranslationFormula(Formula):
@@ -21,3 +21,11 @@ class TranslationFormula(Formula):
 
     def get_params(self):
         return ["rate"]
+
+    def __str__(self):
+        rate = str(self.rate)
+
+        string = "Type: Translation" + "\n"
+        string += "Rate: " + rate + "\n"
+
+        return string

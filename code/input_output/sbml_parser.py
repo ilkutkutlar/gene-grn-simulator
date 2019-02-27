@@ -2,8 +2,8 @@ import libsbml
 from libsbml._libsbml import parseL3Formula
 
 import helper
-from models.custom_formula import CustomFormula
-from models.degradation_formula import DegradationFormula
+from models.formulae.custom_formula import CustomFormula
+from models.formulae.degradation_formula import DegradationFormula
 from models.network import Network
 from models.reaction import Reaction
 # 1. Core objects of libsbml:
@@ -12,7 +12,7 @@ from models.reaction import Reaction
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
 from models.reg_type import RegType
 from models.regulation import Regulation
-from models.transcription_formula import TranscriptionFormula
+from models.formulae.transcription_formula import TranscriptionFormula
 
 
 class SbmlParser:

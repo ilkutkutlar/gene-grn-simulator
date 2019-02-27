@@ -1,13 +1,10 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
     QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget
 
-from models.transcription_formula import TranscriptionFormula
-from models.translation_formula import TranslationFormula
-from models.degradation_formula import DegradationFormula
-from models.custom_formula import CustomFormula
+from models.formulae.translation_formula import TranslationFormula
+from models.formulae.degradation_formula import DegradationFormula
+from models.formulae.custom_formula import CustomFormula
 from models.reaction import Reaction
-from models.reg_type import RegType
-from models.regulation import Regulation
 from ui import common_widgets
 from ui.reactions.add_reaction_dialog_transcription import TranscriptionFields
 from ui.gene_controller import GeneController

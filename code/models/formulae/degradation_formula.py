@@ -1,4 +1,4 @@
-from models.formula import Formula
+from models.formulae.formula import Formula
 
 
 class DegradationFormula(Formula):
@@ -21,3 +21,11 @@ class DegradationFormula(Formula):
 
     def get_params(self):
         return ["rate"]
+
+    def __str__(self):
+        rate = str(self.rate)
+
+        string = "Type: Degradation" + "\n"
+        string += "Rate: " + rate + "\n"
+
+        return string

@@ -1,5 +1,5 @@
 import helper
-from models.formula import Formula
+from models.formulae.formula import Formula
 
 
 class CustomFormula(Formula):
@@ -26,3 +26,17 @@ class CustomFormula(Formula):
 
     def get_params(self):
         return list(self.parameters.keys())
+
+    def __str__(self):
+        rate_function_ast = str(self.rate_function)
+
+        params = ""
+        for p in self.parameters:
+            params += "\n       • " + p + ": " + str(self.parameters[p])
+
+        string = "Type: Custom Reaction" + "\n"
+        string += "Rate function: " + rate_function_ast + "\n\n"
+        string += "== Parameters == \n"
+        string += params
+
+        return string

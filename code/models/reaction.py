@@ -1,8 +1,7 @@
-from models.formula import Formula
-from models.transcription_formula import TranscriptionFormula
-from models.translation_formula import TranslationFormula
-from models.degradation_formula import DegradationFormula
-from models.custom_formula import CustomFormula
+from models.formulae.transcription_formula import TranscriptionFormula
+from models.formulae.translation_formula import TranslationFormula
+from models.formulae.degradation_formula import DegradationFormula
+from models.formulae.custom_formula import CustomFormula
 from models.reg_type import RegType
 
 
@@ -13,6 +12,7 @@ class Reaction:
     :param List[str] right:
     :param Formula rate_fn:
     """
+
     def __init__(self, name, left, right, rate_fn):
         self.name = name
         self.left = left
@@ -24,6 +24,7 @@ class Reaction:
     :param Dict[str, float] n: network state
     :returns float of reaction rate
     """
+
     def rate(self, n):
         return self.rate_function.compute(n)
 
@@ -32,6 +33,7 @@ class Reaction:
     :param Dict[str, float] n: Network state
     :returns Dict[str, float] of change vector of reaction
     """
+
     def change_vector(self, n):
         # fpm + MmyR -> [k1] fpm:MmyR
         # ---------------------------
@@ -64,61 +66,7 @@ class Reaction:
         left = self.left[0] if self.left else "∅"
         right = self.right[0] if self.right else "∅"
 
-        if isinstance(self.rate_function, TranscriptionFormula):
-            # left = "∅"
-            # right = self.rate_fn.transcribed_species if self.rate_fn.transcribed_species else "∅"
+        string = "Reaction: " + left + " ⟶ " + right + "\n"
+        string += str(self.rate_function)
 
-            trans_rate = str(self.rate_function.rate)
-            hill_coeff = str(self.rate_function.hill_coeff)
-
-            string = "Type: Transcription" + "\n"
-            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
-
-            string += "Rate: " + trans_rate + "\n\n"
-
-            string += "== Regulation == \n"
-            string += "Hill coefficient: " + hill_coeff + "\n\n"
-
-            if self.rate_function.regulators:
-                for r in self.rate_function.regulators:
-                    from_gene = r.from_gene
-                    sign = " ⟶ " if r.reg_type == RegType.ACTIVATION else " ⊣ "
-                    to_gene = r.to_gene
-                    string += from_gene + sign + to_gene + "\n"
-                    string += "    - K: " + str(r.k) + "\n\n"
-            else:
-                string += "Not regulated"
-
-            return string
-
-        elif isinstance(self.rate_function, TranslationFormula):
-            rate = str(self.rate_function.rate)
-
-            string = "Type: Translation" + "\n"
-            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
-            string += "Rate: " + rate + "\n"
-
-            return string
-        elif isinstance(self.rate_function, DegradationFormula):
-            rate = str(self.rate_function.rate)
-
-            string = "Type: Degradation" + "\n"
-            string += "Reaction: " + left + " ⟶ " + right + "\n\n"
-            string += "Rate: " + rate + "\n"
-
-            return string
-        elif isinstance(self.rate_function, CustomFormula):
-            rate_function_ast = str(self.rate_function.rate_function)
-
-            params = ""
-            for p in self.rate_function.parameters:
-                params += "\n       • " + p + ": " + str(self.rate_function.parameters[p])
-
-            string = "Type: Custom Reaction" + "\n"
-            # TODO: ➞ ?
-            string += "Reaction: " + left + " ⟶ " + right + "\n"
-            string += "Rate function: " + rate_function_ast + "\n\n"
-            string += "== Parameters == \n"
-            string += params
-
-            return string
+        return string

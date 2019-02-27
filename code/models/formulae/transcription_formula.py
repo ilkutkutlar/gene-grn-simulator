@@ -1,4 +1,4 @@
-from models.formula import Formula
+from models.formulae.formula import Formula
 from models.input_gate import InputGate
 from models.reg_type import RegType
 
@@ -176,3 +176,26 @@ class TranscriptionFormula(Formula):
 
     def get_params(self):
         return ["rate", "hill_coeff"]
+
+    def __str__(self):
+        trans_rate = str(self.rate)
+        hill_coeff = str(self.hill_coeff)
+
+        string = "Type: Transcription" + "\n"
+
+        string += "Rate: " + trans_rate + "\n\n"
+
+        string += "== Regulation == \n"
+        string += "Hill coefficient: " + hill_coeff + "\n\n"
+
+        if self.regulators:
+            for r in self.regulators:
+                from_gene = r.from_gene
+                sign = " ⭢ " if r.reg_type == RegType.ACTIVATION else " ⊣ "
+                to_gene = r.to_gene
+                string += from_gene + sign + to_gene + "\n"
+                string += "    - K: " + str(r.k) + "\n\n"
+        else:
+            string += "Not regulated"
+
+        return string

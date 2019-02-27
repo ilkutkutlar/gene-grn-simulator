@@ -1,15 +1,18 @@
 import libsbml
+from libsbml._libsbml import parseL3Formula
 
 import helper
 from models.custom_formula import CustomFormula
+from models.degradation_formula import DegradationFormula
 from models.network import Network
 from models.reaction import Reaction
-
-
 # 1. Core objects of libsbml:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
 # 2. Classes:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
+from models.reg_type import RegType
+from models.regulation import Regulation
+from models.transcription_formula import TranscriptionFormula
 
 
 class SbmlParser:
@@ -124,9 +127,62 @@ class SbmlParser:
 
     @staticmethod
     def save_as_sbml(net):
-        model: libsbml.Model
+        model = libsbml.Model(2, 3)  # SBML level 2, version 3
+
+        # species = {s.getId(): s.getInitialAmount()
+        #            for s in model.getListOfSpecies()}
+
+        for name, initial_amount in net.species.items():
+            spec = model.createSpecies()
+            spec.setId(name)
+            spec.setInitialAmount(initial_amount)
+
+        # rate_function = helper.ast_to_string(x.getKineticLaw().getMath().deepCopy())
+
+        # reactants = x.getListOfReactants()
+        # products = x.getListOfProducts()
+
+        # left = [y.getSpecies() for y in reactants]
+        # right = [y.getSpecies() for y in products]
+        # parameters = {p.getId(): p.getValue() for p in x.getKineticLaw().getListOfParameters()}
+
+        # sbo = x.getSBOTerm()
 
         for react in net.reactions:
-            r = libsbml.Reaction()
-            r.addReactant()
-            model.addReaction()
+            reaction = model.createReaction()
+
+            for x in react.left:
+                z = reaction.createReactant()
+                z.setSpecies(x)
+
+            for x in react.right:
+                z = reaction.createProduct()
+                z.setSpecies(x)
+
+            parseL3Formula('k * s1 * c1')
+
+            # r = libsbml.Reaction(2, 3)
+            # r.addReactant()
+        return model
+
+
+def test():
+    species = {"x": 0, "y": 20}
+
+    reg = Regulation("y", "x", RegType.REPRESSION, 40)
+    x_trans = TranscriptionFormula(5, "x")
+    x_trans.set_regulation(2, [reg])
+
+    reactions = [Reaction("", [], ["x"], x_trans),
+                 Reaction("", ["y"], [], DegradationFormula(0.3, "y"))]
+
+    net: Network = Network()
+    net.species = species
+    net.reactions = reactions
+
+    m = SbmlParser.save_as_sbml(net)
+    print(m.getListOfReactions()[0].getListOfProducts()[0].getSpecies())
+
+
+if __name__ == '__main__':
+    test()

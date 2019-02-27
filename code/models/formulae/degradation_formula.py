@@ -22,6 +22,9 @@ class DegradationFormula(Formula):
     def get_params(self):
         return ["rate"]
 
+    def get_formula_string(self):
+        return str(self.rate)
+
     def __str__(self):
         rate = str(self.rate)
 

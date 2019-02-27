@@ -39,6 +39,53 @@ class TranscriptionFormula(Formula):
         self.regulators = None
         self.input_gate = None
 
+    def compute(self, state):
+        # Protein regulates mRNA
+        if not self.regulators:
+            h = 1
+        elif len(self.regulators) == 1:
+            h = self._h_single(state)
+        elif len(self.regulators) == 2:
+            h = self._h_combinatorial(state)
+        else:
+            h = 0
+
+        return h * self.rate
+
+    def mutate(self, mutation):
+        for m in mutation:
+            if m == "rate":
+                self.rate = mutation[m][0]
+            else:  # m == "hill_coeff":
+                self.hill_coeff = mutation[m][0]
+
+    def get_params(self):
+        return ["rate", "hill_coeff"]
+
+    def get_formula_string(self):
+        if not self.regulators:
+            return str(self.rate)
+        elif len(self.regulators) == 1:
+            reg = self.regulators[0]
+            tf = reg.from_gene
+            n = str(self.hill_coeff)
+            k = reg.k
+
+            if reg.reg_type == RegType.ACTIVATION:
+                a = "({}^{})".format(tf, n)
+                b = "({}^{} + {}^{})".format(k, n, tf, n)
+
+                return "{}/{}".format(a, b)
+            else:
+                c = "(1 + ({}/{})^{})".format(tf, k, n)
+                return "1/{}".format(c)
+        elif len(self.regulators) == 2:
+            # TODO!!
+            return ""
+        else:
+            # TODO!!
+            return ""
+
     def set_regulation(self, hill_coeff, regulators, input_gate=InputGate.NONE):
         self.hill_coeff = hill_coeff
         self.regulators = regulators
@@ -122,19 +169,6 @@ class TranscriptionFormula(Formula):
         else:  # Repression, repression
             return one_rep * two_rep
 
-    def compute(self, state):
-        # Protein regulates mRNA
-        if not self.regulators:
-            h = 1
-        elif len(self.regulators) == 1:
-            h = self._h_single(state)
-        elif len(self.regulators) == 2:
-            h = self._h_combinatorial(state)
-        else:
-            h = 0
-
-        return h * self.rate
-
     """
     Return regulation strength when species is regulated by a single TF
     """
@@ -166,16 +200,6 @@ class TranscriptionFormula(Formula):
             h = 1
 
         return h
-
-    def mutate(self, mutation):
-        for m in mutation:
-            if m == "rate":
-                self.rate = mutation[m][0]
-            else:  # m == "hill_coeff":
-                self.hill_coeff = mutation[m][0]
-
-    def get_params(self):
-        return ["rate", "hill_coeff"]
 
     def __str__(self):
         trans_rate = str(self.rate)

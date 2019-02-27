@@ -126,43 +126,33 @@ class SbmlParser:
         return net
 
     @staticmethod
-    def save_as_sbml(net):
+    def network_to_sbml(net):
         model = libsbml.Model(2, 3)  # SBML level 2, version 3
-
-        # species = {s.getId(): s.getInitialAmount()
-        #            for s in model.getListOfSpecies()}
 
         for name, initial_amount in net.species.items():
             spec = model.createSpecies()
             spec.setId(name)
             spec.setInitialAmount(initial_amount)
 
-        # rate_function = helper.ast_to_string(x.getKineticLaw().getMath().deepCopy())
-
-        # reactants = x.getListOfReactants()
-        # products = x.getListOfProducts()
-
-        # left = [y.getSpecies() for y in reactants]
-        # right = [y.getSpecies() for y in products]
         # parameters = {p.getId(): p.getValue() for p in x.getKineticLaw().getListOfParameters()}
-
         # sbo = x.getSBOTerm()
 
-        for react in net.reactions:
+        for r in net.reactions:
             reaction = model.createReaction()
 
-            for x in react.left:
+            for x in r.left:
                 z = reaction.createReactant()
                 z.setSpecies(x)
 
-            for x in react.right:
+            for x in r.right:
                 z = reaction.createProduct()
                 z.setSpecies(x)
 
-            parseL3Formula('k * s1 * c1')
+            # TODO: http://sbml.org/Software/libSBML/5.17.0/docs//python-api/create_simple_model_8py-example.html
+            law = reaction.createKineticLaw()
+            law.setMath(parseL3Formula(r.rate_function.get_formula_string()))
+            # TODO: PARAMETERS!
 
-            # r = libsbml.Reaction(2, 3)
-            # r.addReactant()
         return model
 
 
@@ -180,8 +170,8 @@ def test():
     net.species = species
     net.reactions = reactions
 
-    m = SbmlParser.save_as_sbml(net)
-    print(m.getListOfReactions()[0].getListOfProducts()[0].getSpecies())
+    m = SbmlParser.network_to_sbml(net)
+    print(helper.ast_to_string(m.getListOfReactions()[0].getKineticLaw().getMath()))
 
 
 if __name__ == '__main__':

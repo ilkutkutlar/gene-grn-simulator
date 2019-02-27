@@ -24,3 +24,7 @@ class Formula(ABC):
     @abstractmethod
     def get_params(self):
         pass
+
+    @staticmethod
+    def get_formula_string():
+        pass

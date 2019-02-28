@@ -8,6 +8,17 @@ from structured_results import StructuredResults
 
 
 class AnnealingState:
+    class Variable:
+
+        def __init__(self, mutable):
+            pass
+            # self.lower_bound = lower_bound
+            # self.upper_bound = upper_bound
+            # self.increments = increments
+            # self.reaction_name = reaction_name
+
+            # self.value = self.lower_bound
+
     def __init__(self, mutables):
         self.mutables = mutables
         self.variables = {name: (mutables[name].lower_bound,
@@ -53,10 +64,11 @@ class ReverseEngineering:
         available_mutables = list(filter(lambda x: not will_reach_upperbound(x), list(mutables.keys())))
 
         if available_mutables:
+            # 1. Choose a random mutable from the mutables list
             r = random.randrange(len(available_mutables))
-            # Choose a random mutable from the mutables list
             rand_mutable = list(available_mutables)[r]
-            # Increment mutable by its increment to create a new network,
+
+            # 2. Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
             nbour[rand_mutable] = (nbour[rand_mutable][0] + mutables[rand_mutable].increments,
                                    nbour[rand_mutable][1])
@@ -103,8 +115,7 @@ class ReverseEngineering:
     @staticmethod
     def find_network(net, sim, mutables, constraints, schedule):
         # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-        current = {name: (mutables[name].lower_bound,
-                          mutables[name].reaction_name) for name in mutables}
+        current = mutables
 
         for t in range(1, len(schedule) - 1):
             T = schedule[t]

@@ -53,11 +53,10 @@ class TranscriptionFormula(Formula):
         return h * self.rate
 
     def mutate(self, mutation):
-        for m in mutation:
-            if m == "rate":
-                self.rate = mutation[m][0]
-            else:  # m == "hill_coeff":
-                self.hill_coeff = mutation[m][0]
+        if mutation.variable_name == "rate":
+            self.rate = mutation.current_value
+        elif mutation.variable_name == "hill_coeff":
+            self.hill_coeff = mutation.current_value
 
     def get_params(self):
         return ["rate", "hill_coeff"]

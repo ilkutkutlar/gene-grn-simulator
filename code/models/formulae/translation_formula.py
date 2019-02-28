@@ -15,9 +15,8 @@ class TranslationFormula(Formula):
         return self.rate * state[self.mrna_species]
 
     def mutate(self, mutation):
-        for m in mutation:
-            if m == "rate":
-                self.rate = mutation[m][0]
+        if mutation.variable_name == "rate":
+            self.rate = mutation.current_value
 
     def get_params(self):
         return ["rate"]

@@ -1,3 +1,6 @@
+from reverse_engineering.mutable import ReactionMutable, VariableMutable
+
+
 class Network:
 
     def __init__(self):
@@ -20,14 +23,13 @@ class Network:
 
     def mutate(self, mutations):
         for m in mutations:
-            new_value = mutations[m][0]
-            reaction_name = mutations[m][1]
-
-            if reaction_name != "":
-                r = self.find_reaction_by_name(reaction_name)
-                r.rate_function.mutate(mutations)
+            if isinstance(m, ReactionMutable):
+                r = self.find_reaction_by_name(m.reaction_name)
+                r.rate_function.mutate(m)
+            elif isinstance(m, VariableMutable):
+                self.species[m] = m.current_value
             else:
-                self.species[m] = new_value
+                pass  # error
 
     """
     Return reaction with given name

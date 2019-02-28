@@ -21,8 +21,7 @@ class CustomFormula(Formula):
                                     parameters=self.parameters)
 
     def mutate(self, mutation):
-        for m in mutation:
-            self.parameters.update({m: mutation[m][0]})
+        self.parameters.update({mutation.variable_name: mutation.current_value})
 
     def get_params(self):
         return list(self.parameters.keys())

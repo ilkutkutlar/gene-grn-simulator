@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox
 
+from simulation.ode_simulator import OdeSimulator
+from ui.gene_controller import GeneController
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
@@ -50,6 +52,16 @@ class GeneWindow(QMainWindow):
         self.setWindowTitle("Gene")
         self.show()
 
+    def _deterministic_simulation_clicked(self):
+        def handler(s):
+            net = GeneController.get_instance().network
+            OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
+
+        DeterministicSimulationDialog(handler)
+
+    def _stochastic_simulation_clicked(self):
+        StochasticSimulationDialog()
+
     def _init_menubar(self):
         self.menubar = self.menuBar()
 
@@ -65,11 +77,11 @@ class GeneWindow(QMainWindow):
         simulate = self.menubar.addMenu("Simulate")
 
         deterministic = QAction("Deterministic (ODE)", self)
-        deterministic.triggered.connect(lambda _: DeterministicSimulationDialog())
+        deterministic.triggered.connect(self._deterministic_simulation_clicked)
         simulate.addAction(deterministic)
 
         stochastic = QAction("Stochastic (Gillespie Algorithm)", self)
-        stochastic.triggered.connect(lambda _: StochasticSimulationDialog())
+        stochastic.triggered.connect(self._stochastic_simulation_clicked)
         simulate.addAction(stochastic)
 
 

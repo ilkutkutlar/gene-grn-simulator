@@ -1,9 +1,7 @@
-from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout, QCheckBox, QGridLayout
+from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout
 
 from models.simulation_settings import SimulationSettings
-from simulation.ode_simulator import OdeSimulator
 from ui import common_widgets
-from ui.gene_controller import GeneController
 
 
 class DeterministicSimulationDialog(QDialog):
@@ -23,14 +21,19 @@ class DeterministicSimulationDialog(QDialog):
         sampling_rate = int(sampling_text)
 
         self.close()
-        s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
-        net = GeneController.get_instance().network
-        OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
-    def __init__(self):
+        s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
+        self.handler(s)
+
+    """
+    :param Callable[[SimulationSettings], None] handler: The handler for the dialog's ok button.
+    """
+
+    def __init__(self, handler):
         super().__init__()
         main = QVBoxLayout()
         fields = QFormLayout()
+        self.handler = handler
 
         self.time_field = QLineEdit()
         fields.addRow(QLabel("Simulation time"), self.time_field)

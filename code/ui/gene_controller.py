@@ -91,7 +91,7 @@ class GeneController:
         # c2 = Constraint("z", lambda x: x - 150, (0, 20))
         # m = Mutable(0.5, 50, 0.5, "x_trans")
         self.network = get_test()
-        self.mutables = {}
+        self.mutables = []
         self.constraints = []
 
     @staticmethod
@@ -108,6 +108,12 @@ class GeneController:
 
     def get_mutables(self):
         return self.mutables
+
+    def get_mutable_by_name(self, name):
+        f = list(filter(
+            lambda m: m.variable_name == name,
+            self.mutables))
+        return f[0] if f else None
 
     def get_constraints(self):
         return self.constraints
@@ -134,9 +140,8 @@ class GeneController:
     def remove_reaction_by_index(self, index):
         del self.network.reactions[index]
 
-    # TODO: NOT GUARANTEED TO WORK!!!
-    def remove_mutable_by_index(self, index):
-        del self.mutables[list(self.mutables.keys())[index]]
+    def remove_mutable(self, index):
+        del self.mutables[index]
 
     def remove_constraint(self, index):
         del self.constraints[index]

@@ -10,7 +10,6 @@ class VariableMutable:
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
         self.increments = increments
-
         self.current_value = self.lower_bound
 
     def get_next_value(self):

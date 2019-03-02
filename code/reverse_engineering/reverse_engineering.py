@@ -1,3 +1,4 @@
+import copy
 import random
 from math import e, ceil
 
@@ -55,13 +56,12 @@ class ReverseEngineering:
     """
 
     @staticmethod
-    def _generate_network_neighbour(current, mutables):
-        nbour = current.copy()
-
-        will_reach_upperbound = lambda m: nbour[m][0] + mutables[m].increments > mutables[m].upper_bound
+    def _generate_neighbour(mutables):
         # These are the mutables which still have not reached their upperbound value, so they are
         # available for incrementing
-        available_mutables = list(filter(lambda x: not will_reach_upperbound(x), list(mutables.keys())))
+        available_mutables = list(filter(lambda x: x.get_next_value() is not None, list(mutables)))
+
+        nbour = mutables.copy()
 
         if available_mutables:
             # 1. Choose a random mutable from the mutables list
@@ -70,8 +70,7 @@ class ReverseEngineering:
 
             # 2. Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
-            nbour[rand_mutable] = (nbour[rand_mutable][0] + mutables[rand_mutable].increments,
-                                   nbour[rand_mutable][1])
+            rand_mutable.current_value = rand_mutable.get_next_value()
 
         return nbour
 
@@ -82,7 +81,7 @@ class ReverseEngineering:
     """
 
     @staticmethod
-    def rand_bool(prob):
+    def _rand_bool(prob):
         # Since using integers for random generation, some precision of p, which is a float,
         # will be lost (e.g. 0.387 would give 2.58397... for 1/p, and no = 3 in this case. Thus
         # rather than the actual probability being 0.387, it will be 0.33.) To avoid this,
@@ -103,6 +102,17 @@ class ReverseEngineering:
         return False
 
     """
+    Return a schedule to be used with simulated annealing of given length starting from length, 
+    ending at 0, stepping by 1.
+    
+    :param int length: The length of the produced scheduled.
+    """
+
+    @staticmethod
+    def generate_schedule(length):
+        return {z: (length - z) for z in range(0, length + 1)}
+
+    """
     :param Network net: The network to modify
     :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
     :param Dict[str, Tuple[float, float, float, str]] mutables:
@@ -114,22 +124,24 @@ class ReverseEngineering:
 
     @staticmethod
     def find_network(net, sim, mutables, constraints, schedule):
+        mut_net = copy.deepcopy(net)
+
         # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
         current = mutables
 
         for t in range(1, len(schedule) - 1):
             T = schedule[t]
 
-            net.mutate(current)
-            evalCurrent = ReverseEngineering._evaluate_network(net, sim, constraints)
+            mut_net.mutate(current)
+            evalCurrent = ReverseEngineering._evaluate_network(mut_net, sim, constraints)
 
             if T == 0 or (evalCurrent <= 0):
-                return current
+                return mut_net
             else:
-                neighbour = ReverseEngineering._generate_network_neighbour(current, mutables)
+                neighbour = ReverseEngineering._generate_neighbour(mutables)
 
-                net.mutate(neighbour)
-                evalNeighbour = ReverseEngineering._evaluate_network(net, sim, constraints)
+                mut_net.mutate(neighbour)
+                evalNeighbour = ReverseEngineering._evaluate_network(mut_net, sim, constraints)
 
                 delta_e = evalCurrent - evalNeighbour
 
@@ -138,7 +150,7 @@ class ReverseEngineering:
                     current = neighbour
                 else:
                     p = e ** (-delta_e / T)
-                    if ReverseEngineering.rand_bool(p):
+                    if ReverseEngineering._rand_bool(p):
                         current = neighbour
 
         return None

@@ -59,7 +59,7 @@ class ReverseEngineering:
     def _generate_neighbour(mutables):
         # These are the mutables which still have not reached their upperbound value, so they are
         # available for incrementing
-        available_mutables = list(filter(lambda x: x.get_next_value() is not None, list(mutables)))
+        available_mutables = list(filter(lambda x: x.is_next(), list(mutables)))
 
         nbour = mutables.copy()
 
@@ -70,7 +70,7 @@ class ReverseEngineering:
 
             # 2. Increment mutable by its increment to create a new network,
             # i.e. current network's neighbour
-            rand_mutable.current_value = rand_mutable.get_next_value()
+            rand_mutable.next()
 
         return nbour
 

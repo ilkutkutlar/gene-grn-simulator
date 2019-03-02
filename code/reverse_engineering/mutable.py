@@ -12,11 +12,18 @@ class VariableMutable:
         self.increments = increments
         self.current_value = self.lower_bound
 
-    def get_next_value(self):
+    def is_next(self):
         if self.current_value + self.increments > self.upper_bound:
-            return None
+            return False
         else:
-            return self.current_value + self.increments
+            return True
+
+    def next(self):
+        if self.is_next():
+            self.current_value += self.increments
+            return True
+        else:
+            return False
 
     def __str__(self):
         lo = str(self.lower_bound)
@@ -40,3 +47,65 @@ class ReactionMutable(VariableMutable):
         hi = str(self.upper_bound)
         step = str(self.increments)
         return "({} to {}) step: {} in {}".format(lo, hi, step, self.reaction_name)
+
+
+class RegulationMutable:
+    """
+    :param str reaction_name: The name of the reaction which can potentially do regulation
+    :param List[str] to_species: The list of possible species which this reaction can potentially regulate
+    :param VariableMutable k_variable: k variable mutable associated with this regulation
+    :param List[RegType] possible_reg_types: All possible regulation types accepted
+    :param bool is_installed: Whether this regulation is installed in the network
+    """
+
+    def __init__(self, reaction_name, to_species, k_variable, possible_reg_types, is_installed):
+        self.reaction_name = reaction_name
+        self.to_species = to_species
+        self.possible_reg_types = possible_reg_types
+        self.k_variable = k_variable
+
+        self.is_installed = is_installed
+        self.current_to = 0 if to_species else None
+        self.current_reg_type = 0 if possible_reg_types else None
+
+    def is_next(self):
+        if not self.is_installed:
+            return True
+        else:
+            # for x in to_species:
+            #   for y in reg_types:
+            #       for z in k:
+
+            if self.k_variable.next():
+                return True
+            else:
+                if self.current_reg_type < len(self.possible_reg_types):
+                    return True
+                else:
+                    if self.current_to < len(self.to_species):
+                        return True
+                    else:
+                        return False
+
+    def next(self):
+        if not self.is_installed:
+            self.is_installed = True
+            return True
+        else:
+            # for x in to_species:
+            #   for y in reg_types:
+            #       for z in k:
+
+            if self.k_variable.next():
+                self.k_variable.next()
+                return True
+            else:
+                if self.current_reg_type < len(self.possible_reg_types):
+                    self.current_reg_type += 1
+                    return True
+                else:
+                    if self.current_to < len(self.to_species):
+                        self.current_to += 1
+                        return True
+                    else:
+                        return False

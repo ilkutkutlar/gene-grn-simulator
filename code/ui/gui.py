@@ -1,9 +1,11 @@
-from PyQt5.QtWidgets import QTabWidget
+from PyQt5.QtWidgets import QTabWidget, QFileDialog
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessageBox
 
+from input_output.sbml_saver import SbmlSaver
 from simulation.ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
+from ui.save_sbml_dialog import SaveSbmlDialog
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
@@ -62,6 +64,14 @@ class GeneWindow(QMainWindow):
     def _stochastic_simulation_clicked(self):
         StochasticSimulationDialog()
 
+    def _save_file_as_sbml_clicked(self):
+        net = GeneController.get_instance().network
+        d = QFileDialog()
+        filename = d.getSaveFileName(self, "Save file", ".", "XML Files (*.xml)")
+
+        if filename:
+            SbmlSaver.save_network_to_file(net, filename[0] + ".xml")
+
     def _init_menubar(self):
         self.menubar = self.menuBar()
 
@@ -70,8 +80,11 @@ class GeneWindow(QMainWindow):
 
         open_file = QAction("Open SBML file", self)
         open_file.triggered.connect(lambda _: OpenSbmlDialog(self))
-
         file.addAction(open_file)
+
+        save_file = QAction("Save as SBML file", self)
+        save_file.triggered.connect(self._save_file_as_sbml_clicked)
+        file.addAction(save_file)
 
         # Simulate menu
         simulate = self.menubar.addMenu("Simulate")

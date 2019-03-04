@@ -109,3 +109,6 @@ class RegulationMutable:
                         return True
                     else:
                         return False
+
+    def __str__(self):
+        pass  # TODO

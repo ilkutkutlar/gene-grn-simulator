@@ -4,7 +4,7 @@ from input_output.sbml_parser import SbmlParser
 from ui.gene_controller import GeneController
 
 
-class OpenSbmlDialog(QFileDialog):
+class SaveSbmlDialog(QFileDialog):
 
     def __init__(self, parent):
         super().__init__()
@@ -22,8 +22,7 @@ class OpenSbmlDialog(QFileDialog):
 
             # Display a nice message showing the contents of the file loaded
             message = QMessageBox()
-            # TODO: Maybe only print species and reactions?
-            message.setText("SBML file has been opened")
+            message.setText("SBML file has been opened and this network has been loaded: \n\n" + net.__str__())
             message.exec_()
 
             parent.species_tab.update_list()

@@ -74,10 +74,10 @@ class TranscriptionFormula(Formula):
                 a = "({}^{})".format(tf, n)
                 b = "({}^{} + {}^{})".format(k, n, tf, n)
 
-                return "{}/{}".format(a, b)
+                return "{}*({}/{})".format(str(self.rate), a, b)
             else:
                 c = "(1 + ({}/{})^{})".format(tf, k, n)
-                return "1/{}".format(c)
+                return "{}*(1/{})".format(str(self.rate), c)
         elif len(self.regulators) == 2:
             # TODO!!
             return ""

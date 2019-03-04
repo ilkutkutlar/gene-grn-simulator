@@ -22,7 +22,7 @@ class DegradationFormula(Formula):
         return ["rate"]
 
     def get_formula_string(self):
-        return str(self.rate)
+        return "{}*{}".format(self.decaying_species, str(self.rate))
 
     def __str__(self):
         rate = str(self.rate)

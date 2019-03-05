@@ -1,9 +1,13 @@
+import os
+
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
     QVBoxLayout
 
-from ui.reactions.add_reaction_dialog import AddReactionDialog
+from network_visualiser import NetworkVisualiser
 from ui.gene_controller import GeneController
+from ui.reactions.add_reaction_dialog import AddReactionDialog
 
 
 class ReactionsTab(QWidget):
@@ -15,17 +19,20 @@ class ReactionsTab(QWidget):
         self._init_reactions_list()
         self._init_reaction_details()
         self._init_buttons()
+        self.network_image = QLabel()
+
         self.update_list()
+        self.update_network_image()
 
         self.grid.addWidget(self.reactions_list, 0, 0)
         self.grid.addWidget(self.aux, 0, 1)
 
         self.main_layout.addLayout(self.grid)
         self.main_layout.addLayout(self.buttons_layout)
+        self.main_layout.addWidget(self.network_image)
         self.setLayout(self.main_layout)
 
     def _init_reaction_details(self):
-
         self.aux = QScrollArea()
         layout = QVBoxLayout()
         self.reaction_details = QLabel()
@@ -35,30 +42,14 @@ class ReactionsTab(QWidget):
         layout.addWidget(self.reaction_details)
         self.aux.setLayout(layout)
 
-    def _add_reaction_click_handler(self):
-        dialog = AddReactionDialog()
-        dialog.finished.connect(lambda: self.update_list())
-        dialog.exec_()
-
-    def _remove_reaction_click_handler(self):
-        i = self.reactions_list.currentRow()
-        GeneController.get_instance().remove_reaction_by_index(i)
-        self.update_list()
-        print(GeneController.get_instance().network)
-
-    def _reaction_list_clicked(self):
-        index = self.reactions_list.currentRow()
-        chosen_reaction = GeneController.get_instance().get_reactions()[index]
-        self.reaction_details.setText(str(chosen_reaction))
-
     def _init_buttons(self):
         self.buttons_layout = QHBoxLayout()
 
         self.add_button = QPushButton("Add")
-        self.add_button.clicked.connect(self._add_reaction_click_handler)
+        self.add_button.clicked.connect(self._add_reaction_clicked)
 
         self.remove_button = QPushButton("Remove")
-        self.remove_button.clicked.connect(self._remove_reaction_click_handler)
+        self.remove_button.clicked.connect(self._remove_reaction_clicked)
 
         self.buttons_layout.addWidget(self.add_button)
         self.buttons_layout.addWidget(self.remove_button)
@@ -69,7 +60,27 @@ class ReactionsTab(QWidget):
         self.reactions_list.setMaximumWidth(200)
         self.reactions_list.itemClicked.connect(self._reaction_list_clicked)
 
+    def _add_reaction_clicked(self):
+        dialog = AddReactionDialog()
+        dialog.finished.connect(lambda: self.update_list())
+        dialog.exec_()
+
+    def _remove_reaction_clicked(self):
+        i = self.reactions_list.currentRow()
+        GeneController.get_instance().remove_reaction_by_index(i)
+        self.update_list()
+        print(GeneController.get_instance().network)
+
+    def _reaction_list_clicked(self):
+        index = self.reactions_list.currentRow()
+        chosen_reaction = GeneController.get_instance().get_reactions()[index]
+        self.reaction_details.setText(str(chosen_reaction))
+
     def update_list(self):
         self.reactions_list.clear()
         for s in GeneController.get_instance().get_reactions():
             self.reactions_list.addItem(s.name)
+
+    def update_network_image(self):
+        im = NetworkVisualiser.visualise(GeneController.get_instance().network)
+        self.network_image.setPixmap(QPixmap.fromImage(im))

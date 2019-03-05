@@ -5,13 +5,12 @@ from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessag
 from input_output.sbml_saver import SbmlSaver
 from simulation.ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
-from ui.save_sbml_dialog import SaveSbmlDialog
-from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
 from ui.reverse_engineering.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
-from ui.species.species_tab import SpeciesTab
+from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialog
+from ui.species.species_tab import SpeciesTab
 
 
 def show_error_message(message):

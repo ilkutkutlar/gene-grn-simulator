@@ -28,3 +28,4 @@ class OpenSbmlDialog(QFileDialog):
 
             parent.species_tab.update_list()
             parent.reactions_tab.update_list()
+            parent.reactions_tab.update_network_image()

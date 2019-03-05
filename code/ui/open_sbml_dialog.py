@@ -26,6 +26,5 @@ class OpenSbmlDialog(QFileDialog):
             message.setText("SBML file has been opened")
             message.exec_()
 
-            parent.species_tab.update_list()
-            parent.reactions_tab.update_list()
-            parent.reactions_tab.update_network_image()
+            parent.species_tab.update_ui()
+            parent.reactions_tab.update_ui()

@@ -37,7 +37,7 @@ class GeneWindow(QMainWindow):
 
         tabs = QTabWidget()
 
-        self.species_tab = SpeciesTab()
+        self.species_tab = SpeciesTab(self)
         self.reactions_tab = ReactionsTab()
         self.rev_eng_modify_tab = ReverseEngineeringModifyTab()
         tabs.addTab(self.species_tab, "Species")

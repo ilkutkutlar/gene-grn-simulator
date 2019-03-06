@@ -226,8 +226,7 @@ class TranscriptionFormula(Formula):
                 from_gene = r.from_gene
                 sign = " ⭢ " if r.reg_type == RegType.ACTIVATION else " ⊣ "
                 to_gene = r.to_gene
-                string += from_gene + sign + to_gene + "\n"
-                string += "    - K: " + str(r.k) + "\n\n"
+                string += from_gene + sign + to_gene + "    (K: " + str(r.k) + ")\n"
         else:
             string += "Not regulated"
 

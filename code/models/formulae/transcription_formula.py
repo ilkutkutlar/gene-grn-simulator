@@ -90,6 +90,16 @@ class TranscriptionFormula(Formula):
         self.regulators = regulators
         self.input_gate = input_gate
 
+    def get_regulation(self, from_gene):
+        if self.regulators:
+            regs = list(filter(lambda x: x.from_gene == from_gene, self.regulators))
+            if regs:
+                return regs[0]
+            else:
+                return None
+        else:
+            return None
+
     @staticmethod
     def _hill_activator(tf, n, k):
         """

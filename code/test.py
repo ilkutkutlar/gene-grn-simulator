@@ -9,6 +9,9 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
+from reverse_engineering.constraint import Constraint
+from reverse_engineering.mutable import RegulationMutable, VariableMutable
+from reverse_engineering.reverse_engineering import ReverseEngineering
 from simulation.ode_simulator import OdeSimulator
 
 
@@ -154,7 +157,116 @@ def get_test_network2():
     return net2
 
 
+def get_large_network():
+    species = {"mA": 0, "pA": 0,
+               "mB": 50, "pB": 0,
+               "mC": 30, "pC": 0,
+               "mD": 45, "pD": 0,
+               "mE": 20, "pE": 0,
+               "mF": 35, "pF": 0,
+               "mG": 35, "pG": 0,
+               "mH": 55, "pH": 0,
+               "mI": 75, "pI": 0,
+               "mJ": 85, "pJ": 0,
+               "mX": 110, "pX": 0,
+               "mY": 30, "pY": 0,
+               "mZ": 140, "pZ": 0}
+
+    reactions = []
+
+    n = 2
+    gate = InputGate.AND
+    k = 40
+
+    a_trans = TranscriptionFormula(16, "mA")
+    a_trans.set_regulation(n, [Regulation("pB", "mA", RegType.REPRESSION, k)])
+
+    b_trans = TranscriptionFormula(17, "mB")
+    b_trans.set_regulation(n, [Regulation("pE", "mB", RegType.ACTIVATION, k)])
+
+    c_trans = TranscriptionFormula(5, "mC")
+    c_trans.set_regulation(n, [Regulation("pY", "mC", RegType.REPRESSION, k)])
+
+    d_trans = TranscriptionFormula(14, "mD")
+    d_trans.set_regulation(n, [Regulation("pD", "mD", RegType.ACTIVATION, k),
+                               Regulation("pB", "mD", RegType.REPRESSION, k)])
+
+    e_trans = TranscriptionFormula(35, "mE")
+    e_trans.set_regulation(n, [Regulation("pB", "mE", RegType.REPRESSION, k)])
+
+    f_trans = TranscriptionFormula(18, "mF")
+    f_trans.set_regulation(n,
+                           [Regulation("pF", "mF", RegType.REPRESSION, k),
+                            Regulation("pG", "mF", RegType.ACTIVATION, k)],
+                           input_gate=gate)
+
+    g_trans = TranscriptionFormula(7, "mG")
+    g_trans.set_regulation(n, [Regulation("pE", "mG", RegType.REPRESSION, k)])
+
+    h_trans = TranscriptionFormula(20, "mH")
+
+    i_trans = TranscriptionFormula(27, "mI")
+    i_trans.set_regulation(n, [Regulation("pH", "mI", RegType.ACTIVATION, k)])
+
+    j_trans = TranscriptionFormula(24, "mJ")
+    j_trans.set_regulation(n, [Regulation("pI", "mJ", RegType.ACTIVATION, k),
+                               Regulation("pH", "mJ", RegType.ACTIVATION, k)],
+                           input_gate=gate)
+
+    x_trans = TranscriptionFormula(29, "mX")
+    x_trans.set_regulation(n, [Regulation("pZ", "mX", RegType.REPRESSION, k)])
+
+    y_trans = TranscriptionFormula(21, "mY")
+    y_trans.set_regulation(n, [Regulation("pB", "mY", RegType.ACTIVATION, k)])
+
+    z_trans = TranscriptionFormula(8, "mZ")
+    z_trans.set_regulation(n, [Regulation("pX", "mZ", RegType.ACTIVATION, k)])
+
+    reactions = [Reaction("a_trans", [], ["mA"], a_trans),
+                 Reaction("b_trans", [], ["mB"], b_trans),
+                 Reaction("c_trans", [], ["mC"], c_trans),
+                 Reaction("d_trans", [], ["mD"], d_trans),
+                 Reaction("e_trans", [], ["mE"], e_trans),
+                 Reaction("f_trans", [], ["mF"], f_trans),
+                 Reaction("g_trans", [], ["mG"], g_trans),
+                 Reaction("h_trans", [], ["mH"], h_trans),
+                 Reaction("i_trans", [], ["mI"], i_trans),
+                 Reaction("j_trans", [], ["mJ"], j_trans),
+                 Reaction("x_trans", [], ["mX"], x_trans),
+                 Reaction("y_trans", [], ["mY"], y_trans),
+                 Reaction("z_trans", [], ["mZ"], z_trans)]
+
+    deg_rates_mrna = [0.095, 0.014, 0.098, 0.043, 0.091, 0.047, 0.074, 0.022, 0.085, 0.092, 0.028, 0.038, 0.045]
+    deg_rates_protein = [0.035, 0.093, 0.075, 0.025, 0.045, 0.064, 0.068, 0.084, 0.03, 0.094, 0.066, 0.053, 0.084]
+    all_deg_rates = deg_rates_mrna + deg_rates_protein
+    translation_rates = [0.5, 8.8, 7.9, 2.7, 1.5, 3.6, 1.8, 9.5, 8.0, 6.4, 7.4, 1.6, 6.5]
+
+    for s, r in zip(species.keys(), all_deg_rates):
+        reactions.append(Reaction(s + "_deg", [s], [], DegradationFormula(r, s)))
+
+    for i, r in zip(range(1, 26, 2), translation_rates):
+        spec = list(species.keys())[i]
+        mrna = list(species.keys())[i - 1]
+        reactions.append(Reaction(spec + "_translation", [], [spec], TranslationFormula(r, mrna)))
+
+    net = Network()
+    net.species = species
+    net.reactions = reactions
+    return net
+
 if __name__ == '__main__':
-    net = get_repressilator()
-    s = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
-    OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
+    # repressilator_sim = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
+    #
+    # net = get_test_network1()
+    # net1_sim = SimulationSettings(0, 100, 100, ["x", "y", "z"])
+    #
+    # mutables = [RegulationMutable("y_trans", ["px", "py", "pz"], VariableMutable("k", 1, 50, 1),
+    #                               [RegType.ACTIVATION, RegType.REPRESSION], True)]
+    # constraints = [Constraint("y", lambda x: x - 50, (20, 40))]
+    # schedule = ReverseEngineering.generate_schedule(100)
+    #
+    # n = ReverseEngineering.find_network(net, net1_sim, mutables, constraints, schedule)
+    #
+    # print(n.get_reaction_by_name("y_trans"))
+    # OdeSimulator.visualise(n, net1_sim, OdeSimulator.simulate(n, net1_sim))
+    get_large_network()

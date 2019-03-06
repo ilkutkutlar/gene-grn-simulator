@@ -29,7 +29,7 @@ class VariableMutable:
         lo = str(self.lower_bound)
         hi = str(self.upper_bound)
         step = str(self.increments)
-        return "({} to {}) step: {}".format(lo, hi, step)
+        return "{}: ({} to {}) step: {}".format(self.variable_name, lo, hi, step)
 
 
 class ReactionMutable(VariableMutable):
@@ -46,26 +46,26 @@ class ReactionMutable(VariableMutable):
         lo = str(self.lower_bound)
         hi = str(self.upper_bound)
         step = str(self.increments)
-        return "({} to {}) step: {} in {}".format(lo, hi, step, self.reaction_name)
+        return "{}: ({} to {}) step: {} in {}".format(self.variable_name, lo, hi, step, self.reaction_name)
 
 
 class RegulationMutable:
     """
     :param str reaction_name: The name of the reaction which can potentially do regulation
-    :param List[str] to_species: The list of possible species which this reaction can potentially regulate
+    :param List[str] possible_regulators: The list of species which this reaction can potentially be regulated by
     :param VariableMutable k_variable: k variable mutable associated with this regulation
     :param List[RegType] possible_reg_types: All possible regulation types accepted
     :param bool is_installed: Whether this regulation is installed in the network
     """
 
-    def __init__(self, reaction_name, to_species, k_variable, possible_reg_types, is_installed):
+    def __init__(self, reaction_name, possible_regulators, k_variable, possible_reg_types, is_installed):
         self.reaction_name = reaction_name
-        self.to_species = to_species
+        self.possible_regulators = possible_regulators
         self.possible_reg_types = possible_reg_types
         self.k_variable = k_variable
 
         self.is_installed = is_installed
-        self.current_to = 0 if to_species else None
+        self.current_regulator = 0 if possible_regulators else None
         self.current_reg_type = 0 if possible_reg_types else None
 
     def is_next(self):
@@ -82,7 +82,7 @@ class RegulationMutable:
                 if self.current_reg_type < len(self.possible_reg_types):
                     return True
                 else:
-                    if self.current_to < len(self.to_species):
+                    if self.current_regulator < len(self.possible_regulators):
                         return True
                     else:
                         return False
@@ -100,15 +100,15 @@ class RegulationMutable:
                 self.k_variable.next()
                 return True
             else:
-                if self.current_reg_type < len(self.possible_reg_types):
+                if self.current_reg_type < len(self.possible_reg_types) - 1:
                     self.current_reg_type += 1
                     return True
                 else:
-                    if self.current_to < len(self.to_species):
-                        self.current_to += 1
+                    if self.current_regulator < len(self.possible_regulators) - 1:
+                        self.current_regulator += 1
                         return True
                     else:
                         return False
 
     def __str__(self):
-        pass  # TODO
+        return "This is a mutable!"

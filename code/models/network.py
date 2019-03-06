@@ -1,3 +1,6 @@
+from models.formulae.transcription_formula import TranscriptionFormula
+from models.input_gate import InputGate
+from models.regulation import Regulation
 from reverse_engineering.mutable import ReactionMutable, VariableMutable, RegulationMutable
 
 
@@ -24,35 +27,43 @@ class Network:
     def mutate(self, mutations):
         for m in mutations:
             if isinstance(m, ReactionMutable):
-                r = self.find_reaction_by_name(m.reaction_name)
+                r = self.get_reaction_by_name(m.reaction_name)
                 r.rate_function.mutate(m)
             elif isinstance(m, VariableMutable):
                 self.species[m] = m.current_value
             elif isinstance(m, RegulationMutable):
-                pass  # TODO
-                # self.reaction_name = reaction_name
-                # self.to_species = to_species
-                # self.possible_reg_types = possible_reg_types
-                # self.k_variable = k_variable
-                #
-                # self.is_installed = is_installed
-                # self.current_to = 0 if to_species else None
-                # self.current_reg_type = 0 if possible_reg_types else None
-                maybe_reaction = list(filter(lambda x: x.reaction_name == m.reaction_name, self.reactions))
+                maybe_reaction = \
+                    list(filter(lambda x: x.name == m.reaction_name, self.reactions))
                 if maybe_reaction:
-                    reaction = maybe_reaction[0]
-                    # reaction.rate_function.
-                    # TODO
+                    transcription = maybe_reaction[0].rate_function
+
+                    if m.is_installed:
+                        reg = transcription.get_regulation(m.possible_regulators[m.current_regulator])
+                        if reg:
+                            reg.reg_type = m.possible_reg_types[m.current_reg_type]
+                            reg.k = m.k_variable.current_value
+                        else:
+                            # TODO
+                            transcription.set_regulation(2, [], InputGate.AND)
+
+                            new_reg = Regulation(m.possible_regulators[m.current_regulator], transcription.transcribed_species,
+                                                 m.possible_reg_types[m.current_reg_type], m.k_variable.current_value)
+
+                            transcription.regulators.append(new_reg)
+                    else:
+                        reg = transcription.get_regulation(m.current_regulator)
+                        if reg:
+                            transcription.regulators.remove(reg)
                 else:
                     pass  # error
 
-                """
-                Return reaction with given name
-                :param str name: Name of reaction
-                :returns Reaction if found, None if not
-                """
+    """
+    Return reaction with given name
+    :param str name: Name of reaction
+    :returns Reaction if found, None if not
+    """
 
-    def find_reaction_by_name(self, name):
+    def get_reaction_by_name(self, name):
         t = list(filter(lambda r: r.name == name, self.reactions))
         if t:
             return t[0]

@@ -8,7 +8,7 @@ from simulation.ode_simulator import OdeSimulator
 from structured_results import StructuredResults
 
 
-class ReverseEngineering:
+class ConstraintSatisfaction:
     """
     :param StructuredResults results: results of network's simulation
     :param List[Constraint] constraints: list of constraints to evaluate the results against
@@ -109,7 +109,7 @@ class ReverseEngineering:
         mut_net = copy.deepcopy(net)
 
         # First, check whether network already satisfies constraints
-        evalCurrent = ReverseEngineering._evaluate_network(mut_net, sim, constraints)
+        evalCurrent = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
         if evalCurrent <= 0:
             return mut_net
 
@@ -120,15 +120,15 @@ class ReverseEngineering:
             T = schedule[t]
 
             mut_net.mutate(current)
-            evalCurrent = ReverseEngineering._evaluate_network(mut_net, sim, constraints)
+            evalCurrent = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
 
             if T == 0 or (evalCurrent <= 0):
                 return mut_net
             else:
-                neighbour = ReverseEngineering._generate_neighbour(mutables)
+                neighbour = ConstraintSatisfaction._generate_neighbour(mutables)
 
                 mut_net.mutate(neighbour)
-                evalNeighbour = ReverseEngineering._evaluate_network(mut_net, sim, constraints)
+                evalNeighbour = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
 
                 delta_e = evalCurrent - evalNeighbour
 
@@ -137,7 +137,7 @@ class ReverseEngineering:
                     current = neighbour
                 else:
                     p = e ** (-delta_e / T)
-                    if ReverseEngineering._rand_bool(p):
+                    if ConstraintSatisfaction._rand_bool(p):
                         current = neighbour
 
         return None

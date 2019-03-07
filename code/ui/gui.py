@@ -7,7 +7,7 @@ from simulation.ode_simulator import OdeSimulator
 from ui.gene_controller import GeneController
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
-from ui.reverse_engineering.reverse_engineering_modify_tab import ReverseEngineeringModifyTab
+from ui.constraint_satisfaction.constraint_satisfaction_tab import ReverseEngineeringModifyTab
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialog
 from ui.species.species_tab import SpeciesTab

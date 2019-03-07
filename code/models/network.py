@@ -1,7 +1,7 @@
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.input_gate import InputGate
 from models.regulation import Regulation
-from reverse_engineering.mutable import ReactionMutable, VariableMutable, RegulationMutable
+from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable
 
 
 class Network:

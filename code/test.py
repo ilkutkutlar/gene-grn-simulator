@@ -9,9 +9,9 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
-from reverse_engineering.constraint import Constraint
-from reverse_engineering.mutable import RegulationMutable, VariableMutable
-from reverse_engineering.reverse_engineering import ReverseEngineering
+from constraint_satisfaction.constraint import Constraint
+from constraint_satisfaction.mutable import RegulationMutable, VariableMutable
+from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from simulation.ode_simulator import OdeSimulator
 
 

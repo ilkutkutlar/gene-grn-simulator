@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog, QGridLayout
 
 from ui.gene_controller import GeneController
 
@@ -10,9 +10,27 @@ class SpeciesTab(QWidget):
         self.parent = parent
         self.main_layout = QVBoxLayout()
 
+        list_style = """
+            QListWidget#species_list{
+                
+            }
+        
+            QListWidget#species_list::item {
+                padding: 10px;
+                border: 1px solid #0a48a8;
+            }
+            
+            QListWidget#species_list::item:selected {
+                padding: 0px;
+                background-color: #3577dd;
+                color: white;
+            }
+        """
+        self.setStyleSheet(list_style)
+
         self.species_list = QListWidget()
-        self.species_list.setFont(QFont("Arial", 15))
-        self.species_list.setMaximumWidth(400)
+        self.species_list.setFont(QFont("Oxygen", 14))
+        self.species_list.setObjectName("species_list")
 
         self.update_ui()
         self.buttons_layout = QHBoxLayout()
@@ -20,6 +38,7 @@ class SpeciesTab(QWidget):
 
         self.main_layout.addWidget(self.species_list)
         self.main_layout.addLayout(self.buttons_layout)
+        self.main_layout.setObjectName("main_layout")
         self.setLayout(self.main_layout)
 
     def _init_buttons(self):

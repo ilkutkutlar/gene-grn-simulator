@@ -36,7 +36,8 @@ class AddMutableValueTab(QWidget):
         else:
             GeneController.get_instance().mutables.append(ReactionMutable(mutable_title, lo, u, i, mutable_reaction))
 
-        self.close()
+        # Climb up the hierarchy to find the window and close that.
+        self.parent().parent().parent().close()
 
     def _init_fields(self):
         fields = QFormLayout()

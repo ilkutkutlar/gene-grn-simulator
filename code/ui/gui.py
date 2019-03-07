@@ -42,7 +42,7 @@ class GeneWindow(QMainWindow):
         self.rev_eng_modify_tab = ReverseEngineeringModifyTab()
         tabs.addTab(self.species_tab, "Species")
         tabs.addTab(self.reactions_tab, "Reactions")
-        tabs.addTab(self.rev_eng_modify_tab, "Reverse Engineering")
+        tabs.addTab(self.rev_eng_modify_tab, "Constraint Satisfaction")
 
         self._init_menubar()
 

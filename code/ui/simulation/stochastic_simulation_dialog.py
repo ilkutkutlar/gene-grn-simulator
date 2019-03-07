@@ -42,7 +42,6 @@ class StochasticSimulationDialog(QDialog):
         main.addWidget(self.ok_button)
 
         self.setLayout(main)
-        self.setFixedHeight(140)
         self.setMinimumWidth(200)
         self.setWindowTitle("Simulation settings")
         self.exec_()

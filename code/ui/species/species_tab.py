@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog
 
 from ui.gene_controller import GeneController
@@ -10,6 +11,9 @@ class SpeciesTab(QWidget):
         self.main_layout = QVBoxLayout()
 
         self.species_list = QListWidget()
+        self.species_list.setFont(QFont("Arial", 15))
+        self.species_list.setMaximumWidth(400)
+
         self.update_ui()
         self.buttons_layout = QHBoxLayout()
         self._init_buttons()

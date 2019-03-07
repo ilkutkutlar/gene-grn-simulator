@@ -1,7 +1,7 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPalette
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
-    QVBoxLayout
+    QVBoxLayout, QComboBox
 
 from network_visualiser import NetworkVisualiser
 from ui.gene_controller import GeneController
@@ -17,8 +17,9 @@ class ReactionsTab(QWidget):
         self._init_reactions_list()
         self._init_reaction_details()
         self._init_buttons()
-        self.network_image = QLabel()
 
+        self.network_image_combo = self._make_network_image_combo()
+        self.network_image, network_image_area = self._make_image_panel()
         self.update_ui()
 
         self.grid.addWidget(self.reactions_list, 0, 0)
@@ -27,7 +28,29 @@ class ReactionsTab(QWidget):
         self.main_layout.addLayout(self.grid)
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addWidget(self.network_image)
+        self.main_layout.addWidget(self.network_image_combo)
+
         self.setLayout(self.main_layout)
+
+    @staticmethod
+    def _make_image_panel():
+        scroll_area = QScrollArea()
+        layout = QVBoxLayout()
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+        network_image = QLabel()
+        layout.addWidget(network_image)
+        scroll_area.setWidget(network_image)
+
+        return network_image, scroll_area
+
+    def _make_network_image_combo(self):
+        combo = QComboBox()
+        combo.addItem("Reaction view")
+        combo.addItem("Gene view")
+        combo.currentIndexChanged.connect(self.update_ui)
+        combo.setMaximumWidth(200)
+        return combo
 
     def _init_reaction_details(self):
         self.aux = QScrollArea()
@@ -77,9 +100,15 @@ class ReactionsTab(QWidget):
         self.reaction_details.setText(str(chosen_reaction))
 
     def update_ui(self):
+        g = GeneController.get_instance()
+
         self.reactions_list.clear()
-        for s in GeneController.get_instance().get_reactions():
+        for s in g.get_reactions():
             self.reactions_list.addItem(s.name)
 
-        im = NetworkVisualiser.visualise(GeneController.get_instance().network)
+        view = "reaction" if self.network_image_combo.currentIndex() == 0 else "gene"
+
+        im = NetworkVisualiser.visualise(g.network, view)
         self.network_image.setPixmap(QPixmap.fromImage(im))
+        self.network_image.setAlignment(Qt.AlignCenter)
+        self.network_image.setBackgroundRole(QPalette.Dark)

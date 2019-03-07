@@ -46,6 +46,11 @@ class TranscriptionFields(QWidget):
         for x in self.regulations:
             self.regulations_list.addItem(str(x))
 
+        if self.regulations_list.count() >= 2:
+            self.add_button.setDisabled(True)
+        else:
+            self.add_button.setDisabled(False)
+
     def _add_regulation_clicked(self):
         from_gene = self.regulator.currentText()
         to_gene = self.transcribed_species.currentText()

@@ -198,6 +198,8 @@ class TranscriptionFormula(Formula):
     """
 
     def _h_combinatorial(self, state):
+        # Currently only two regulators are supported.
+
         one = self.regulators[0]
         two = self.regulators[1]
 

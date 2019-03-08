@@ -1,7 +1,7 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QModelIndex
 from PyQt5.QtGui import QPixmap, QPalette
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
-    QVBoxLayout, QComboBox
+    QVBoxLayout, QComboBox, QSizePolicy
 
 from network_visualiser import NetworkVisualiser
 from ui.gene_controller import GeneController
@@ -35,11 +35,15 @@ class ReactionsTab(QWidget):
     @staticmethod
     def _make_image_panel():
         scroll_area = QScrollArea()
-        layout = QVBoxLayout()
         scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
 
         network_image = QLabel()
-        layout.addWidget(network_image)
+        # network_image.setSizePolicy(
+        #     QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        # network_image.setScaledContents(True)
+        network_image.setMinimumHeight(300)
+        network_image.setMinimumWidth(300)
         scroll_area.setWidget(network_image)
 
         return network_image, scroll_area
@@ -76,9 +80,8 @@ class ReactionsTab(QWidget):
 
     def _init_reactions_list(self):
         self.reactions_list = QListWidget()
-        self.reactions_list.setMinimumWidth(200)
-        self.reactions_list.setMaximumWidth(200)
         self.reactions_list.itemClicked.connect(self._reaction_list_clicked)
+        self.reactions_list.setMinimumHeight(200)
 
     def _add_reaction_clicked(self):
         def dialog_finished():

@@ -46,6 +46,7 @@ class TranscriptionFields(QWidget):
         for x in self.regulations:
             self.regulations_list.addItem(str(x))
 
+        # Allow at most two regulations
         if self.regulations_list.count() >= 2:
             self.add_button.setDisabled(True)
         else:

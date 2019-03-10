@@ -1,7 +1,7 @@
-from PyQt5.QtCore import Qt, QModelIndex
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QPalette
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
-    QVBoxLayout, QComboBox, QSizePolicy
+    QVBoxLayout, QComboBox
 
 from network_visualiser import NetworkVisualiser
 from ui.gene_controller import GeneController

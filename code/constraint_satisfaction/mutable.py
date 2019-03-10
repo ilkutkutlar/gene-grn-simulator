@@ -1,3 +1,6 @@
+from models.reg_type import RegType
+
+
 class VariableMutable:
     """
             :param float lower_bound, upper_bound: defines the interval of values to be tried for this parameter.
@@ -111,4 +114,25 @@ class RegulationMutable:
                         return False
 
     def __str__(self):
-        return "This is a mutable!"
+        # return "{}: ({} to {}) step: {}".format(self.variable_name, lo, hi, step)
+
+        # self.reaction_name = reaction_name
+        # self.possible_regulators = possible_regulators
+        # self.possible_reg_types = possible_reg_types
+        # self.k_variable = k_variable
+
+        regulators = "{"
+        for r in self.possible_regulators:
+            regulators += r + ", "
+        regulators = regulators[0:len(regulators) - 2]
+        regulators += "}"
+
+        reg_types = "{"
+        for r in self.possible_reg_types:
+            reg_types += "Act." if r == RegType.ACTIVATION else "Rep."
+            reg_types += ", "
+        reg_types = reg_types[0:len(reg_types) - 2]
+        reg_types += "}"
+
+        return "{}: regulated by {} with {} \n    with {}". \
+            format(self.reaction_name, regulators, reg_types, str(self.k_variable))

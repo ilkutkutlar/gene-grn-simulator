@@ -17,7 +17,6 @@ class SpeciesTab(QWidget):
         
             QListWidget#species_list::item {
                 padding: 10px;
-                border: 1px solid #0a48a8;
             }
             
             QListWidget#species_list::item:selected {

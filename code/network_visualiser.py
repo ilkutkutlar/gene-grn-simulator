@@ -1,17 +1,11 @@
-import networkx as nx
-import matplotlib.pyplot as plt
 from PyQt5.QtGui import QImage
 from graphviz import Digraph
 
-from matplotlib.patches import ArrowStyle
-
-from models.formulae.degradation_formula import DegradationFormula
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.formulae.translation_formula import TranslationFormula
-from models.network import Network
-from models.reaction import Reaction
 from models.reg_type import RegType
-from models.regulation import Regulation
+
+import matplotlib.image as image
 
 
 class NetworkVisualiser:
@@ -96,4 +90,15 @@ class NetworkVisualiser:
 
         g.render("temp")
         im = QImage("temp.png")
+        return im
+
+    @staticmethod
+    def visualise_as_image(net, network_type):
+        if network_type == "reaction":
+            g = NetworkVisualiser._network_to_reaction_graphviz(net)
+        else:
+            g = NetworkVisualiser._network_to_gene_graphviz(net)
+
+        g.render("temp")
+        im = image.imread("temp.png")
         return im

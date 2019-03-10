@@ -1,6 +1,9 @@
+import matplotlib.image as image
+import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QMessageBox, QTabWidget
 
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
+from network_visualiser import NetworkVisualiser
 from simulation.ode_simulator import OdeSimulator
 from ui.constraint_satisfaction.constraints_tab import ConstraintsTab
 from ui.constraint_satisfaction.mutables_tab import MutablesTab
@@ -32,6 +35,12 @@ class ReverseEngineeringModifyTab(QWidget):
 
             if t:
                 OdeSimulator.visualise(t, s, OdeSimulator.simulate(t, s))
+
+                im = NetworkVisualiser.visualise_as_image(t, "reaction")
+
+                plt.figure()
+                plt.imshow(im)
+                plt.show()
             else:
                 error_message = QMessageBox()
                 error_message.setIcon(QMessageBox.Warning)

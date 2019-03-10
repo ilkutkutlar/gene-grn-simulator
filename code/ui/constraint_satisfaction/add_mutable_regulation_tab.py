@@ -105,9 +105,9 @@ class AddMutableRegulationTab(QWidget):
         if self.activation_check.isChecked():
             reg_types.append(RegType.REPRESSION)
 
-        k_lb = self.lb_edit.text()
-        k_ub = self.ub_edit.text()
-        k_step = self.step_edit.text()
+        k_lb = float(self.lb_edit.text())
+        k_ub = float(self.ub_edit.text())
+        k_step = float(self.step_edit.text())
 
         reg_mut = RegulationMutable(reaction_name, regulators,
                                     VariableMutable("k", k_lb, k_ub, k_step),

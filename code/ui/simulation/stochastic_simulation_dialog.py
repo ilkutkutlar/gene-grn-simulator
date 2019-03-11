@@ -1,3 +1,5 @@
+import copy
+
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QFormLayout, QLineEdit, QPushButton
 
 from models.simulation_settings import SimulationSettings
@@ -22,7 +24,8 @@ class StochasticSimulationDialog(QDialog):
 
         # Precision field does not apply to stochastic simulation!
         s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
-        GillespieSimulator.visualise(GillespieSimulator.simulate(GeneController.get_instance().network, s), s)
+        sim_net = copy.deepcopy(GeneController.get_instance().network)
+        GillespieSimulator.visualise(GillespieSimulator.simulate(sim_net, s), s)
 
     def __init__(self):
         super().__init__()

@@ -1,6 +1,6 @@
 # 100 - y => min is 100
 # y - 100 => max is 100
-
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QListWidget, QHBoxLayout, QPushButton, QWidget, QVBoxLayout
 
 from ui.constraint_satisfaction.add_constraint_dialog import AddConstraintDialog
@@ -11,6 +11,8 @@ class ConstraintsTab(QWidget):
     def __init__(self):
         super().__init__()
         self.constraints_list = QListWidget()
+        self.constraints_list.setFont(QFont("Oxygen", 16))
+
         constraints_buttons_layout = QHBoxLayout()
         self.add_constraint_button = QPushButton("Add Constraint")
         constraints_buttons_layout.addWidget(self.add_constraint_button)

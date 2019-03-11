@@ -137,7 +137,8 @@ class ConstraintSatisfaction:
                     current = neighbour
                 else:
                     p = e ** (-delta_e / T)
-                    if ConstraintSatisfaction._rand_bool(p):
-                        current = neighbour
+                    if p > 0.000001:
+                        if ConstraintSatisfaction._rand_bool(p):
+                            current = neighbour
 
         return None

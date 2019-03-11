@@ -102,7 +102,7 @@ class AddMutableRegulationTab(QWidget):
         reg_types = []
         if self.activation_check.isChecked():
             reg_types.append(RegType.ACTIVATION)
-        if self.activation_check.isChecked():
+        if self.repression_check.isChecked():
             reg_types.append(RegType.REPRESSION)
 
         k_lb = float(self.lb_edit.text())

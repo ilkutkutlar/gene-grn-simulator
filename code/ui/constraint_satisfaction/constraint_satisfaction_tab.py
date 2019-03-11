@@ -34,13 +34,12 @@ class ReverseEngineeringModifyTab(QWidget):
                                                     schedule)
 
             if t:
-                OdeSimulator.visualise(t, s, OdeSimulator.simulate(t, s))
-
-                im = NetworkVisualiser.visualise_as_image(t, "reaction")
-
+                im = NetworkVisualiser.visualise_as_image(t, "gene")
                 plt.figure()
                 plt.imshow(im)
                 plt.show()
+
+                OdeSimulator.visualise(t, s, OdeSimulator.simulate(t, s))
             else:
                 error_message = QMessageBox()
                 error_message.setIcon(QMessageBox.Warning)

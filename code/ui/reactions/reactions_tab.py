@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QPalette
+from PyQt5.QtGui import QPixmap, QPalette, QFont
 from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollArea, QHBoxLayout, QPushButton, \
     QVBoxLayout, QComboBox
 
@@ -60,6 +60,7 @@ class ReactionsTab(QWidget):
         self.aux = QScrollArea()
         layout = QVBoxLayout()
         self.reaction_details = QLabel()
+        self.reaction_details.setFont(QFont("Oxygen", 16))
         self.reaction_details.setAlignment(Qt.AlignLeft)
         self.reaction_details.setMinimumWidth(200)
         self.reaction_details.setWordWrap(True)
@@ -80,6 +81,8 @@ class ReactionsTab(QWidget):
 
     def _init_reactions_list(self):
         self.reactions_list = QListWidget()
+        self.reactions_list.setFont(QFont("Oxygen", 16))
+
         self.reactions_list.itemClicked.connect(self._reaction_list_clicked)
         self.reactions_list.setMinimumHeight(200)
 

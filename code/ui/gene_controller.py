@@ -5,10 +5,7 @@ class GeneController:
     instance = None
 
     def __init__(self):
-        # c1 = Constraint("y", lambda y: 200 - y, (40, 60))
-        # c2 = Constraint("z", lambda x: x - 150, (0, 20))
-        # m = Mutable(0.5, 50, 0.5, "x_trans")
-        self.network = test.get_test_network1()
+        self.network = test.get_test_network3()
         self.mutables = []
         self.constraints = []
 

@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QWidget
 
 from ui.constraint_satisfaction.add_mutable_dialog import AddMutableDialog
@@ -9,6 +10,7 @@ class MutablesTab(QWidget):
         super().__init__()
 
         self.mutables_list = QListWidget()
+        self.mutables_list.setFont(QFont("Oxygen", 16))
 
         mutables_buttons_layout = QHBoxLayout()
         self.add_mutable_button = QPushButton("Add Mutable")

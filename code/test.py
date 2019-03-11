@@ -157,6 +157,60 @@ def get_test_network2():
     return net2
 
 
+def get_test_network3():
+    species = {"mX": 100, "pX": 0,
+               "mY": 100, "pY": 0,
+               "mZ": 30, "pZ": 0,
+               "mG": 100, "pG": 0,
+               "mH": 25, "pH": 0, }
+
+    x_trans = TranscriptionFormula(5, "mX")
+    x_trans.set_regulation(2, [Regulation("pZ", "mX", RegType.REPRESSION, 10)])
+
+    y_trans = TranscriptionFormula(5, "mY")
+    y_trans.set_regulation(1, [Regulation("pX", "mY", RegType.ACTIVATION, 40)])
+
+    z_trans = TranscriptionFormula(1, "mZ")
+    z_trans.set_regulation(2, [Regulation("pG", "mZ", RegType.ACTIVATION, 20)])
+
+    v_trans = TranscriptionFormula(20, "mH")
+    v_trans.set_regulation(2, [Regulation("pX", "mH", RegType.REPRESSION, 10)])
+
+    u_trans = TranscriptionFormula(90, "mG")
+    u_trans.set_regulation(2, [Regulation("pY", "mG", RegType.REPRESSION, 5),
+                               Regulation("pZ", "mG", RegType.ACTIVATION, 5)], input_gate=InputGate.AND)
+
+    reactions = [Reaction("mx_trans", [], ["mX"], x_trans),
+                 Reaction("my_trans", [], ["mY"], y_trans),
+                 Reaction("mz_trans", [], ["mZ"], z_trans),
+                 Reaction("mg_trans", [], ["pG"], u_trans),
+                 Reaction("mh_trans", [], ["pH"], v_trans),
+
+                 Reaction("mx_deg", ["mX"], [], DegradationFormula(0.01, "mX")),
+                 Reaction("my_deg", ["mY"], [], DegradationFormula(0.01, "mY")),
+                 Reaction("mz_deg", ["mZ"], [], DegradationFormula(0.02, "mZ")),
+                 Reaction("mg_deg", ["pG"], [], DegradationFormula(0.02, "mG")),
+                 Reaction("mh_deg", ["mY"], [], DegradationFormula(0.02, "mH")),
+
+                 Reaction("px_deg", ["pX"], [], DegradationFormula(0.01, "pX")),
+                 Reaction("py_deg", ["pY"], [], DegradationFormula(0.01, "pY")),
+                 Reaction("pz_deg", ["pZ"], [], DegradationFormula(0.01, "pZ")),
+                 Reaction("pu_deg", ["pH"], [], DegradationFormula(0.01, "pH")),
+                 Reaction("pg_deg", ["pG"], [], DegradationFormula(0.01, "pG")),
+
+                 Reaction("px_translation", [], ["pX"], TranslationFormula(0.2, "mX")),
+                 Reaction("py_translation", [], ["pY"], TranslationFormula(5, "mY")),
+                 Reaction("pz_translation", [], ["pZ"], TranslationFormula(1, "mZ")),
+                 Reaction("pu_translation", [], ["pH"], TranslationFormula(10, "mG")),
+                 Reaction("pg_translation", [], ["pG"], TranslationFormula(10, "mH"))]
+
+    net3 = Network()
+    net3.species = species
+    net3.reactions = reactions
+
+    return net3
+
+
 def get_large_network():
     species = {"mA": 0, "pA": 0,
                "mB": 50, "pB": 0,
@@ -253,6 +307,7 @@ def get_large_network():
     net.species = species
     net.reactions = reactions
     return net
+
 
 if __name__ == '__main__':
     # repressilator_sim = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])

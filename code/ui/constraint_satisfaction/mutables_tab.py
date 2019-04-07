@@ -2,7 +2,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout, QListWidget, QHBoxLayout, QPushButton, QWidget
 
 from ui.constraint_satisfaction.add_mutable_dialog import AddMutableDialog
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class MutablesTab(QWidget):
@@ -29,7 +29,7 @@ class MutablesTab(QWidget):
     def _update_mutables_list(self):
         self.mutables_list.clear()
 
-        for m in GeneController.get_instance().get_mutables():
+        for m in GenePresenter.get_instance().get_mutables():
             self.mutables_list.addItem(str(m))
 
     def _add_mutable_clicked(self):
@@ -39,6 +39,6 @@ class MutablesTab(QWidget):
 
     def _remove_mutable_clicked(self):
         i = self.mutables_list.currentRow()
-        GeneController.get_instance().remove_mutable(i)
+        GenePresenter.get_instance().remove_mutable(i)
         self._update_mutables_list()
-        print(GeneController.get_instance().get_mutables())
+        print(GenePresenter.get_instance().get_mutables())

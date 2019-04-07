@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QListWidgetItem, 
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.reg_type import RegType
 from constraint_satisfaction.mutable import RegulationMutable, VariableMutable
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class AddMutableRegulationTab(QWidget):
@@ -35,7 +35,7 @@ class AddMutableRegulationTab(QWidget):
     def _make_regulators_list():
         t = QListWidget()
 
-        for s in GeneController.get_instance().network.species:
+        for s in GenePresenter.get_instance().network.species:
             i = QListWidgetItem()
             i.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
             i.setCheckState(Qt.Unchecked)
@@ -48,7 +48,7 @@ class AddMutableRegulationTab(QWidget):
     def _make_transcription_reactions_combo():
         c = QComboBox()
 
-        for r in GeneController.get_instance().network.reactions:
+        for r in GenePresenter.get_instance().network.reactions:
             if isinstance(r.rate_function, TranscriptionFormula):
                 c.addItem(r.name)
 
@@ -112,7 +112,7 @@ class AddMutableRegulationTab(QWidget):
         reg_mut = RegulationMutable(reaction_name, regulators,
                                     VariableMutable("k", k_lb, k_ub, k_step),
                                     reg_types, False)
-        GeneController.get_instance().mutables.append(reg_mut)
+        GenePresenter.get_instance().mutables.append(reg_mut)
 
         # Climb up the hierarchy to find the window and close that.
         self.parent().parent().parent().close()

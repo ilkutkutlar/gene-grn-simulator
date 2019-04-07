@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QListWidget, QLabel, QGridLayout, QScrollAr
     QVBoxLayout, QComboBox
 
 from network_visualiser import NetworkVisualiser
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 from ui.reactions.add_reaction_dialog import AddReactionDialog
 
 
@@ -96,17 +96,17 @@ class ReactionsTab(QWidget):
 
     def _remove_reaction_clicked(self):
         i = self.reactions_list.currentRow()
-        GeneController.get_instance().remove_reaction_by_index(i)
+        GenePresenter.get_instance().remove_reaction_by_index(i)
         self.update_ui()
-        print(GeneController.get_instance().network)
+        print(GenePresenter.get_instance().network)
 
     def _reaction_list_clicked(self):
         index = self.reactions_list.currentRow()
-        chosen_reaction = GeneController.get_instance().get_reactions()[index]
+        chosen_reaction = GenePresenter.get_instance().get_reactions()[index]
         self.reaction_details.setText(str(chosen_reaction))
 
     def update_ui(self):
-        g = GeneController.get_instance()
+        g = GenePresenter.get_instance()
 
         self.reactions_list.clear()
         for s in g.get_reactions():

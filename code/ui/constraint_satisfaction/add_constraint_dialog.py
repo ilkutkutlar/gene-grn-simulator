@@ -3,7 +3,7 @@ import re
 from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QLineEdit, QPushButton, QVBoxLayout
 
 from constraint_satisfaction.constraint import Constraint
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class AddConstraintDialog(QDialog):
@@ -44,7 +44,7 @@ class AddConstraintDialog(QDialog):
 
         c = Constraint(species, cons, (t0, t1))
         c.pretty_print = species + sign + str(value) + " for time: " + str(t0) + "s - " + str(t1) + "s"
-        GeneController.get_instance().add_constraint(c)
+        GenePresenter.get_instance().add_constraint(c)
         self.close()
 
     def _init_button(self):

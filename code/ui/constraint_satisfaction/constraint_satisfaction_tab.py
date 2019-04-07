@@ -7,7 +7,7 @@ from network_visualiser import NetworkVisualiser
 from simulation.ode_simulator import OdeSimulator
 from ui.constraint_satisfaction.constraints_tab import ConstraintsTab
 from ui.constraint_satisfaction.mutables_tab import MutablesTab
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 
 
@@ -27,7 +27,7 @@ class ReverseEngineeringModifyTab(QWidget):
     def _run_button_click_handler(self):
 
         def handler(s):
-            g = GeneController.get_instance()
+            g = GenePresenter.get_instance()
             schedule = ConstraintSatisfaction.generate_schedule(100)
             t = ConstraintSatisfaction.find_network(g.network, s,
                                                     g.get_mutables(), g.get_constraints(),

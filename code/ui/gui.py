@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QWidget, QApplication, QMainWindow, QAction, QMessag
 
 from input_output.sbml_saver import SbmlSaver
 from simulation.ode_simulator import OdeSimulator
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
 from ui.constraint_satisfaction.constraint_satisfaction_tab import ReverseEngineeringModifyTab
@@ -55,7 +55,7 @@ class GeneWindow(QMainWindow):
 
     def _deterministic_simulation_clicked(self):
         def handler(s):
-            net = GeneController.get_instance().network
+            net = GenePresenter.get_instance().network
             OdeSimulator.visualise(net, s, OdeSimulator.simulate(net, s))
 
         DeterministicSimulationDialog(handler)
@@ -64,7 +64,7 @@ class GeneWindow(QMainWindow):
         StochasticSimulationDialog()
 
     def _save_file_as_sbml_clicked(self):
-        net = GeneController.get_instance().network
+        net = GenePresenter.get_instance().network
         d = QFileDialog()
         filename = d.getSaveFileName(self, "Save file", ".", "XML Files (*.xml)")
 

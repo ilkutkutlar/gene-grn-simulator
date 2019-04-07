@@ -4,7 +4,7 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QListWidget, QHBoxLayout, QPushButton, QWidget, QVBoxLayout
 
 from ui.constraint_satisfaction.add_constraint_dialog import AddConstraintDialog
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class ConstraintsTab(QWidget):
@@ -31,7 +31,7 @@ class ConstraintsTab(QWidget):
     def _update_constraints_list(self):
         self.constraints_list.clear()
 
-        for c in GeneController.get_instance().get_constraints():
+        for c in GenePresenter.get_instance().get_constraints():
             self.constraints_list.addItem(str(c))
 
     def _add_constraint_clicked(self):
@@ -41,6 +41,6 @@ class ConstraintsTab(QWidget):
 
     def _remove_constraint_clicked(self):
         i = self.constraints_list.currentRow()
-        GeneController.get_instance().remove_constraint(i)
+        GenePresenter.get_instance().remove_constraint(i)
         self._update_constraints_list()
-        print(GeneController.get_instance().get_constraints())
+        print(GenePresenter.get_instance().get_constraints())

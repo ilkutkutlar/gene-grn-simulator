@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import QComboBox, QGridLayout, QCheckBox
 
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 def make_species_combo():
     combo = QComboBox()
-    for x in GeneController.get_instance().get_species():
+    for x in GenePresenter.get_instance().get_species():
         combo.addItem(x)
     return combo
 
@@ -15,7 +15,7 @@ def make_species_checkboxes_layout():
     left = True  # Indicates that the next species must be placed to the left
     g = QGridLayout()
 
-    for x in GeneController.get_instance().get_species():
+    for x in GenePresenter.get_instance().get_species():
         col = 1 if left else 2  # Column number depending on variable "left"
         g.addWidget(QCheckBox(x), row, col)
 

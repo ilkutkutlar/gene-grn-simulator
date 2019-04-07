@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
 from input_output.sbml_parser import SbmlParser
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class OpenSbmlDialog(QFileDialog):
@@ -18,7 +18,7 @@ class OpenSbmlDialog(QFileDialog):
             # selectedFiles returns all files, we only want to open one
             filename = self.selectedFiles()[0]
             net = SbmlParser.parse(filename)
-            GeneController.get_instance().network = net
+            GenePresenter.get_instance().network = net
 
             # Display a nice message showing the contents of the file loaded
             message = QMessageBox()

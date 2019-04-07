@@ -7,7 +7,7 @@ from models.formulae.custom_formula import CustomFormula
 from models.reaction import Reaction
 from ui import common_widgets
 from ui.reactions.add_reaction_dialog_transcription import TranscriptionFields
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class AddReactionDialog(QDialog):
@@ -55,7 +55,7 @@ class AddReactionDialog(QDialog):
         index = self.reaction_types_list.currentRow()
 
         if index == 0:  # Transcription
-            GeneController.get_instance().add_reaction(self.transcription_fields.get_transcription_reaction())
+            GenePresenter.get_instance().add_reaction(self.transcription_fields.get_transcription_reaction())
 
         elif index == 1:  # Translation
             name = str(self.reaction_name2.text())
@@ -63,21 +63,21 @@ class AddReactionDialog(QDialog):
             translated_mrna = str(self.translated_mrna.currentText())
             produced_protein = str(self.produced_protein.currentText())
             formula = TranslationFormula(rate, translated_mrna)
-            GeneController.get_instance().add_reaction(Reaction(name, [translated_mrna], [produced_protein], formula))
+            GenePresenter.get_instance().add_reaction(Reaction(name, [translated_mrna], [produced_protein], formula))
 
         elif index == 2:  # Degradation
             name = str(self.reaction_name3.text())
             rate = float(self.decay_rate.text())
             decaying_species = str(self.decaying_species.currentText())
             formula = DegradationFormula(rate, decaying_species)
-            GeneController.get_instance().add_reaction(Reaction(name, [decaying_species], [], formula))
+            GenePresenter.get_instance().add_reaction(Reaction(name, [decaying_species], [], formula))
         else:  # Custom
             name = str(self.reaction_name4.text())
             reactant = str(self.reactant.currentText())
             product = str(self.product.currentText())
             equation = str(self.equation.text())
             formula = CustomFormula(equation, {}, {})
-            GeneController.get_instance().add_reaction(Reaction(name, [reactant], [product], formula))
+            GenePresenter.get_instance().add_reaction(Reaction(name, [reactant], [product], formula))
 
         self.close()
 

@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFormLayout, QLineEdit, QLabel, QComboBox
 
 from constraint_satisfaction.mutable import VariableMutable, ReactionMutable
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class AddMutableValueTab(QWidget):
@@ -32,9 +32,9 @@ class AddMutableValueTab(QWidget):
         i = float(i) if i != "" else 0.0
 
         if mutable_reaction == "":
-            GeneController.get_instance().mutables.append(VariableMutable(mutable_title, lo, u, i))
+            GenePresenter.get_instance().mutables.append(VariableMutable(mutable_title, lo, u, i))
         else:
-            GeneController.get_instance().mutables.append(ReactionMutable(mutable_title, lo, u, i, mutable_reaction))
+            GenePresenter.get_instance().mutables.append(ReactionMutable(mutable_title, lo, u, i, mutable_reaction))
 
         # Climb up the hierarchy to find the window and close that.
         self.parent().parent().parent().close()
@@ -61,11 +61,11 @@ class AddMutableValueTab(QWidget):
         combo_items = []
         item_values = []
 
-        for s in GeneController.get_instance().get_species():
+        for s in GenePresenter.get_instance().get_species():
             combo_items.append("Species ⟹ {}".format(s))
             item_values.append((s, ""))
 
-        for r in GeneController.get_instance().get_reactions():
+        for r in GenePresenter.get_instance().get_reactions():
             for p in r.rate_function.get_params():
                 combo_items.append("{} ⟹ {}".format(r.name, p))
                 item_values.append((p, r.name))

@@ -201,8 +201,8 @@ def get_test_network3():
                  Reaction("px_translation", [], ["pX"], TranslationFormula(0.2, "mX")),
                  Reaction("py_translation", [], ["pY"], TranslationFormula(5, "mY")),
                  Reaction("pz_translation", [], ["pZ"], TranslationFormula(1, "mZ")),
-                 Reaction("pu_translation", [], ["pH"], TranslationFormula(10, "mG")),
-                 Reaction("pg_translation", [], ["pG"], TranslationFormula(10, "mH"))]
+                 Reaction("pu_translation", [], ["pH"], TranslationFormula(10, "mH")),
+                 Reaction("pg_translation", [], ["pG"], TranslationFormula(10, "mG"))]
 
     net3 = Network()
     net3.species = species

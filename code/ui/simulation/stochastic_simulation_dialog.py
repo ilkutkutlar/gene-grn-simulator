@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QFormLayout, QLineEdit
 from models.simulation_settings import SimulationSettings
 from simulation.gillespie_simulator import GillespieSimulator
 from ui import common_widgets
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class StochasticSimulationDialog(QDialog):
@@ -24,7 +24,7 @@ class StochasticSimulationDialog(QDialog):
 
         # Precision field does not apply to stochastic simulation!
         s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
-        sim_net = copy.deepcopy(GeneController.get_instance().network)
+        sim_net = copy.deepcopy(GenePresenter.get_instance().network)
         GillespieSimulator.visualise(GillespieSimulator.simulate(sim_net, s), s)
 
     def __init__(self):

@@ -1,7 +1,7 @@
 import test
 
 
-class GeneController:
+class GenePresenter:
     instance = None
 
     def __init__(self):
@@ -11,9 +11,9 @@ class GeneController:
 
     @staticmethod
     def get_instance():
-        if not GeneController.instance:
-            GeneController.instance = GeneController()
-        return GeneController.instance
+        if not GenePresenter.instance:
+            GenePresenter.instance = GenePresenter()
+        return GenePresenter.instance
 
     def get_species(self):
         return self.network.species

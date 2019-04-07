@@ -1,7 +1,7 @@
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog, QGridLayout
 
-from ui.gene_controller import GeneController
+from ui.gene_presenter import GenePresenter
 
 
 class SpeciesTab(QWidget):
@@ -50,8 +50,8 @@ class SpeciesTab(QWidget):
 
     def update_ui(self):
         self.species_list.clear()
-        for s in GeneController.get_instance().get_species():
-            self.species_list.addItem(s + ": " + str(GeneController.get_instance().get_species()[s]))
+        for s in GenePresenter.get_instance().get_species():
+            self.species_list.addItem(s + ": " + str(GenePresenter.get_instance().get_species()[s]))
 
     def _add_species_click_handler(self):
         (text, ok) = QInputDialog.getText(self, "Add Species", "Write species and initial "
@@ -63,7 +63,7 @@ class SpeciesTab(QWidget):
                 split = pair.strip().split(':')
                 species_name = split[0].strip()
                 species_concent = float(split[1].strip())
-                GeneController.get_instance().add_species(species_name, species_concent)
+                GenePresenter.get_instance().add_species(species_name, species_concent)
 
         self.update_ui()
         self.parent.reactions_tab.update_ui()
@@ -71,6 +71,6 @@ class SpeciesTab(QWidget):
     def _remove_species_click_handler(self):
         text = self.species_list.item(self.species_list.currentRow()).text()
         species = text.split(':')[0]
-        GeneController.get_instance().remove_species(species)
+        GenePresenter.get_instance().remove_species(species)
         self.update_ui()
         self.parent.reactions_tab.update_ui()

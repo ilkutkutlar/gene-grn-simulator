@@ -97,7 +97,7 @@ class ConstraintSatisfaction:
         return {z: (length - z) for z in range(0, length + 1)}
 
     @staticmethod
-    def generate_next_level(net, sim, mutables, constraints):
+    def _generate_next_level(net, sim, mutables, constraints):
         level = []
 
         nodes = []
@@ -114,8 +114,15 @@ class ConstraintSatisfaction:
 
         return level
 
+    """
+    :param Network net: The network to modify
+    :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering.
+    :param List[Mutable] mutables: List of values which can be mutated during the constraint satisfaction process.
+    :param List[Constraint] constraints: The list of constraints which the network must satisfy.
+    """
+
     @staticmethod
-    def find_network_2(net, sim, mutables, constraints):
+    def find_network(net, sim, mutables, constraints):
 
         mut_net = copy.deepcopy(net)
 
@@ -125,75 +132,64 @@ class ConstraintSatisfaction:
             return mut_net
 
         first_level = sorted(ConstraintSatisfaction.
-                             generate_next_level(mut_net, sim, mutables, constraints),
+                             _generate_next_level(mut_net, sim, mutables, constraints),
                              reverse=True, key=lambda x: x[1])
 
         stack = first_level
         while stack:
-            # for s in stack:
-            #     print(s[1])
-
             (current, eval_current) = stack.pop()
-
-            # print("<", end='')
-            print(eval_current)
-            # print(">")
 
             if eval_current <= 0:
                 return mut_net
             else:
-                s = ConstraintSatisfaction.generate_next_level(mut_net, sim, current, constraints)
+                s = ConstraintSatisfaction._generate_next_level(mut_net, sim, current, constraints)
                 stack = sorted(stack + s, reverse=True, key=lambda x: x[1])
 
         return None
 
+    """
+    :param Network net: The network to modify
+    :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
+    :param List[Mutable] mutables: List of values which can be mutated during the optimisation process.
+    :param List[Constraint] constraints: The list of constraints which the network must satisfy.
+    :param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
+    """
 
-"""
-:param Network net: The network to modify
-:param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering
-:param Dict[str, Tuple[float, float, float, str]] mutables:
-:param List[Constraint] constraints: The list of constraints which the network must satisfy.
-:param Dict[float, float] schedule: The schedule required by the simulated annealing algorithm.
-:param Dict[str, Mutable] name: key -> the name of the parameter/species which can be mutated during
-    the annealing process. value -> the mutable corresponding to the given name.
-"""
+    @staticmethod
+    def find_closest_network(net, sim, mutables, constraints, schedule):
+        mut_net = copy.deepcopy(net)
 
-
-@staticmethod
-def find_network(net, sim, mutables, constraints, schedule):
-    mut_net = copy.deepcopy(net)
-
-    # First, check whether network already satisfies constraints
-    evalCurrent = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
-    if evalCurrent <= 0:
-        return mut_net
-
-    # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
-    current = mutables
-
-    for t in range(1, len(schedule) - 1):
-        T = schedule[t]
-
-        mut_net.mutate(current)
+        # First, check whether network already satisfies constraints
         evalCurrent = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
-
-        if T == 0 or (evalCurrent <= 0):
+        if evalCurrent <= 0:
             return mut_net
-        else:
-            neighbour = ConstraintSatisfaction._generate_neighbour(mutables)
 
-            mut_net.mutate(neighbour)
-            evalNeighbour = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
+        # Current is the set of values the mutable variables will have -> dict has the value name as key, value as value
+        current = mutables
 
-            delta_e = evalCurrent - evalNeighbour
+        for t in range(1, len(schedule) - 1):
+            T = schedule[t]
 
-            # We want to minimise rather than maximise, so delta_e <= 0
-            if delta_e <= 0:
-                current = neighbour
+            mut_net.mutate(current)
+            evalCurrent = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
+
+            if T == 0 or (evalCurrent <= 0):
+                return mut_net
             else:
-                p = e ** (-delta_e / T)
-                if p > 0.000001:
-                    if ConstraintSatisfaction._rand_bool(p):
-                        current = neighbour
+                neighbour = ConstraintSatisfaction._generate_neighbour(mutables)
 
-    return None
+                mut_net.mutate(neighbour)
+                evalNeighbour = ConstraintSatisfaction._evaluate_network(mut_net, sim, constraints)
+
+                delta_e = evalCurrent - evalNeighbour
+
+                # We want to minimise rather than maximise, so delta_e <= 0
+                if delta_e <= 0:
+                    current = neighbour
+                else:
+                    p = e ** (-delta_e / T)
+                    if p > 0.000001:
+                        if ConstraintSatisfaction._rand_bool(p):
+                            current = neighbour
+
+        return None

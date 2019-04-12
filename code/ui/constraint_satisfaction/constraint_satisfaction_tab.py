@@ -30,9 +30,8 @@ class ReverseEngineeringModifyTab(QWidget):
             g = GenePresenter.get_instance()
             schedule = ConstraintSatisfaction.generate_schedule(1000)
             t = ConstraintSatisfaction.find_network(g.network, s,
-                                                    g.get_mutables(), g.get_constraints(),
-                                                    schedule)
-
+                                                    g.get_mutables(), g.get_constraints())
+            print(t)
             if t:
                 im = NetworkVisualiser.visualise_as_image(t, "gene")
                 plt.figure()

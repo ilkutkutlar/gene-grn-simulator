@@ -379,5 +379,5 @@ if __name__ == '__main__':
     #     print(str(i[1]))
     #     print("-----")
 
-    f = ConstraintSatisfaction.find_network_2(net, sim, ms, cs)
+    f = ConstraintSatisfaction.find_network(net, sim, ms, cs)
     print(f)

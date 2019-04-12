@@ -39,12 +39,17 @@ class NetworkVisualiser:
 
         for r in NetworkVisualiser._get_regulated_reactions(net):
             for regulator in r.rate_function.regulators:
-                # TODO: Check whether it found something!
-                regulating_gene = list(filter(lambda x: x[1] == regulator.from_gene, genes))[0]
-                regulating_gene_name = NetworkVisualiser._get_gene_name(regulating_gene)
+                regulating_gene = list(filter(lambda x: x[1] == regulator.from_gene, genes))
+                if regulating_gene:
+                    regulating_gene_name = NetworkVisualiser._get_gene_name(regulating_gene[0])
+                else:
+                    regulating_gene_name = ""
 
-                regulated_gene = list(filter(lambda x: x[0] == regulator.to_gene, genes))[0]
-                regulated_gene_name = NetworkVisualiser._get_gene_name(regulated_gene)
+                regulated_gene = list(filter(lambda x: x[0] == regulator.to_gene, genes))
+                if regulated_gene:
+                    regulated_gene_name = NetworkVisualiser._get_gene_name(regulated_gene[0])
+                else:
+                    regulated_gene_name = ""
 
                 arrow = "normal" if regulator.reg_type == RegType.ACTIVATION else "tee"
                 g.edge(regulating_gene_name, regulated_gene_name, arrowhead=arrow)

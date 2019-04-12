@@ -30,7 +30,7 @@ class Network:
                 r = self.get_reaction_by_name(m.reaction_name)
                 r.rate_function.mutate(m)
             elif isinstance(m, VariableMutable):
-                self.species[m] = m.current_value
+                self.species[m.variable_name] = m.current_value
             elif isinstance(m, RegulationMutable):
                 maybe_reaction = \
                     list(filter(lambda x: x.name == m.reaction_name, self.reactions))

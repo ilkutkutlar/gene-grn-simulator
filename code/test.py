@@ -10,7 +10,7 @@ from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
 from constraint_satisfaction.constraint import Constraint
-from constraint_satisfaction.mutable import RegulationMutable, VariableMutable
+from constraint_satisfaction.mutable import RegulationMutable, VariableMutable, ReactionMutable
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from simulation.ode_simulator import OdeSimulator
 
@@ -309,6 +309,47 @@ def get_large_network():
     return net
 
 
+def get_test_network_4():
+    species = {"X": 1, "Y": 1, "Z": 1}
+
+    x_trans = TranscriptionFormula(5, "X")
+    x_trans.set_regulation(2, [Regulation("Y", "X", RegType.REPRESSION, 10)])
+
+    y_trans = TranscriptionFormula(5, "Y")
+    y_trans.set_regulation(1, [Regulation("Z", "Y", RegType.ACTIVATION, 40)])
+
+    z_trans = TranscriptionFormula(1, "Z")
+    z_trans.set_regulation(2, [Regulation("X", "Z", RegType.ACTIVATION, 20)])
+
+    reactions = [Reaction("x_trans", [], ["X"], x_trans),
+                 Reaction("y_trans", [], ["Y"], y_trans),
+                 Reaction("z_trans", [], ["Z"], z_trans),
+                 Reaction("x_deg", ["X"], [], DegradationFormula(0.01, "X")),
+                 Reaction("y_deg", ["Y"], [], DegradationFormula(0.01, "Y")),
+                 Reaction("z_deg", ["Z"], [], DegradationFormula(0.02, "Z"))]
+
+    net4 = Network()
+    net4.species = species
+    net4.reactions = reactions
+
+    return net4
+
+
+def get_constraints_1():
+    c = Constraint("X", lambda v: v - 40, (20, 40))
+    c.pretty_print = "X" + "<=" + str(40) + " for time: " + str(20) + "s - " + str(40) + "s"
+    return [c]
+
+
+def get_mutables_1():
+    # m1 = VariableMutable("X", 1, 3, 1)
+    m1 = ReactionMutable("rate", 0, 1, 0.01, "x_deg")
+    m2 = VariableMutable("Y", 1, 3, 1)
+    m3 = VariableMutable("Z", 1, 3, 1)
+
+    return [m1, m2, m3]
+
+
 if __name__ == '__main__':
     # repressilator_sim = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
     #
@@ -324,4 +365,19 @@ if __name__ == '__main__':
     #
     # print(n.get_reaction_by_name("y_trans"))
     # OdeSimulator.visualise(n, net1_sim, OdeSimulator.simulate(n, net1_sim))
-    get_large_network()
+    # get_large_network()
+
+    net = get_test_network_4()
+    cs = get_constraints_1()
+    ms = get_mutables_1()
+
+    sim = SimulationSettings(0, 100, 100, ["X", "Y", "Z"])
+    # t = ConstraintSatisfaction.generate_next_level(net, sim, cs, ms)
+    # for i in t:
+    #     for j in i[0]:
+    #         print(str(j.current_value))
+    #     print(str(i[1]))
+    #     print("-----")
+
+    f = ConstraintSatisfaction.find_network_2(net, sim, ms, cs)
+    print(f)

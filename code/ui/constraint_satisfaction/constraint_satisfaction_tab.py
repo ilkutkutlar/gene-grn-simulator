@@ -28,7 +28,7 @@ class ReverseEngineeringModifyTab(QWidget):
 
         def handler(s):
             g = GenePresenter.get_instance()
-            schedule = ConstraintSatisfaction.generate_schedule(100)
+            schedule = ConstraintSatisfaction.generate_schedule(1000)
             t = ConstraintSatisfaction.find_network(g.network, s,
                                                     g.get_mutables(), g.get_constraints(),
                                                     schedule)

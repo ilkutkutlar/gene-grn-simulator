@@ -22,11 +22,13 @@ class ConstraintSatisfaction:
         total = 0
 
         for c in constraints:
+            # All the simulation values in the time range
             vals = results.results_between_times(c.species, c.time_period[0], c.time_period[1])
+            # All the simulation values in the time range, which do not satisfy the constraint.
             not_sat = list(filter(lambda v: c.value_constraint(v) > 0, vals))
 
             if not_sat:
-                total += np.mean(not_sat)
+                total += c.value_constraint(np.mean(not_sat))
 
         return total
 
@@ -136,6 +138,8 @@ class ConstraintSatisfaction:
                 if delta_e <= 0:
                     current = neighbour
                 else:
+                    print("Found me!")
+
                     p = e ** (-delta_e / T)
                     if p > 0.000001:
                         if ConstraintSatisfaction._rand_bool(p):

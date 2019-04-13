@@ -41,4 +41,3 @@ class MutablesTab(QWidget):
         i = self.mutables_list.currentRow()
         GenePresenter.get_instance().remove_mutable(i)
         self._update_mutables_list()
-        print(GenePresenter.get_instance().get_mutables())

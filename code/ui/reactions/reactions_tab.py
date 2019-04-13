@@ -98,7 +98,6 @@ class ReactionsTab(QWidget):
         i = self.reactions_list.currentRow()
         GenePresenter.get_instance().remove_reaction_by_index(i)
         self.update_ui()
-        print(GenePresenter.get_instance().network)
 
     def _reaction_list_clicked(self):
         index = self.reactions_list.currentRow()

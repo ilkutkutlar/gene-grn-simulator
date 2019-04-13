@@ -43,4 +43,3 @@ class ConstraintsTab(QWidget):
         i = self.constraints_list.currentRow()
         GenePresenter.get_instance().remove_constraint(i)
         self._update_constraints_list()
-        print(GenePresenter.get_instance().get_constraints())

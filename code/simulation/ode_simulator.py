@@ -56,7 +56,6 @@ class OdeSimulator:
     """
     @staticmethod
     def visualise(net, sim, results):
-        print(len(results))
         values = StructuredResults.label_results(results, net.species)
 
         plt.figure()

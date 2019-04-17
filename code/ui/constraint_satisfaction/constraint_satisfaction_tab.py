@@ -11,7 +11,7 @@ from ui.gene_presenter import GenePresenter
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 
 
-class ReverseEngineeringModifyTab(QWidget):
+class ConstraintSatisfactionModifyTab(QWidget):
     def __init__(self):
         super().__init__()
         self.main_layout = QVBoxLayout()
@@ -28,8 +28,13 @@ class ReverseEngineeringModifyTab(QWidget):
 
         def handler(s):
             g = GenePresenter.get_instance()
+
             t = ConstraintSatisfaction.find_network(g.network, s,
                                                     g.get_mutables(), g.get_constraints())
+
+            # s = ConstraintSatisfaction.generate_schedule(1000)
+            # t = ConstraintSatisfaction.find_closest_network(g.network, s,
+            #                                         g.get_mutables(), g.get_constraints(), s)
 
             if t:
                 im = NetworkVisualiser.visualise_as_image(t, "gene")

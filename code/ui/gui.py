@@ -7,7 +7,7 @@ from simulation.ode_simulator import OdeSimulator
 from ui.gene_presenter import GenePresenter
 from ui.open_sbml_dialog import OpenSbmlDialog
 from ui.reactions.reactions_tab import ReactionsTab
-from ui.constraint_satisfaction.constraint_satisfaction_tab import ReverseEngineeringModifyTab
+from ui.constraint_satisfaction.constraint_satisfaction_tab import ConstraintSatisfactionModifyTab
 from ui.simulation.deterministic_simulation_dialog import DeterministicSimulationDialog
 from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialog
 from ui.species.species_tab import SpeciesTab
@@ -39,7 +39,7 @@ class GeneWindow(QMainWindow):
 
         self.species_tab = SpeciesTab(self)
         self.reactions_tab = ReactionsTab()
-        self.rev_eng_modify_tab = ReverseEngineeringModifyTab()
+        self.rev_eng_modify_tab = ConstraintSatisfactionModifyTab()
         tabs.addTab(self.species_tab, "Species")
         tabs.addTab(self.reactions_tab, "Reactions")
         tabs.addTab(self.rev_eng_modify_tab, "Constraint Satisfaction")

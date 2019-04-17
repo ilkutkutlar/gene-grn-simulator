@@ -1,5 +1,7 @@
 import copy
 import random
+import time
+
 from math import e, ceil
 
 import numpy as np
@@ -57,10 +59,11 @@ class ConstraintSatisfaction:
     :param SimulationSettings sim: The settings to be used to simulate the network during reverse engineering.
     :param List[Mutable] mutables: List of values which can be mutated during the constraint satisfaction process.
     :param List[Constraint] constraints: The list of constraints which the network must satisfy.
+    :param int give_up_time: The time limit after which the process will stop and return None
     """
 
     @staticmethod
-    def find_network(net, sim, mutables, constraints):
+    def find_network(net, sim, mutables, constraints, give_up_time):
 
         mut_net = copy.deepcopy(net)
 
@@ -73,8 +76,15 @@ class ConstraintSatisfaction:
                              _generate_next_level(mut_net, sim, mutables, constraints),
                              reverse=True, key=lambda x: x[1])
 
+        start = time.time()
+
         stack = first_level
         while stack:
+            now = time.time()
+            # Check whether the time limit has been reached
+            if now - start >= give_up_time:
+                return None
+
             (current, eval_current) = stack.pop()
 
             if eval_current <= 0:
@@ -198,6 +208,6 @@ class ConstraintSatisfaction:
                         if ConstraintSatisfaction._rand_bool(p):
                             current = neighbour
 
-        return None
+        return mut_net
 
     # endregion

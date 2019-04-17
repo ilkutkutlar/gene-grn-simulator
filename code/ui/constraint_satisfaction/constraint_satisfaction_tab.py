@@ -33,13 +33,14 @@ class ConstraintSatisfactionModifyTab(QWidget):
             g = GenePresenter.get_instance()
 
             if self.method_combo.currentIndex() == 0:
+                give_up_time = int(self.give_up_edit.text())
                 t = ConstraintSatisfaction.find_network(g.network, s,
-                                                        g.get_mutables(), g.get_constraints())
+                                                        g.get_mutables(), g.get_constraints(), give_up_time)
             else:
-                temperature = float(self.temperature_edit.text())
-                s = ConstraintSatisfaction.generate_schedule(1000)
+                temperature = int(self.temperature_edit.text())
+                schedule = ConstraintSatisfaction.generate_schedule(temperature)
                 t = ConstraintSatisfaction.find_closest_network(g.network, s,
-                                                                g.get_mutables(), g.get_constraints(), s)
+                                                                g.get_mutables(), g.get_constraints(), schedule)
 
             if t:
                 im = NetworkVisualiser.visualise_as_image(t, "gene")

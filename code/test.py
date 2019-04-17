@@ -1,5 +1,8 @@
 from math import log, e
 
+from constraint_satisfaction.constraint import Constraint
+from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
+from constraint_satisfaction.mutable import VariableMutable, ReactionMutable
 from models.formulae.degradation_formula import DegradationFormula
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.formulae.translation_formula import TranslationFormula
@@ -9,10 +12,6 @@ from models.reaction import Reaction
 from models.reg_type import RegType
 from models.regulation import Regulation
 from models.simulation_settings import SimulationSettings
-from constraint_satisfaction.constraint import Constraint
-from constraint_satisfaction.mutable import RegulationMutable, VariableMutable, ReactionMutable
-from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
-from simulation.ode_simulator import OdeSimulator
 
 
 def get_repressilator():
@@ -309,7 +308,7 @@ def get_large_network():
     return net
 
 
-def get_test_network_4():
+def get_test_network4():
     species = {"X": 1, "Y": 1, "Z": 1}
 
     x_trans = TranscriptionFormula(5, "X")
@@ -335,13 +334,13 @@ def get_test_network_4():
     return net4
 
 
-def get_constraints_1():
+def get_constraints1():
     c = Constraint("X", lambda v: v - 40, (20, 40))
     c.pretty_print = "X" + "<=" + str(40) + " for time: " + str(20) + "s - " + str(40) + "s"
     return [c]
 
 
-def get_mutables_1():
+def get_mutables1():
     # m1 = VariableMutable("X", 1, 3, 1)
     m1 = ReactionMutable("rate", 0, 1, 0.01, "x_deg")
     m2 = VariableMutable("Y", 1, 3, 1)
@@ -367,9 +366,9 @@ if __name__ == '__main__':
     # OdeSimulator.visualise(n, net1_sim, OdeSimulator.simulate(n, net1_sim))
     # get_large_network()
 
-    net = get_test_network_4()
-    cs = get_constraints_1()
-    ms = get_mutables_1()
+    net = get_test_network4()
+    cs = get_constraints1()
+    ms = get_mutables1()
 
     sim = SimulationSettings(0, 100, 100, ["X", "Y", "Z"])
     # t = ConstraintSatisfaction.generate_next_level(net, sim, cs, ms)

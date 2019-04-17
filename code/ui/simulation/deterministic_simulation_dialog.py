@@ -1,3 +1,4 @@
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout
 
 from models.simulation_settings import SimulationSettings
@@ -35,6 +36,7 @@ class DeterministicSimulationDialog(QDialog):
         self.handler = handler
 
         self.time_field = QLineEdit()
+        self.time_field.setValidator(QIntValidator())
         fields.addRow(QLabel("Simulation time"), self.time_field)
 
         self.species_checkboxes = common_widgets.make_species_checkboxes_layout()

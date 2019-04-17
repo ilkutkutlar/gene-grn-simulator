@@ -1,5 +1,6 @@
 import matplotlib.image as image
 import matplotlib.pyplot as plt
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QMessageBox, QTabWidget, QComboBox, QGroupBox, \
     QHBoxLayout, QLabel, QLineEdit, QFormLayout
 
@@ -62,7 +63,7 @@ class ConstraintSatisfactionModifyTab(QWidget):
     def _get_annealing_panel(self):
         annealing_panel = QWidget()
         self.temperature_edit = QLineEdit()
-        self.temperature_edit
+        self.temperature_edit.setValidator(QIntValidator())
         annealing_layout = QFormLayout()
         annealing_layout.addRow(QLabel("Temperature"), self.temperature_edit)
         annealing_panel.setLayout(annealing_layout)
@@ -72,6 +73,7 @@ class ConstraintSatisfactionModifyTab(QWidget):
     def _get_best_first_panel(self):
         best_first_panel = QWidget()
         self.give_up_edit = QLineEdit()
+        self.give_up_edit.setValidator(QIntValidator())
         best_first_layout = QFormLayout()
         best_first_layout.addRow(QLabel("Give up after"), self.give_up_edit)
         best_first_panel.setLayout(best_first_layout)

@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFormLayout, QLineEdit, QLabel, QComboBox
 
+import helper
 from constraint_satisfaction.mutable import VariableMutable, ReactionMutable
 from ui.gene_presenter import GenePresenter
 
@@ -46,12 +47,15 @@ class AddMutableValueTab(QWidget):
         fields.addRow(QLabel("Mutable: "), self.mutables_combo)
 
         self.lb = QLineEdit()
+        self.lb.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Lower bound"), self.lb)
 
         self.ub = QLineEdit()
+        self.ub.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Upper bound"), self.ub)
 
         self.inc = QLineEdit()
+        self.inc.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Increments"), self.inc)
 
         self.layout.addLayout(fields)

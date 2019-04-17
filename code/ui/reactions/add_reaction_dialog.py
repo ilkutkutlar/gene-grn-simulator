@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QListWidget, QLabel, QGridLayout, QPushButton, \
     QVBoxLayout, QDialog, QFormLayout, QLineEdit, QWidget
 
+import helper
 from models.formulae.translation_formula import TranslationFormula
 from models.formulae.degradation_formula import DegradationFormula
 from models.formulae.custom_formula import CustomFormula
@@ -110,6 +111,7 @@ class AddReactionDialog(QDialog):
         self.reaction_name2 = QLineEdit()
         fields.addRow(QLabel("Reaction name"), self.reaction_name2)
         self.translation_rate = QLineEdit()
+        self.translation_rate.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Translation rate: "), self.translation_rate)
         self.translated_mrna = common_widgets.make_species_combo()
         fields.addRow(QLabel("Translated mRNA: "), self.translated_mrna)
@@ -127,6 +129,7 @@ class AddReactionDialog(QDialog):
         self.reaction_name3 = QLineEdit()
         fields.addRow(QLabel("Reaction name"), self.reaction_name3)
         self.decay_rate = QLineEdit()
+        self.decay_rate.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Decay rate: "), self.decay_rate)
         self.decaying_species = common_widgets.make_species_combo()
         fields.addRow(QLabel("Decaying species: "), self.decaying_species)

@@ -1,6 +1,7 @@
 import math
 
 import libsbml
+from PyQt5.QtGui import QDoubleValidator
 from libsbml._libsbml import formulaToL3String
 
 """
@@ -93,3 +94,9 @@ def evaluate_ast(node, symbols, species=None):
             value = 0  # TODO: Error!
 
     return value
+
+
+def get_double_validator():
+    v = QDoubleValidator()
+    v.setNotation(QDoubleValidator.StandardNotation)
+    return v

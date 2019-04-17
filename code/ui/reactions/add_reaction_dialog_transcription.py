@@ -1,6 +1,8 @@
+from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QFormLayout, QRadioButton, QGroupBox, QLabel, QLineEdit, QWidget, QComboBox, QCheckBox, \
     QListWidget, QPushButton
 
+import helper
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.input_gate import InputGate
 from models.reaction import Reaction
@@ -17,6 +19,8 @@ class TranscriptionFields(QWidget):
 
         self.reaction_name = QLineEdit()
         self.transcription_rate = QLineEdit()
+        self.transcription_rate.setValidator(helper.get_double_validator())
+
         self.transcribed_species = common_widgets.make_species_combo()
         self.transcribed_species.currentIndexChanged.connect(self._transcribed_species_current_index_changed)
 
@@ -68,6 +72,7 @@ class TranscriptionFields(QWidget):
 
         self.regulator = common_widgets.make_species_combo()
         self.k = QLineEdit()
+        self.k.setValidator(helper.get_double_validator())
 
         self.add_button = QPushButton("Add regulation")
         self.add_button.clicked.connect(self._add_regulation_clicked)
@@ -86,6 +91,7 @@ class TranscriptionFields(QWidget):
         fields = QFormLayout()
 
         self.hill = QLineEdit()
+        self.hill.setValidator(helper.get_double_validator())
 
         self.input_gate = QComboBox()
         self.input_gate.addItems(["AND", "OR", "SUM"])

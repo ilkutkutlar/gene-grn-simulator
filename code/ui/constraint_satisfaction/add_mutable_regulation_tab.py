@@ -2,6 +2,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QListWidget, QListWidgetItem, QComboBox, QCheckBox, QGroupBox, \
     QHBoxLayout, QLineEdit, QLabel, QPushButton
 
+import helper
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.reg_type import RegType
 from constraint_satisfaction.mutable import RegulationMutable, VariableMutable
@@ -70,12 +71,15 @@ class AddMutableRegulationTab(QWidget):
     @staticmethod
     def _make_k_box():
         lb_edit = QLineEdit()
+        lb_edit.setValidator(helper.get_double_validator())
         lb_edit.setFixedWidth(60)
 
         ub_edit = QLineEdit()
+        ub_edit.setValidator(helper.get_double_validator())
         ub_edit.setFixedWidth(60)
 
         step_edit = QLineEdit()
+        step_edit.setValidator(helper.get_double_validator())
         step_edit.setFixedWidth(60)
 
         fields = QHBoxLayout()

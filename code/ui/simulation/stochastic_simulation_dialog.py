@@ -2,6 +2,7 @@ import copy
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QFormLayout, QLineEdit, QPushButton
 
+import helper
 from models.simulation_settings import SimulationSettings
 from simulation.gillespie_simulator import GillespieSimulator
 from ui import common_widgets
@@ -33,6 +34,7 @@ class StochasticSimulationDialog(QDialog):
         fields = QFormLayout()
 
         self.time_field = QLineEdit()
+        self.time_field.setValidator(helper.get_double_validator())
         fields.addRow(QLabel("Simulation time"), self.time_field)
 
         self.species_checkboxes = common_widgets.make_species_checkboxes_layout()

@@ -21,8 +21,8 @@ class MutablesTab(QWidget):
         mutables_buttons_layout.addWidget(self.remove_mutable_button)
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(self.mutables_list)
         main_layout.addLayout(mutables_buttons_layout)
+        main_layout.addWidget(self.mutables_list)
         self.setLayout(main_layout)
         self._update_mutables_list()
 

@@ -23,8 +23,8 @@ class ConstraintsTab(QWidget):
         constraints_buttons_layout.addWidget(self.remove_constraint_button)
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(self.constraints_list)
         main_layout.addLayout(constraints_buttons_layout)
+        main_layout.addWidget(self.constraints_list)
         self.setLayout(main_layout)
         self._update_constraints_list()
 

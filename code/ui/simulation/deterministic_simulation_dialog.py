@@ -8,9 +8,9 @@ class DeterministicSimulationDialog(QDialog):
 
     def _ok_button_clicked(self):
         time_text = self.time_field.text().strip()
-        sampling_text = self.sampling_field.text().strip()
 
-        end_time = int(time_text) if time_text else 1
+        end_time = float(time_text) if time_text else 1
+        sampling_rate = int(end_time)
 
         species = list()
         for x in range(0, self.species_checkboxes.count()):
@@ -18,8 +18,7 @@ class DeterministicSimulationDialog(QDialog):
             if checkbox.isChecked():
                 species.append(checkbox.text())
 
-        sampling_rate = int(sampling_text)
-
+        print(sampling_rate)
         self.close()
 
         s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
@@ -37,9 +36,6 @@ class DeterministicSimulationDialog(QDialog):
 
         self.time_field = QLineEdit()
         fields.addRow(QLabel("Simulation time"), self.time_field)
-
-        self.sampling_field = QLineEdit()
-        fields.addRow(QLabel("Sampling rate"), self.sampling_field)
 
         self.species_checkboxes = common_widgets.make_species_checkboxes_layout()
 

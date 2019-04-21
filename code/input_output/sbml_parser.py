@@ -70,7 +70,7 @@ class SbmlParser:
     """
 
     @staticmethod
-    def _get_reactions(model):
+    def _get_reactions(model, time_multiplier):
         # Evaluate and store global parameters in a symbol table
         symbols = SbmlParser._get_symbols(model)
         if not symbols:
@@ -103,9 +103,19 @@ class SbmlParser:
             # else:
             #     r = CustomFormula(rate_function, parameters, symbols)
 
-            r = CustomFormula(rate_function, parameters, symbols)
+            r = CustomFormula(rate_function, parameters, symbols, time_multiplier)
             reactions.append(Reaction(x.getName(), left, right, r))
         return reactions
+
+    @staticmethod
+    def _get_time_multipler(model):
+        defs = model.getListOfUnitDefinitions()
+        time = defs.get("time")
+        time_multiplier = 1.0
+        if time:
+            time_multiplier = time.getListOfUnits().get(0).getMultiplier()
+
+        return time_multiplier
 
     """
     Return a Network representing the SBML model in the given SBML file.
@@ -124,8 +134,10 @@ class SbmlParser:
         # Initialise species and their initial amounts
         net.species = SbmlParser._get_species(model)
 
+        time_multipler = SbmlParser._get_time_multipler(model)
         # Parse reactions and create CustomReaction objects
-        net.reactions = SbmlParser._get_reactions(model)
+        net.reactions = SbmlParser._get_reactions(model, time_multipler)
+
         if not net.reactions:
             return False
 

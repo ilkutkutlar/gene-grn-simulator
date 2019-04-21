@@ -9,16 +9,17 @@ class CustomFormula(Formula):
     :param Dict[str, float] symbols:
     """
 
-    def __init__(self, rate_function, parameters, symbols):
+    def __init__(self, rate_function, parameters, symbols, time_multiplier):
         self.rate_function = rate_function
         self.symbols = symbols
         self.parameters = parameters
+        self.time_multiplier = time_multiplier
 
     def compute(self, state):
         return helper.eval_equation(self.rate_function,
                                     species=state,
                                     symbols=self.symbols,
-                                    parameters=self.parameters)
+                                    parameters=self.parameters) / self.time_multiplier
 
     def mutate(self, mutation):
         self.parameters.update({mutation.variable_name: mutation.current_value})

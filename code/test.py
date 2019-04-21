@@ -3,6 +3,8 @@ from math import log, e
 from constraint_satisfaction.constraint import Constraint
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from constraint_satisfaction.mutable import VariableMutable, ReactionMutable
+from input_output.sbml_saver import SbmlSaver
+from models.formulae.custom_formula import CustomFormula
 from models.formulae.degradation_formula import DegradationFormula
 from models.formulae.transcription_formula import TranscriptionFormula
 from models.formulae.translation_formula import TranslationFormula
@@ -182,14 +184,14 @@ def get_test_network3():
     reactions = [Reaction("mx_trans", [], ["mX"], x_trans),
                  Reaction("my_trans", [], ["mY"], y_trans),
                  Reaction("mz_trans", [], ["mZ"], z_trans),
-                 Reaction("mg_trans", [], ["pG"], u_trans),
-                 Reaction("mh_trans", [], ["pH"], v_trans),
+                 Reaction("mg_trans", [], ["mG"], u_trans),
+                 Reaction("mh_trans", [], ["mH"], v_trans),
 
                  Reaction("mx_deg", ["mX"], [], DegradationFormula(0.01, "mX")),
                  Reaction("my_deg", ["mY"], [], DegradationFormula(0.01, "mY")),
                  Reaction("mz_deg", ["mZ"], [], DegradationFormula(0.02, "mZ")),
-                 Reaction("mg_deg", ["pG"], [], DegradationFormula(0.02, "mG")),
-                 Reaction("mh_deg", ["mY"], [], DegradationFormula(0.02, "mH")),
+                 Reaction("mg_deg", ["mG"], [], DegradationFormula(0.02, "mG")),
+                 Reaction("mh_deg", ["mH"], [], DegradationFormula(0.02, "mH")),
 
                  Reaction("px_deg", ["pX"], [], DegradationFormula(0.01, "pX")),
                  Reaction("py_deg", ["pY"], [], DegradationFormula(0.01, "pY")),
@@ -380,3 +382,23 @@ if __name__ == '__main__':
 
     f = ConstraintSatisfaction.find_network(net, sim, ms, cs)
     print(f)
+
+
+def sbml_saver_test():
+    species = {"x": 0, "y": 20}
+
+    reg = Regulation("y", "x", RegType.REPRESSION, 40)
+    x_trans = TranscriptionFormula(5, "x")
+    x_trans.set_regulation(2, [reg])
+
+    reactions = [Reaction("", [], ["x"], x_trans),
+                 Reaction("", ["y"], [], DegradationFormula(0.3, "y")),
+                 Reaction("", ["y"], [], CustomFormula("10*2", {'r': 4}, {'t': 5}))]
+
+    net: Network = Network()
+    net.species = species
+    net.reactions = reactions
+
+    m = SbmlSaver.network_to_sbml(net)
+    print(m.getListOfReactions()[2].getKineticLaw().getListOfParameters()[0].getValue())
+    # print(helper.ast_to_string(m.getListOfReactions()[0].getKineticLaw().getMath()))

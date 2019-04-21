@@ -19,7 +19,6 @@ class DeterministicSimulationDialog(QDialog):
             if checkbox.isChecked():
                 species.append(checkbox.text())
 
-        print(sampling_rate)
         self.close()
 
         s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])

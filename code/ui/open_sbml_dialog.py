@@ -12,7 +12,7 @@ class OpenSbmlDialog(QFileDialog):
         self.setFileMode(QFileDialog.AnyFile)
 
         filename = self.getOpenFileName(self, "Open file", ".", "XML Files (*.xml);; All Files (*.*)")
-        print(filename[0])
+
         if filename:
             net = SbmlParser.parse(filename[0])
             if not net:

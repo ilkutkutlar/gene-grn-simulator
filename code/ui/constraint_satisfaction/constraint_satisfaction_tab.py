@@ -57,7 +57,6 @@ class ConstraintSatisfactionModifyTab(QWidget):
                 error_message.setText("No matching network found within the given parameters.")
                 error_message.exec_()
                 error_message.show()
-                print("Error")
 
         DeterministicSimulationDialog(handler)
 

@@ -249,7 +249,7 @@ class TranscriptionFormula(Formula):
         hill_coeff = str(self.hill_coeff)
 
         string = "Type: Transcription" + "\n"
-        string += "Rate: " + trans_rate + " molecules/s\n\n"
+        string += "Rate: " + trans_rate + "\n\n"
 
         string += "== Regulation == \n"
         string += "Hill coefficient: " + hill_coeff + "\n\n"

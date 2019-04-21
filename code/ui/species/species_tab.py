@@ -51,7 +51,7 @@ class SpeciesTab(QWidget):
     def update_ui(self):
         self.species_list.clear()
         for s in GenePresenter.get_instance().get_species():
-            self.species_list.addItem(s + ": " + str(GenePresenter.get_instance().get_species()[s]) + " molecules")
+            self.species_list.addItem(s + ": " + str(GenePresenter.get_instance().get_species()[s]))
 
     def _add_species_click_handler(self):
         (text, ok) = QInputDialog.getText(self, "Add Species", "Write species and initial "

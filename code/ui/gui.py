@@ -57,6 +57,25 @@ class GeneWindow(QMainWindow):
         if filename:
             SbmlSaver.save_network_to_file(net, filename[0] + ".xml")
 
+    def _help_units_clicked(self):
+        units_message = QMessageBox()
+        units_message.setIcon(QMessageBox.Information)
+        units_message.setWindowTitle("Units")
+        units_message.setStandardButtons(QMessageBox.Ok)
+
+        units = """
+        The quantities used in this programme have these units:
+        
+        Time: seconds
+        Species: molecules
+        Transcription rate: molecules/second
+        Translation rate: molecules/mRNA molecules/second
+        Degradation rate: molecules/second
+        """
+
+        units_message.setText(units)
+        units_message.exec_()
+
     def _init_menubar(self):
         self.menubar = self.menuBar()
 
@@ -81,6 +100,13 @@ class GeneWindow(QMainWindow):
         stochastic = QAction("Stochastic (Gillespie Algorithm)", self)
         stochastic.triggered.connect(self._stochastic_simulation_clicked)
         simulate.addAction(stochastic)
+
+        # Help menu
+        help = self.menubar.addMenu("Help")
+
+        help_units = QAction("Units", self)
+        help_units.triggered.connect(self._help_units_clicked)
+        help.addAction(help_units)
 
 
 app = QApplication([])

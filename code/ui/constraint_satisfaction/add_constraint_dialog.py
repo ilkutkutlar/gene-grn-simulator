@@ -1,6 +1,6 @@
 import re
 
-from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QLineEdit, QPushButton, QVBoxLayout
+from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QLineEdit, QPushButton, QVBoxLayout, QHBoxLayout, QComboBox
 
 import helper
 from constraint_satisfaction.constraint import Constraint
@@ -57,6 +57,25 @@ class AddConstraintDialog(QDialog):
     def _init_fields(self):
         fields = QFormLayout()
 
+        lhs = QLineEdit()
+        sign_combo = QComboBox()
+        sign_combo.addItems([">=", "<="])
+        rhs = QLineEdit()
+
+        constraint_box = QHBoxLayout()
+        constraint_box.addWidget(lhs)
+        constraint_box.addWidget(sign_combo)
+        constraint_box.addWidget(rhs)
+        fields.addRow("Constraint:", constraint_box)
+
+        time_lb = QLineEdit()
+        time_ub = QLineEdit()
+
+        time_box = QHBoxLayout()
+        time_box.addWidget(time_lb)
+        time_box.addWidget(QLabel("-"))
+        time_box.addWidget(time_ub)
+        fields.addRow("Time period", time_box)
 
         self.constraint = QLineEdit()
         fields.addRow(QLabel("Constraint (e.g. x >= 10)"), self.constraint)

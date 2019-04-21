@@ -94,7 +94,7 @@ class TranscriptionFields(QWidget):
         self.hill.setValidator(helper.get_double_validator())
 
         self.input_gate = QComboBox()
-        self.input_gate.addItems(["AND", "OR", "SUM"])
+        self.input_gate.addItems(["NONE", "AND", "OR"])
 
         self.add_regulation_box = self._make_add_regulation_box()
 
@@ -143,7 +143,7 @@ class TranscriptionFields(QWidget):
             elif input_gate == "OR":
                 input_gate = InputGate.OR
             else:
-                input_gate = InputGate.SUM
+                input_gate = InputGate.NONE
 
             f.set_regulation(hill, self.regulations, input_gate)
 

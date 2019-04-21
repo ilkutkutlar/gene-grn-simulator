@@ -66,7 +66,7 @@ class ConstraintSatisfactionModifyTab(QWidget):
         self.temperature_edit = QLineEdit()
         self.temperature_edit.setValidator(QIntValidator())
         annealing_layout = QFormLayout()
-        annealing_layout.addRow(QLabel("Temperature"), self.temperature_edit)
+        annealing_layout.addRow(QLabel("Search extensiveness (typical value 100)"), self.temperature_edit)
         annealing_panel.setLayout(annealing_layout)
         annealing_panel.setVisible(False)
         return annealing_panel
@@ -76,7 +76,7 @@ class ConstraintSatisfactionModifyTab(QWidget):
         self.give_up_edit = QLineEdit()
         self.give_up_edit.setValidator(QIntValidator())
         best_first_layout = QFormLayout()
-        best_first_layout.addRow(QLabel("Give up after"), self.give_up_edit)
+        best_first_layout.addRow(QLabel("Duration (seconds)"), self.give_up_edit)
         best_first_panel.setLayout(best_first_layout)
         best_first_panel.setVisible(False)
         return best_first_panel
@@ -91,7 +91,7 @@ class ConstraintSatisfactionModifyTab(QWidget):
 
     def _get_method_combo(self):
         self.method_combo = QComboBox()
-        self.method_combo.addItems(["Best-first search (exact match)", "Simulated annealing (closest match)"])
+        self.method_combo.addItems(["Find exact match", "Find closest match"])
         self.method_combo.currentIndexChanged.connect(self._method_combo_index_changed)
         return self.method_combo
 
@@ -101,12 +101,14 @@ class ConstraintSatisfactionModifyTab(QWidget):
         return self.run_button
 
     def _get_run_options_panel(self):
-        run_options_box = QVBoxLayout()
         mode_layout = QFormLayout()
         mode_layout.addRow(QLabel("Search method"), self._get_method_combo())
-        run_options_box.addLayout(mode_layout)
+
         self.annealing_panel = self._get_annealing_panel()
         self.best_first_panel = self._get_best_first_panel()
+
+        run_options_box = QVBoxLayout()
+        run_options_box.addLayout(mode_layout)
         run_options_box.addWidget(self.annealing_panel)
         run_options_box.addWidget(self.best_first_panel)
         return run_options_box

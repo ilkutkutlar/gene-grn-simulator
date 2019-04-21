@@ -2,6 +2,7 @@ import re
 
 from PyQt5.QtWidgets import QDialog, QLabel, QFormLayout, QLineEdit, QPushButton, QVBoxLayout
 
+import helper
 from constraint_satisfaction.constraint import Constraint
 from ui.gene_presenter import GenePresenter
 
@@ -27,7 +28,8 @@ class AddConstraintDialog(QDialog):
             sign = m.group(2).strip()
             value = float(m.group(3).strip())
         else:
-            return      # TODO: Error!
+            helper.show_error_message("Constraint syntax error.")
+            return
 
         time = self.time.text().strip()
         time = time.split("-")
@@ -39,7 +41,7 @@ class AddConstraintDialog(QDialog):
         elif sign == ">=":
             cons = lambda v: value - v
         else:
-            # TODO: error
+            helper.show_error_message("Constraint syntax error: Unrecognised sign")
             cons = lambda v: v
 
         c = Constraint(species, cons, (t0, t1))
@@ -54,6 +56,7 @@ class AddConstraintDialog(QDialog):
 
     def _init_fields(self):
         fields = QFormLayout()
+
 
         self.constraint = QLineEdit()
         fields.addRow(QLabel("Constraint (e.g. x >= 10)"), self.constraint)

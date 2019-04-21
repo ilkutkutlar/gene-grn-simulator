@@ -62,6 +62,15 @@ class TranscriptionFormula(Formula):
         return ["rate", "hill_coeff"]
 
     def get_formula_string(self):
+        def get_single_activation(tf, n, k):
+            a = "({}^{})".format(tf, n)
+            b = "({}^{} + {}^{})".format(k, n, tf, n)
+            return "{}*({}/{})".format(str(self.rate), a, b)
+
+        def get_single_repression(tf, n, k):
+            c = "(1 + ({}/{})^{})".format(tf, k, n)
+            return "{}*(1/{})".format(str(self.rate), c)
+
         if not self.regulators:
             return str(self.rate)
         elif len(self.regulators) == 1:
@@ -71,19 +80,42 @@ class TranscriptionFormula(Formula):
             k = reg.k
 
             if reg.reg_type == RegType.ACTIVATION:
-                a = "({}^{})".format(tf, n)
-                b = "({}^{} + {}^{})".format(k, n, tf, n)
-
-                return "{}*({}/{})".format(str(self.rate), a, b)
+                return get_single_activation(tf, n, k)
             else:
-                c = "(1 + ({}/{})^{})".format(tf, k, n)
-                return "{}*(1/{})".format(str(self.rate), c)
-        elif len(self.regulators) == 2:
-            # TODO!!
-            return ""
-        else:
-            # TODO!!
-            return ""
+                return get_single_repression(tf, n, k)
+        else:  # len(self.regulators) == 2:
+            one = self.regulators[0]
+            two = self.regulators[1]
+            n = str(self.hill_coeff)
+
+            if self.input_gate == InputGate.OR:
+                a = "({}/{})^{}".format(one.from_gene, one.k, n)
+                b = "({}/{})^{}".format(one.from_gene, two.k, n)
+                c = "1 + {} + {}".format(a, b)
+
+                if one.reg_type == RegType.ACTIVATION and two.reg_type == RegType.ACTIVATION:
+                    return "({}+{})/{}".format(a, b, c)
+                elif one.reg_type == RegType.ACTIVATION and two.reg_type == RegType.REPRESSION:
+                    return "({}+1)/{}".format(a, c)
+                elif one.reg_type == RegType.REPRESSION and two.reg_type == RegType.ACTIVATION:
+                    return "(1+{})/{}".format(b, c)
+                else:  # Repression, repression
+                    return "1/{}".format(c)
+            else:  # self.input_gate == InputGate.AND:
+                one_act = get_single_activation(one.from_gene, n, one.k)
+                one_rep = get_single_repression(one.from_gene, n, one.k)
+
+                two_act = get_single_activation(two.from_gene, n, two.k)
+                two_rep = get_single_repression(two.from_gene, n, two.k)
+
+                if one.reg_type == RegType.ACTIVATION and two.reg_type == RegType.ACTIVATION:
+                    return "{}*{}".format(one_act, two_act)
+                elif one.reg_type == RegType.ACTIVATION and two.reg_type == RegType.REPRESSION:
+                    return "{}*{}".format(one_act, two_rep)
+                elif one.reg_type == RegType.REPRESSION and two.reg_type == RegType.ACTIVATION:
+                    return "{}*{}".format(one_rep, two_act)
+                else:  # Repression, repression
+                    return "{}*{}".format(one_rep, two_rep)
 
     def set_regulation(self, hill_coeff, regulators, input_gate=InputGate.NONE):
         self.hill_coeff = hill_coeff
@@ -217,8 +249,7 @@ class TranscriptionFormula(Formula):
         hill_coeff = str(self.hill_coeff)
 
         string = "Type: Transcription" + "\n"
-
-        string += "Rate: " + trans_rate + "\n\n"
+        string += "Rate: " + trans_rate + " molecules/s\n\n"
 
         string += "== Regulation == \n"
         string += "Hill coefficient: " + hill_coeff + "\n\n"

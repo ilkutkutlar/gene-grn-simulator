@@ -28,6 +28,6 @@ class DegradationFormula(Formula):
         rate = str(self.rate)
 
         string = "Type: Degradation" + "\n"
-        string += "Rate: " + rate + "\n"
+        string += "Rate: " + rate + " molecules/s\n"
 
         return string

@@ -19,6 +19,8 @@ class AddMutableRegulationTab(QWidget):
         reg_type_box, self.activation_check, self.repression_check = self._make_reg_type_box()
         k_box, self.lb_edit, self.ub_edit, self.step_edit = self._make_k_box()
         self.add_button = self._make_add_button()
+        self.hill_edit = QLineEdit()
+        self.hill_edit.setValidator(helper.get_double_validator())
 
         layout.addWidget(QLabel("This reaction can be regulated..."))
         layout.addWidget(self.transcription_reactions_combo)
@@ -28,6 +30,8 @@ class AddMutableRegulationTab(QWidget):
         layout.addWidget(reg_type_box)
         layout.addWidget(QLabel("And have a K value with the range..."))
         layout.addWidget(k_box)
+        layout.addWidget(QLabel("Will have this immutable hill coefficient..."))
+        layout.addWidget(self.hill_edit)
         layout.addWidget(self.add_button)
 
         self.setLayout(layout)
@@ -113,9 +117,11 @@ class AddMutableRegulationTab(QWidget):
         k_ub = float(self.ub_edit.text())
         k_step = float(self.step_edit.text())
 
+        hill_coeff = float(self.hill_edit.text())
+
         reg_mut = RegulationMutable(reaction_name, regulators,
                                     VariableMutable("k", k_lb, k_ub, k_step),
-                                    reg_types, False)
+                                    reg_types, False, hill_coeff)
         GenePresenter.get_instance().mutables.append(reg_mut)
 
         # Climb up the hierarchy to find the window and close that.

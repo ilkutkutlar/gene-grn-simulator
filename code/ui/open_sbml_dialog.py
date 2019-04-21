@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 
+import helper
 from input_output.sbml_parser import SbmlParser
 from ui.gene_presenter import GenePresenter
 
@@ -8,21 +9,18 @@ class OpenSbmlDialog(QFileDialog):
 
     def __init__(self, parent):
         super().__init__()
-
         self.setFileMode(QFileDialog.AnyFile)
 
-        # TODO: Why is the filter not working?
-        # file_dialog.setFilter("SBML files (*.xml)")
+        filename = self.getOpenFileName(self, "Open file", ".", "XML Files (*.xml);; All Files (*.*)")
+        print(filename[0])
+        if filename:
+            net = SbmlParser.parse(filename[0])
+            if not net:
+                helper.show_error_message("An error occurred while opening the SBML file.")
 
-        if self.exec_():
-            # selectedFiles returns all files, we only want to open one
-            filename = self.selectedFiles()[0]
-            net = SbmlParser.parse(filename)
             GenePresenter.get_instance().network = net
 
-            # Display a nice message showing the contents of the file loaded
             message = QMessageBox()
-            # TODO: Maybe only print species and reactions?
             message.setText("SBML file has been opened")
             message.exec_()
 

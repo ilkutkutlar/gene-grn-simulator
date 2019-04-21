@@ -1,18 +1,15 @@
 import libsbml
-from libsbml._libsbml import parseL3Formula
 
 import helper
 from models.formulae.custom_formula import CustomFormula
-from models.formulae.degradation_formula import DegradationFormula
 from models.network import Network
 from models.reaction import Reaction
+
+
 # 1. Core objects of libsbml:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/group__core.html
 # 2. Classes:
 # http://sbml.org/Software/libSBML/5.17.0/docs//python-api/annotated.html
-from models.reg_type import RegType
-from models.regulation import Regulation
-from models.formulae.transcription_formula import TranscriptionFormula
 
 
 class SbmlParser:
@@ -55,6 +52,10 @@ class SbmlParser:
 
         for r in model.getListOfRules():
             val = helper.evaluate_ast(r.getMath(), symbols)
+
+            if not val:
+                return False
+
             symbols[r.getId()] = val
 
         for c in model.getListOfCompartments():
@@ -72,6 +73,9 @@ class SbmlParser:
     def _get_reactions(model):
         # Evaluate and store global parameters in a symbol table
         symbols = SbmlParser._get_symbols(model)
+        if not symbols:
+            return False
+
         reactions = []
 
         for x in model.getListOfReactions():
@@ -122,5 +126,7 @@ class SbmlParser:
 
         # Parse reactions and create CustomReaction objects
         net.reactions = SbmlParser._get_reactions(model)
+        if not net.reactions:
+            return False
 
         return net

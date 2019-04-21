@@ -1,7 +1,6 @@
 import libsbml
 from libsbml._libsbml import parseL3Formula
 
-from input_output.sbml_parser import SbmlParser
 from models.formulae.custom_formula import CustomFormula
 from models.formulae.degradation_formula import DegradationFormula
 from models.formulae.transcription_formula import TranscriptionFormula

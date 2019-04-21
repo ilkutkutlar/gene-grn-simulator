@@ -30,7 +30,7 @@ class TranscriptionFields(QWidget):
         self.regulation_settings_panel = self._make_regulation_settings_panel()
 
         fields.addRow(QLabel("Reaction name"), self.reaction_name)
-        fields.addRow(QLabel("Transcription rate"), self.transcription_rate)
+        fields.addRow(QLabel("Transcription rate (mRNA molecules/s)"), self.transcription_rate)
         fields.addRow(QLabel("Transcribed species: "), self.transcribed_species)
         fields.addRow(self.is_regulated)
         fields.addRow(self.regulation_settings_panel)

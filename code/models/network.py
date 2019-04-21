@@ -1,7 +1,6 @@
-from models.formulae.transcription_formula import TranscriptionFormula
+from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable
 from models.input_gate import InputGate
 from models.regulation import Regulation
-from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable
 
 
 class Network:
@@ -32,30 +31,43 @@ class Network:
             elif isinstance(m, VariableMutable):
                 self.species[m.variable_name] = m.current_value
             elif isinstance(m, RegulationMutable):
-                maybe_reaction = \
-                    list(filter(lambda x: x.name == m.reaction_name, self.reactions))
-                if maybe_reaction:
-                    transcription = maybe_reaction[0].rate_function
+                self._mutate_regulation(m)
 
-                    if m.is_installed:
-                        reg = transcription.get_regulation(m.possible_regulators[m.current_regulator])
-                        if reg:
-                            reg.reg_type = m.possible_reg_types[m.current_reg_type]
-                            reg.k = m.k_variable.current_value
-                        else:
-                            # TODO
-                            transcription.set_regulation(2, [], InputGate.AND)
+    def _mutate_regulation(self, m):
+        # Find the reaction this RegulationMutable refers to
+        # If it doesn't exist, maybe_reaction will return None
+        maybe_reaction = \
+            list(filter(lambda x: x.name == m.reaction_name, self.reactions))
 
-                            new_reg = Regulation(m.possible_regulators[m.current_regulator], transcription.transcribed_species,
-                                                 m.possible_reg_types[m.current_reg_type], m.k_variable.current_value)
+        if maybe_reaction:  # Reaction exists
+            # Get reaction's TranscriptionFormula
+            transcription = maybe_reaction[0].rate_function
 
-                            transcription.regulators.append(new_reg)
-                    else:
-                        reg = transcription.get_regulation(m.current_regulator)
-                        if reg:
-                            transcription.regulators.remove(reg)
-                else:
-                    pass  # error
+            if m.is_installed:
+                # The regulator species that needs to be installed
+                the_regulator = m.possible_regulators[m.current_regulator]
+                # The regulation object which corresponds to this regulator
+                the_regulation = transcription.get_regulation(the_regulator)
+
+                if the_regulation:  # Regulation already installed, just change the parameters.
+                    the_regulation.reg_type = m.possible_reg_types[m.current_reg_type]
+                    the_regulation.k = m.k_variable.current_value
+                else:  # Regulation not installed, install it now.
+                    if len(transcription.regulators) == 0:
+                        # No regulators have been installed yet, so set common regulation parameters
+                        transcription.set_regulation(m.hill_coeff, [], InputGate.AND)
+
+                    new_reg = Regulation(m.possible_regulators[m.current_regulator],
+                                         transcription.transcribed_species,
+                                         m.possible_reg_types[m.current_reg_type],
+                                         m.k_variable.current_value)
+
+                    transcription.regulators.append(new_reg)
+
+            else:
+                the_regulation = transcription.get_regulation(m.current_regulator)
+                if the_regulation:
+                    transcription.regulators.remove(the_regulation)
 
     """
     Return reaction with given name

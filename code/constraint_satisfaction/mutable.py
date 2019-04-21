@@ -61,12 +61,13 @@ class RegulationMutable:
     :param bool is_installed: Whether this regulation is installed in the network
     """
 
-    def __init__(self, reaction_name, possible_regulators, k_variable, possible_reg_types, is_installed):
+    def __init__(self, reaction_name, possible_regulators, k_variable, possible_reg_types, is_installed, hill_coeff):
         self.reaction_name = reaction_name
         self.possible_regulators = possible_regulators
         self.possible_reg_types = possible_reg_types
         self.k_variable = k_variable
 
+        self.hill_coeff = hill_coeff
         self.is_installed = is_installed
         self.current_regulator = 0 if possible_regulators else None
         self.current_reg_type = 0 if possible_reg_types else None

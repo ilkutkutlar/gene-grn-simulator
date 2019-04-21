@@ -2,6 +2,7 @@ import math
 
 import libsbml
 from PyQt5.QtGui import QDoubleValidator
+from PyQt5.QtWidgets import QMessageBox
 from libsbml._libsbml import formulaToL3String
 
 """
@@ -64,15 +65,20 @@ def evaluate_ast(node, symbols, species=None):
         elif species and (name in species):
             value = species[name]
         else:
-            value = 0  # TODO: Error!
+            value = False
     elif node_type == libsbml.AST_FUNCTION_LN:
         val = evaluate_ast(node.getLeftChild(), symbols, species=species)
-        value = math.log(val, math.e)
+        if val:
+            value = math.log(val, math.e)
+        else:
+            value = False
     else:
         left = evaluate_ast(node.getLeftChild(), symbols, species=species)
         right = evaluate_ast(node.getRightChild(), symbols, species=species)
 
-        if node_type == libsbml.AST_PLUS:
+        if not left or not right:
+            value = False
+        elif node_type == libsbml.AST_PLUS:
             value = left + right
         elif node_type == libsbml.AST_DIVIDE:
             value = left / right
@@ -83,15 +89,7 @@ def evaluate_ast(node, symbols, species=None):
         elif node_type == 296:  # AST_POWER
             value = math.pow(left, right)
         else:
-            # Debug codes:
-            # print("ERROR!")
-            # print("Operator: " + str(node.getOperatorName()))
-            # print("Value: " + str(node.getValue()))
-            # print("Name: " + str(node.getName()))
-            # print("Exponent: " + str(node.getExponent()))
-            # print("Type: " + str(node.getType()))
-
-            value = 0  # TODO: Error!
+            value = False
 
     return value
 
@@ -100,3 +98,17 @@ def get_double_validator():
     v = QDoubleValidator()
     v.setNotation(QDoubleValidator.StandardNotation)
     return v
+
+
+def show_error_message(message):
+    error_message = QMessageBox()
+    error_message.setIcon(QMessageBox.Warning)
+    error_message.setWindowTitle("Error")
+    error_message.setStandardButtons(QMessageBox.Ok)
+    error_message.setText(message)
+
+    button = error_message.exec_()
+    if button == QMessageBox.Ok:
+        return True
+    else:
+        return False

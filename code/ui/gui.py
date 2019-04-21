@@ -13,20 +13,6 @@ from ui.simulation.stochastic_simulation_dialog import StochasticSimulationDialo
 from ui.species.species_tab import SpeciesTab
 
 
-def show_error_message(message):
-    error_message = QMessageBox()
-    error_message.setIcon(QMessageBox.Warning)
-    error_message.setWindowTitle("Error")
-    error_message.setStandardButtons(QMessageBox.Ok)
-    error_message.setText(message)
-
-    button = error_message.exec_()
-    if button == QMessageBox.Ok:
-        return True
-    else:
-        return False
-
-
 class GeneWindow(QMainWindow):
     def __init__(self):
         super().__init__()

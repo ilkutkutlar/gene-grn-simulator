@@ -112,7 +112,7 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Reaction name"), self.reaction_name2)
         self.translation_rate = QLineEdit()
         self.translation_rate.setValidator(helper.get_double_validator())
-        fields.addRow(QLabel("Translation rate: "), self.translation_rate)
+        fields.addRow(QLabel("Translation rate (molecules/mRNA/s): "), self.translation_rate)
         self.translated_mrna = common_widgets.make_species_combo()
         fields.addRow(QLabel("Translated mRNA: "), self.translated_mrna)
         self.produced_protein = common_widgets.make_species_combo()
@@ -130,7 +130,7 @@ class AddReactionDialog(QDialog):
         fields.addRow(QLabel("Reaction name"), self.reaction_name3)
         self.decay_rate = QLineEdit()
         self.decay_rate.setValidator(helper.get_double_validator())
-        fields.addRow(QLabel("Decay rate: "), self.decay_rate)
+        fields.addRow(QLabel("Decay rate (molecules/s): "), self.decay_rate)
         self.decaying_species = common_widgets.make_species_combo()
         fields.addRow(QLabel("Decaying species: "), self.decaying_species)
 

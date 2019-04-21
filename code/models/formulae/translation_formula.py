@@ -28,6 +28,6 @@ class TranslationFormula(Formula):
         rate = str(self.rate)
 
         string = "Type: Translation" + "\n"
-        string += "Rate: " + rate + "\n"
+        string += "Rate: " + rate + " molecules/mRNA/s\n"
 
         return string

@@ -29,12 +29,12 @@ class Network:
             if isinstance(m, ReactionMutable):
                 r = self.get_reaction_by_name(m.reaction_name)
                 r.rate_function.mutate(m)
+            elif isinstance(m, GlobalParameterMutable):
+                self.symbols[m.variable_name] = m.current_value
             elif isinstance(m, VariableMutable):
                 self.species[m.variable_name] = m.current_value
             elif isinstance(m, RegulationMutable):
                 self._mutate_regulation(m)
-            elif isinstance(m, GlobalParameterMutable):
-                self.symbols[m.variable_name] = m.current_value
 
     def _mutate_regulation(self, m):
         # Find the reaction this RegulationMutable refers to

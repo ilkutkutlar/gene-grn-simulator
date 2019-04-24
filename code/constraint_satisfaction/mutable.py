@@ -137,3 +137,8 @@ class RegulationMutable:
 
         return "{}: regulated by {} with {} \n    with {}". \
             format(self.reaction_name, regulators, reg_types, str(self.k_variable))
+
+
+class GlobalParameterMutable(VariableMutable):
+    def __init__(self, variable_name, lower_bound, upper_bound, increments):
+        super().__init__(variable_name, lower_bound, upper_bound, increments)

@@ -31,3 +31,9 @@ class DegradationFormula(Formula):
         string += "Rate: " + rate + "\n"
 
         return string
+
+    def str_variables(self):
+        rate = str(self.rate)
+        string = "Rate: " + rate
+
+        return string

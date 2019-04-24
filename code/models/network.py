@@ -1,4 +1,4 @@
-from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable
+from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable, GlobalParameterMutable
 from models.input_gate import InputGate
 from models.regulation import Regulation
 
@@ -8,6 +8,7 @@ class Network:
     def __init__(self):
         self.species = dict()  # of Dict[str, float]
         self.reactions = list()  # of Reaction
+        self.symbols = dict()
 
     """
     Change species concentrations of network using a change vector
@@ -32,6 +33,8 @@ class Network:
                 self.species[m.variable_name] = m.current_value
             elif isinstance(m, RegulationMutable):
                 self._mutate_regulation(m)
+            elif isinstance(m, GlobalParameterMutable):
+                self.symbols[m.variable_name] = m.current_value
 
     def _mutate_regulation(self, m):
         # Find the reaction this RegulationMutable refers to
@@ -90,5 +93,23 @@ class Network:
         ret += "\nReactions: \n"
         for x in self.reactions:
             ret += "    " + str(x) + "\n"
+
+        return ret
+
+    def str_variables(self):
+        ret = "\n== Species == \n\n"
+        for x in self.species:
+            ret += x + ": " + str(self.species[x]) + "\n"
+
+        if self.symbols:
+            ret += "\n== Symbols == \n\n"
+            for s in self.symbols:
+                ret += s + ": " + str(self.symbols[s]) + "\n"
+
+        ret += "\n== Reactions == \n\n"
+        for x in self.reactions:
+            string = x.str_variables()
+            if len(string) != 0:
+                ret += string + "\n"
 
         return ret

@@ -264,3 +264,22 @@ class TranscriptionFormula(Formula):
             string += "Not regulated"
 
         return string
+
+    def str_variables(self):
+        trans_rate = str(self.rate)
+        hill_coeff = str(self.hill_coeff)
+
+        string = "Rate: " + trans_rate + "\n"
+        string += "== Regulation == \n"
+        string += "Hill coefficient: " + hill_coeff + "\n"
+
+        if self.regulators:
+            for r in self.regulators:
+                from_gene = r.from_gene
+                sign = " ⭢ " if r.reg_type == RegType.ACTIVATION else " ⊣ "
+                to_gene = r.to_gene
+                string += from_gene + sign + to_gene + "    (K: " + str(r.k) + ")"
+        else:
+            string += "Not regulated"
+
+        return string

@@ -74,6 +74,11 @@ class AddMutableValueTab(QWidget):
                 combo_items.append("{} ⟹ {}".format(r.name, p))
                 item_values.append((p, r.name))
 
+        net = GenePresenter.get_instance().network
+        for symbol in net.symbols:
+            combo_items.append("Global parameter ⟹ {}".format(symbol))
+            item_values.append((symbol, ""))
+
         combo = QComboBox()
         combo.addItems(combo_items)
 

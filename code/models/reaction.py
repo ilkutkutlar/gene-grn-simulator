@@ -70,3 +70,12 @@ class Reaction:
         string += str(self.rate_function)
 
         return string
+
+    def str_variables(self):
+        str_vars = self.rate_function.str_variables()
+        string = ""
+        if len(str_vars) != 0:
+            string = "----- " + self.name + " ----- \n"
+            string += str_vars + "\n"
+
+        return string

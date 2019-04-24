@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QMessageBox, QTab
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from network_visualiser import NetworkVisualiser
 from simulation.ode_simulator import OdeSimulator
+from structured_results import StructuredResults
 from ui.constraint_satisfaction.constraints_tab import ConstraintsTab
 from ui.constraint_satisfaction.mutables_tab import MutablesTab
 from ui.gene_presenter import GenePresenter
@@ -43,12 +44,37 @@ class ConstraintSatisfactionModifyTab(QWidget):
                                                                 g.get_mutables(), g.get_constraints(), schedule)
 
             if t:
-                im = NetworkVisualiser.visualise_as_image(t, "gene")
+                variables_message = QMessageBox()
+                variables_message.setWindowTitle("Variables")
+                variables_message.setStandardButtons(QMessageBox.Ok)
+                variables_message.setText(t.str_variables())
+                d = variables_message.exec_()
+                variables_message.show()
+                if d:
+                    variables_message.close()
+
+                def draw_simulation():
+                    results = OdeSimulator.simulate(t, s)
+                    values = StructuredResults.label_results(results, t.species)
+                    for species in s.plotted_species:
+                        plt.plot(s.generate_time_space(), values[species], label=species)
+                    plt.xlabel("Time (s)")
+                    plt.ylabel("Concentration")
+                    plt.legend(loc=0)
+                    plt.title("Results")
+                    plt.draw()
+
                 plt.figure()
+
+                plt.subplot(2, 1, 1)
+                draw_simulation()
+
+                plt.subplot(2, 1, 2)
+                im = NetworkVisualiser.visualise_as_image(t, "gene")
                 plt.imshow(im)
+
                 plt.show()
 
-                OdeSimulator.visualise(t, s, OdeSimulator.simulate(t, s))
             else:
                 error_message = QMessageBox()
                 error_message.setIcon(QMessageBox.Warning)

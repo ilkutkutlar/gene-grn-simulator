@@ -6,19 +6,19 @@ class CustomFormula(Formula):
     """
     :param str rate_function:
     :param Dict[str, float] parameters:
-    :param Dict[str, float] symbols:
+    :param Network net:
     """
 
-    def __init__(self, rate_function, parameters, symbols, time_multiplier):
+    def __init__(self, rate_function, parameters, net, time_multiplier):
         self.rate_function = rate_function
-        self.symbols = symbols
-        self.parameters = parameters
+        self.net = net
+        self.parameters = parameters  # Local parameters of this reaction
         self.time_multiplier = time_multiplier
 
     def compute(self, state):
         return helper.eval_equation(self.rate_function,
                                     species=state,
-                                    symbols=self.symbols,
+                                    symbols=self.net.symbols,
                                     parameters=self.parameters) / self.time_multiplier
 
     def mutate(self, mutation):
@@ -45,3 +45,11 @@ class CustomFormula(Formula):
         string += params
 
         return string
+
+    def str_variables(self):
+        params = ""
+        if self.parameters:
+            for p in self.parameters:
+                params += p + ": " + str(self.parameters[p]) + "\n"
+
+        return params

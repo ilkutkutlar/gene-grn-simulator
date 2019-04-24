@@ -70,12 +70,7 @@ class SbmlParser:
     """
 
     @staticmethod
-    def _get_reactions(model, time_multiplier):
-        # Evaluate and store global parameters in a symbol table
-        symbols = SbmlParser._get_symbols(model)
-        if not symbols:
-            return False
-
+    def _get_reactions(model, time_multiplier, net):
         reactions = []
 
         for x in model.getListOfReactions():
@@ -103,7 +98,7 @@ class SbmlParser:
             # else:
             #     r = CustomFormula(rate_function, parameters, symbols)
 
-            r = CustomFormula(rate_function, parameters, symbols, time_multiplier)
+            r = CustomFormula(rate_function, parameters, net, time_multiplier)
             reactions.append(Reaction(x.getName(), left, right, r))
         return reactions
 
@@ -131,12 +126,19 @@ class SbmlParser:
         parsed = sbml.readSBML(filename)
         model = parsed.getModel()
 
+        # Evaluate and store global parameters in a symbol table
+        symbols = SbmlParser._get_symbols(model)
+        if not symbols:
+            return False
+        net.symbols = symbols
+
         # Initialise species and their initial amounts
         net.species = SbmlParser._get_species(model)
 
         time_multipler = SbmlParser._get_time_multipler(model)
+
         # Parse reactions and create CustomReaction objects
-        net.reactions = SbmlParser._get_reactions(model, time_multipler)
+        net.reactions = SbmlParser._get_reactions(model, time_multipler, net)
 
         if not net.reactions:
             return False

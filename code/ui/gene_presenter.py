@@ -5,9 +5,10 @@ class GenePresenter:
     instance = None
 
     def __init__(self):
-        self.network = test.get_test_network1()
-        self.mutables = []
-        self.constraints = []
+        self.network = test.get_test_network4()
+        self.mutables = test.get_mutables1()
+        self.constraints = test.get_constraints1()
+        print(self.network.str_variables())
 
     @staticmethod
     def get_instance():

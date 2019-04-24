@@ -1,5 +1,6 @@
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog, QGridLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QPushButton, QListWidget, QInputDialog, QGridLayout, \
+    QLabel
 
 from ui.gene_presenter import GenePresenter
 
@@ -35,6 +36,7 @@ class SpeciesTab(QWidget):
         self.buttons_layout = QHBoxLayout()
         self._init_buttons()
 
+        self.main_layout.addWidget(QLabel("Species of the network and their initial concentration."))
         self.main_layout.addWidget(self.species_list)
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.setObjectName("main_layout")

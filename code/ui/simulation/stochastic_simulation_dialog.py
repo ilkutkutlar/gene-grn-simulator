@@ -43,6 +43,7 @@ class StochasticSimulationDialog(QDialog):
         self.ok_button.clicked.connect(self._ok_button_clicked)
 
         main.addLayout(fields)
+        main.addWidget(QLabel("Which species to show: "))
         main.addLayout(self.species_checkboxes)
         main.addWidget(self.ok_button)
 

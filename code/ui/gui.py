@@ -76,6 +76,48 @@ class GeneWindow(QMainWindow):
         units_message.setText(units)
         units_message.exec_()
 
+    def _help_user_manual_clicked(self):
+        user_manual_message = QMessageBox()
+        user_manual_message.setWindowTitle("User's Manual")
+        user_manual_message.setStandardButtons(QMessageBox.Ok)
+
+        user_manual = """
+                This programme has three main functions:
+                
+                === 1. Designing a gene regulatory network ===
+                
+                · The network is modelled as a series of chemical reactions.
+                
+                · You have to add every species in the "Species" tab before using them in a reaction.
+                You have to add mRNA and protein associated with a gene separately.
+                
+                · "Reactions" tab allows adding network reactions (such as transcription, translation, etc.)
+                The tab also offers a visualisation of the network.
+                Regulation relationships of the network are specified when adding transcription reactions.
+                
+                === 2. Simulating networks ===
+                
+                · Two types of simulation are supported: Deterministic and Stochastic.
+                · Both can be achieved through the "Simulate" menu.
+                
+                
+                === 3. Constraint satisfaction (explained below) ===
+                
+                · Constraint satisfaction allows modifying a network to fit a set of constraints (e.g. species
+                X <= 100 between seconds 0 to 20).
+                
+                · "Mutables" are variables which are allowed to vary in order to satisfy the constraints.
+                · "Constraints" are all the constraints which have to be satisfied.
+                
+                Constraint satisfaction modes:
+                1. Exact match: Find a network which exactly matches the required network.
+                2. Closest match: If no network exactly satisfies all the constraints, 
+                    finds a network which comes closest to satisfying all of them.
+                """
+
+        user_manual_message.setText(user_manual)
+        user_manual_message.exec_()
+
     def _init_menubar(self):
         self.menubar = self.menuBar()
 
@@ -93,7 +135,7 @@ class GeneWindow(QMainWindow):
         # Simulate menu
         simulate = self.menubar.addMenu("Simulate")
 
-        deterministic = QAction("Deterministic (ODE)", self)
+        deterministic = QAction("Deterministic (ODE model)", self)
         deterministic.triggered.connect(self._deterministic_simulation_clicked)
         simulate.addAction(deterministic)
 
@@ -107,6 +149,10 @@ class GeneWindow(QMainWindow):
         help_units = QAction("Units", self)
         help_units.triggered.connect(self._help_units_clicked)
         help.addAction(help_units)
+
+        help_user_manual = QAction("User's Manual", self)
+        help_user_manual.triggered.connect(self._help_user_manual_clicked)
+        help.addAction(help_user_manual)
 
 
 app = QApplication([])

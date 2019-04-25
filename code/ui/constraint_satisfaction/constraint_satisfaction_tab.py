@@ -2,7 +2,7 @@ import matplotlib.image as image
 import matplotlib.pyplot as plt
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QMessageBox, QTabWidget, QComboBox, QGroupBox, \
-    QHBoxLayout, QLabel, QLineEdit, QFormLayout
+    QHBoxLayout, QLabel, QLineEdit, QFormLayout, QDialog, QScrollArea
 
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from network_visualiser import NetworkVisualiser
@@ -44,14 +44,21 @@ class ConstraintSatisfactionModifyTab(QWidget):
                                                                 g.get_mutables(), g.get_constraints(), schedule)
 
             if t:
-                variables_message = QMessageBox()
-                variables_message.setWindowTitle("Variables")
-                variables_message.setStandardButtons(QMessageBox.Ok)
-                variables_message.setText(t.str_variables())
-                d = variables_message.exec_()
-                variables_message.show()
-                if d:
-                    variables_message.close()
+                variables_dialog = QDialog()
+
+                scroll = QScrollArea()
+                scroll.setWidget(QLabel(t.str_variables()))
+
+                layout = QVBoxLayout()
+                layout.addWidget(scroll)
+
+                ok_button = QPushButton("OK")
+                ok_button.clicked.connect(lambda _: variables_dialog.close())
+                layout.addWidget(ok_button)
+
+                variables_dialog.setLayout(layout)
+                variables_dialog.setMinimumWidth(300)
+                variables_dialog.exec_()
 
                 def draw_simulation():
                     results = OdeSimulator.simulate(t, s)

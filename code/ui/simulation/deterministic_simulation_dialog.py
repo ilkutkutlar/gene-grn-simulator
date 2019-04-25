@@ -1,3 +1,5 @@
+import threading
+
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QLineEdit, QPushButton, QFormLayout
 
@@ -22,6 +24,8 @@ class DeterministicSimulationDialog(QDialog):
         self.close()
 
         s = SimulationSettings(0, end_time, sampling_rate, [s.strip() for s in species])
+        # t = threading.Thread(target=self.handler, args=(s,))
+        # t.start()
         self.handler(s)
 
     """

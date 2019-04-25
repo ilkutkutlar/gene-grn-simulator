@@ -1,4 +1,5 @@
 import copy
+import threading
 
 from PyQt5.QtWidgets import QDialog, QVBoxLayout, QLabel, QFormLayout, QLineEdit, QPushButton
 
@@ -26,7 +27,13 @@ class StochasticSimulationDialog(QDialog):
         # Precision field does not apply to stochastic simulation!
         s = SimulationSettings(0, end_time, 0, [s.strip() for s in species])
         sim_net = copy.deepcopy(GenePresenter.get_instance().network)
-        GillespieSimulator.visualise(GillespieSimulator.simulate(sim_net, s), s)
+
+        def do_simulation():
+            GillespieSimulator.visualise(GillespieSimulator.simulate(sim_net, s), s)
+
+        # t = threading.Thread(target=do_simulation)
+        # t.start()
+        do_simulation()
 
     def __init__(self):
         super().__init__()

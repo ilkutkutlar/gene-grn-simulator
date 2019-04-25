@@ -26,7 +26,7 @@ class GillespieSimulator:
         return r0
 
     @staticmethod
-    def _get_theta(r0):
+    def _get_delta_time(r0):
         """
         Calculate the time after which the next random reaction will occur
         :param float r0: sum of all reaction rates
@@ -34,8 +34,9 @@ class GillespieSimulator:
         """
 
         s1 = random()  # To pick time
-        epsilon = 0.001
-        return (1 / (r0 + epsilon)) * log(1 / s1, e)
+        epsilon = 0.001  # To avoid division by zero
+        rate_param = (1 / (r0 + epsilon))
+        return rate_param * pow(e, -rate_param*s1)
 
     @staticmethod
     def _apply_change_vector(state, change):
@@ -143,7 +144,7 @@ class GillespieSimulator:
             r0 = GillespieSimulator._calculate_r0(net)
 
             # Advance time
-            t = t + GillespieSimulator._get_theta(r0)
+            t = t + GillespieSimulator._get_delta_time(r0)
             # Apply one reaction chosen randomly
             net.species = GillespieSimulator._get_next_state(net, r0)
 

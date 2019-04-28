@@ -3,7 +3,7 @@ import math
 import libsbml
 from PyQt5.QtGui import QDoubleValidator
 from PyQt5.QtWidgets import QMessageBox
-from libsbml._libsbml import formulaToL3String
+from libsbml._libsbml import formulaToL3String, parseL3Formula
 
 """
 Return evaluation of the given string equation
@@ -15,9 +15,9 @@ Return evaluation of the given string equation
 """
 
 
-def eval_equation(string_equation,
-                  species=None, symbols=None,
-                  parameters=None):
+def evaluate_ast_in_string_format(string_equation,
+                                  species=None, symbols=None,
+                                  parameters=None):
     temp = symbols.copy() if symbols else dict()
 
     if species is not None:
@@ -27,6 +27,80 @@ def eval_equation(string_equation,
         temp.update(parameters)
 
     return eval(string_equation, temp)
+
+
+"""
+:param Dict[str, float] symbols: symbols to use in evaluation
+:param Dict[str, float] species: species concentrations to be used to evaluate
+:param libsbml.ASTNode node: to evaluate
+:returns float of ast's evaluation
+Only evaluates nodes which contain constants.
+"""
+
+
+def evaluate_ast(node, symbols=None, species=None, parameters=None):
+    temp = symbols.copy() if symbols else dict()
+
+    if species is not None:
+        temp.update(species)
+
+    if parameters is not None:
+        temp.update(parameters)
+
+    node_type = node.getType()
+
+    # Base cases
+    if node.isReal() or node.isInteger() or node.isRational():
+        value = node.getValue()
+    elif node_type == libsbml.AST_NAME:
+        name = node.getName()
+
+        if name in temp:
+            value = temp[name]
+        else:
+            raise NameError("Undefined symbol found in equation: {}".format(name))
+
+    elif node_type == libsbml.AST_FUNCTION_LN:
+        try:
+            val = evaluate_ast(node.getLeftChild(), symbols=symbols, species=species, parameters=parameters)
+            value = math.log(val, math.e)
+        except Exception as e:
+            raise e
+
+    else:  # Binary operators
+        try:
+            left = evaluate_ast(node.getLeftChild(), symbols=symbols, species=species, parameters=parameters)
+
+            right = evaluate_ast(node.getRightChild(), symbols=symbols, species=species, parameters=parameters)
+        except Exception as e:
+            raise e
+
+        if node_type == libsbml.AST_PLUS:
+            value = left + right
+        elif node_type == libsbml.AST_DIVIDE:
+            value = left / right
+        elif node_type == libsbml.AST_MINUS:
+            value = left - right
+        elif node_type == libsbml.AST_TIMES:
+            value = left * right
+        elif node_type == 296:  # AST_POWER
+            value = math.pow(left, right)
+        else:
+            raise ValueError("Unrecognised node type: {}".format(node_type))
+
+    return value
+
+
+def safe_evaluate_ast(node, string, symbols=None, species=None, parameters=None):
+    # evaluate_ast sometimes fails to correctly evaluate the tree as some
+    # node_types are missing from it. In that case, use eval_result for evaluation.
+    try:
+        eval_result = evaluate_ast(
+            node, species=species, symbols=symbols, parameters=parameters)
+    except (NameError, ValueError):
+        eval_result = evaluate_ast_in_string_format(
+            string, species=species, symbols=symbols, parameters=parameters)
+    return eval_result
 
 
 """
@@ -40,57 +114,6 @@ def ast_to_string(ast_node):
     raw = formulaToL3String(ast_node)
     raw = raw.replace("^", "**")
     return raw
-
-
-"""
-:param Dict[str, float] symbols: symbols to use in evaluation
-:param Dict[str, float] species: species concentrations to be used to evaluate
-:param libsbml.ASTNode node: to evaluate
-:returns float of ast's evaluation
-Only evaluates nodes which contain constants.
-"""
-
-
-def evaluate_ast(node, symbols, species=None):
-    node_type = node.getType()
-
-    # Base cases
-    if node.isReal() or node.isInteger() or node.isRational():
-        value = node.getValue()
-    elif node_type == libsbml.AST_NAME:
-        name = node.getName()
-        if name in symbols:
-            value = symbols[name]
-        elif species and (name in species):
-            value = species[name]
-        else:
-            value = False
-    elif node_type == libsbml.AST_FUNCTION_LN:
-        val = evaluate_ast(node.getLeftChild(), symbols, species=species)
-        if val:
-            value = math.log(val, math.e)
-        else:
-            value = False
-    else:
-        left = evaluate_ast(node.getLeftChild(), symbols, species=species)
-        right = evaluate_ast(node.getRightChild(), symbols, species=species)
-
-        if not left or not right:
-            value = False
-        elif node_type == libsbml.AST_PLUS:
-            value = left + right
-        elif node_type == libsbml.AST_DIVIDE:
-            value = left / right
-        elif node_type == libsbml.AST_MINUS:
-            value = left - right
-        elif node_type == libsbml.AST_TIMES:
-            value = left * right
-        elif node_type == 296:  # AST_POWER
-            value = math.pow(left, right)
-        else:
-            value = False
-
-    return value
 
 
 def get_double_validator():

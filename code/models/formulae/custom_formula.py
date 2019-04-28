@@ -1,3 +1,5 @@
+from libsbml._libsbml import parseL3Formula
+
 import helper
 from models.formulae.formula import Formula
 
@@ -16,10 +18,12 @@ class CustomFormula(Formula):
         self.time_multiplier = time_multiplier
 
     def compute(self, state):
-        return helper.eval_equation(self.rate_function,
-                                    species=state,
-                                    symbols=self.net.symbols,
-                                    parameters=self.parameters) / self.time_multiplier
+        # rate_function is str, use this function to convert to AST object.
+        rate_function_ast = parseL3Formula(self.get_formula_string())
+        eval_result = helper.safe_evaluate_ast(rate_function_ast, self.rate_function,
+                                               species=state, symbols=self.net.symbols,
+                                               parameters=self.parameters)
+        return eval_result / self.time_multiplier
 
     def mutate(self, mutation):
         self.parameters.update({mutation.variable_name: mutation.current_value})
@@ -28,7 +32,7 @@ class CustomFormula(Formula):
         return list(self.parameters.keys())
 
     def get_formula_string(self):
-        # Also, parameters!
+        # TODO: Also, parameters!
         return str(self.rate_function).replace("**", "^")
 
     def __str__(self):

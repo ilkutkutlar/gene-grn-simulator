@@ -51,7 +51,9 @@ class SbmlParser:
         """
 
         for r in model.getListOfRules():
-            val = helper.evaluate_ast(r.getMath(), symbols)
+            val = helper.safe_evaluate_ast(r.getMath().deepCopy(),
+                                           helper.ast_to_string(r.getMath().deepCopy()),
+                                           symbols=symbols)
 
             if not val:
                 return False

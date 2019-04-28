@@ -28,7 +28,6 @@ class CustomFormula(Formula):
         return list(self.parameters.keys())
 
     def get_formula_string(self):
-        # TODO: DO THIS PROPERLY!
         # Also, parameters!
         return str(self.rate_function).replace("**", "^")
 

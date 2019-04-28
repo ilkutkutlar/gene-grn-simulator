@@ -1,9 +1,9 @@
-import matplotlib.image as image
 import matplotlib.pyplot as plt
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QMessageBox, QTabWidget, QComboBox, QGroupBox, \
-    QHBoxLayout, QLabel, QLineEdit, QFormLayout, QDialog, QScrollArea
+from PyQt5.QtWidgets import QVBoxLayout, QPushButton, QWidget, QTabWidget, QComboBox, QGroupBox, \
+    QLabel, QLineEdit, QFormLayout, QDialog, QScrollArea
 
+import helper
 from constraint_satisfaction.constraint_satisfaction import ConstraintSatisfaction
 from network_visualiser import NetworkVisualiser
 from simulation.ode_simulator import OdeSimulator
@@ -28,70 +28,64 @@ class ConstraintSatisfactionModifyTab(QWidget):
         self._method_combo_index_changed()
         self.setLayout(self.main_layout)
 
+    def _constraint_satisfaction_handler(self, s):
+        g = GenePresenter.get_instance()
+
+        if self.method_combo.currentIndex() == 0:
+            give_up_time = int(self.give_up_edit.text())
+            t = ConstraintSatisfaction.find_network(
+                g.network, s, g.get_mutables(),
+                g.get_constraints(), give_up_time)
+        else:
+            temperature = int(self.temperature_edit.text())
+            schedule = ConstraintSatisfaction.generate_schedule(temperature)
+            t = ConstraintSatisfaction.find_closest_network(
+                g.network, s, g.get_mutables(),
+                g.get_constraints(), schedule)
+
+        if t:
+            variables_dialog = QDialog()
+
+            scroll = QScrollArea()
+            scroll.setWidget(QLabel(t.str_variables()))
+
+            layout = QVBoxLayout()
+            layout.addWidget(scroll)
+
+            ok_button = QPushButton("OK")
+            ok_button.clicked.connect(lambda _: variables_dialog.close())
+            layout.addWidget(ok_button)
+
+            variables_dialog.setLayout(layout)
+            variables_dialog.setMinimumWidth(300)
+            variables_dialog.exec_()
+
+            def draw_simulation():
+                results = OdeSimulator.simulate(t, s)
+                values = StructuredResults.label_results(results, t.species)
+                for species in s.plotted_species:
+                    plt.plot(s.generate_time_space(), values[species], label=species)
+                plt.xlabel("Time (s)")
+                plt.ylabel("Concentration")
+                plt.legend(loc=0)
+                plt.title("Results")
+                plt.draw()
+
+            plt.figure()
+
+            plt.subplot(2, 1, 1)
+            draw_simulation()
+
+            plt.subplot(2, 1, 2)
+            im = NetworkVisualiser.visualise_as_image(t, "gene")
+            plt.imshow(im)
+            plt.show()
+
+        else:
+            helper.show_error_message("No matching network found within the given parameters.")
+
     def _run_button_click_handler(self):
-
-        def handler(s):
-            g = GenePresenter.get_instance()
-
-            if self.method_combo.currentIndex() == 0:
-                give_up_time = int(self.give_up_edit.text())
-                t = ConstraintSatisfaction.find_network(g.network, s,
-                                                        g.get_mutables(), g.get_constraints(), give_up_time)
-            else:
-                temperature = int(self.temperature_edit.text())
-                schedule = ConstraintSatisfaction.generate_schedule(temperature)
-                t = ConstraintSatisfaction.find_closest_network(g.network, s,
-                                                                g.get_mutables(), g.get_constraints(), schedule)
-
-            if t:
-                variables_dialog = QDialog()
-
-                scroll = QScrollArea()
-                scroll.setWidget(QLabel(t.str_variables()))
-
-                layout = QVBoxLayout()
-                layout.addWidget(scroll)
-
-                ok_button = QPushButton("OK")
-                ok_button.clicked.connect(lambda _: variables_dialog.close())
-                layout.addWidget(ok_button)
-
-                variables_dialog.setLayout(layout)
-                variables_dialog.setMinimumWidth(300)
-                variables_dialog.exec_()
-
-                def draw_simulation():
-                    results = OdeSimulator.simulate(t, s)
-                    values = StructuredResults.label_results(results, t.species)
-                    for species in s.plotted_species:
-                        plt.plot(s.generate_time_space(), values[species], label=species)
-                    plt.xlabel("Time (s)")
-                    plt.ylabel("Concentration")
-                    plt.legend(loc=0)
-                    plt.title("Results")
-                    plt.draw()
-
-                plt.figure()
-
-                plt.subplot(2, 1, 1)
-                draw_simulation()
-
-                plt.subplot(2, 1, 2)
-                im = NetworkVisualiser.visualise_as_image(t, "gene")
-                plt.imshow(im)
-
-                plt.show()
-
-            else:
-                error_message = QMessageBox()
-                error_message.setIcon(QMessageBox.Warning)
-                error_message.setWindowTitle("Error")
-                error_message.setStandardButtons(QMessageBox.Ok)
-                error_message.setText("No matching network found within the given parameters.")
-                error_message.exec_()
-                error_message.show()
-
-        DeterministicSimulationDialog(handler)
+        DeterministicSimulationDialog(self._constraint_satisfaction_handler)
 
     def _get_annealing_panel(self):
         annealing_panel = QWidget()

@@ -336,6 +336,43 @@ def get_test_network4():
     return net4
 
 
+def get_test_network5():
+    species = {"mX": 100, "pX": 0,
+               "mY": 100, "pY": 0,
+               "mZ": 30, "pZ": 0}
+
+    x_trans = TranscriptionFormula(5, "mX")
+    x_trans.set_regulation(2, [Regulation("pZ", "mX", RegType.REPRESSION, 10)])
+
+    y_trans = TranscriptionFormula(5, "mY")
+    y_trans.set_regulation(1, [Regulation("pX", "mY", RegType.ACTIVATION, 40)])
+
+    z_trans = TranscriptionFormula(1, "mZ")
+    z_trans.set_regulation(2, [Regulation("pX", "mZ", RegType.ACTIVATION, 20)])
+
+    reactions = [Reaction("mx_trans", [], ["mX"], x_trans),
+                 Reaction("my_trans", [], ["mY"], y_trans),
+                 Reaction("mz_trans", [], ["mZ"], z_trans),
+
+                 Reaction("mx_deg", ["mX"], [], DegradationFormula(0.01, "mX")),
+                 Reaction("my_deg", ["mY"], [], DegradationFormula(0.01, "mY")),
+                 Reaction("mz_deg", ["mZ"], [], DegradationFormula(0.002, "mZ")),
+
+                 Reaction("px_deg", ["pX"], [], DegradationFormula(0.01, "pX")),
+                 Reaction("py_deg", ["pY"], [], DegradationFormula(0.09, "pY")),
+                 Reaction("pz_deg", ["pZ"], [], DegradationFormula(0.001, "pZ")),
+
+                 Reaction("px_translation", [], ["pX"], TranslationFormula(7, "mX")),
+                 Reaction("py_translation", [], ["pY"], TranslationFormula(5, "mY")),
+                 Reaction("pz_translation", [], ["pZ"], TranslationFormula(1, "mZ"))]
+
+    net5 = Network()
+    net5.species = species
+    net5.reactions = reactions
+
+    return net5
+
+
 def get_constraints1():
     c = Constraint("X", lambda v: v - 40, (20, 40))
     c.pretty_print = "X" + "<=" + str(40) + " for time: " + str(20) + "s - " + str(40) + "s"
@@ -353,17 +390,17 @@ def get_mutables1():
 
 if __name__ == '__main__':
     # repressilator_sim = SimulationSettings(0, 10 * 60, 1000, ["laci_p", "tetr_p", "cl_p"])
-    #
+
     # net = get_test_network1()
     # net1_sim = SimulationSettings(0, 100, 100, ["x", "y", "z"])
-    #
+
     # mutables = [RegulationMutable("y_trans", ["px", "py", "pz"], VariableMutable("k", 1, 50, 1),
     #                               [RegType.ACTIVATION, RegType.REPRESSION], True)]
     # constraints = [Constraint("y", lambda x: x - 50, (20, 40))]
     # schedule = ReverseEngineering.generate_schedule(100)
-    #
+
     # n = ReverseEngineering.find_network(net, net1_sim, mutables, constraints, schedule)
-    #
+
     # print(n.get_reaction_by_name("y_trans"))
     # OdeSimulator.visualise(n, net1_sim, OdeSimulator.simulate(n, net1_sim))
     # get_large_network()
@@ -373,6 +410,7 @@ if __name__ == '__main__':
     ms = get_mutables1()
 
     sim = SimulationSettings(0, 100, 100, ["X", "Y", "Z"])
+
     # t = ConstraintSatisfaction.generate_next_level(net, sim, cs, ms)
     # for i in t:
     #     for j in i[0]:

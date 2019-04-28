@@ -41,6 +41,7 @@ class SbmlSaver:
         for r in net.reactions:
             reaction = model.createReaction()
             reaction.setName(r.name)
+            reaction.setReversible(False)
 
             for x in r.left:
                 z = reaction.createReactant()
@@ -50,7 +51,6 @@ class SbmlSaver:
                 z = reaction.createProduct()
                 z.setSpecies(x)
 
-            # TODO: http://sbml.org/Software/libSBML/5.17.0/docs//python-api/create_simple_model_8py-example.html
             law = reaction.createKineticLaw()
             law.setMath(parseL3Formula(r.rate_function.get_formula_string()))
 

@@ -55,7 +55,6 @@ def evaluate_ast(node, symbols, species=None):
     node_type = node.getType()
 
     # Base cases
-    # TODO: Rational numbers are stored differently: using numerator and denominator, account for that!
     if node.isReal() or node.isInteger() or node.isRational():
         value = node.getValue()
     elif node_type == libsbml.AST_NAME:

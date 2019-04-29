@@ -55,16 +55,6 @@ class SbmlSaver:
                     param = law.createParameter()
                     param.setId(p)
                     param.setValue(params[p])
-
-                # TODO -> Problem is, won't properly save symbols of an
-                #  imported SBML file back to the exported SBML file.
-                # if not symbols:
-                #     syms = r.rate_function.symbols
-                #     for s in syms:
-                #         p = model.createParameter()
-                #         p.setId(s)
-                #         p.setValue(syms[s])
-                #         symbols.append(p)
             elif isinstance(r.rate_function, TranscriptionFormula):
                 if r.rate_function.regulators:
                     for reg in r.rate_function.regulators:

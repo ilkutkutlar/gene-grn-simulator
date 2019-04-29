@@ -15,9 +15,9 @@ Return evaluation of the given string equation
 """
 
 
-def evaluate_ast_in_string_format(string_equation,
-                                  species=None, symbols=None,
-                                  parameters=None):
+def evaluate_ast_as_string(string_equation,
+                           species=None, symbols=None,
+                           parameters=None):
     temp = symbols.copy() if symbols else dict()
 
     if species is not None:
@@ -98,7 +98,7 @@ def safe_evaluate_ast(node, string, symbols=None, species=None, parameters=None)
         eval_result = evaluate_ast(
             node, species=species, symbols=symbols, parameters=parameters)
     except (NameError, ValueError):
-        eval_result = evaluate_ast_in_string_format(
+        eval_result = evaluate_ast_as_string(
             string, species=species, symbols=symbols, parameters=parameters)
     return eval_result
 

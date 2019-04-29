@@ -1,3 +1,5 @@
+import test
+
 from models.network import Network
 
 
@@ -5,9 +7,9 @@ class GenePresenter:
     instance = None
 
     def __init__(self):
-        self.network = Network()
-        self.mutables = []
-        self.constraints = []
+        self.network = test.get_test_network4()
+        self.mutables = test.get_mutables1()
+        self.constraints = test.get_constraints1()
 
     @staticmethod
     def get_instance():

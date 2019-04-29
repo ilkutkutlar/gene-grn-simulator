@@ -142,8 +142,3 @@ class RegulationMutable:
 class GlobalParameterMutable(VariableMutable):
     def __init__(self, variable_name, lower_bound, upper_bound, increments):
         super().__init__(variable_name, lower_bound, upper_bound, increments)
-
-
-class LocalParameterMutable(ReactionMutable):
-    def __init__(self, variable_name, lower_bound, upper_bound, increments, reaction_name):
-        super().__init__(variable_name, lower_bound, upper_bound, increments, reaction_name)

@@ -1,5 +1,4 @@
-from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable, GlobalParameterMutable, \
-    LocalParameterMutable
+from constraint_satisfaction.mutable import ReactionMutable, VariableMutable, RegulationMutable, GlobalParameterMutable
 from models.input_gate import InputGate
 from models.regulation import Regulation
 
@@ -27,10 +26,7 @@ class Network:
 
     def mutate(self, mutations):
         for m in mutations:
-            if isinstance(m, LocalParameterMutable):
-                r = self.get_reaction_by_name(m.reaction_name)
-                r.rate_function.mutate(m)
-            elif isinstance(m, ReactionMutable):
+            if isinstance(m, ReactionMutable):
                 r = self.get_reaction_by_name(m.reaction_name)
                 r.rate_function.mutate(m)
             elif isinstance(m, GlobalParameterMutable):
@@ -39,8 +35,6 @@ class Network:
                 self.species[m.variable_name] = m.current_value
             elif isinstance(m, RegulationMutable):
                 self._mutate_regulation(m)
-
-
 
     def _mutate_regulation(self, m):
         # Find the reaction this RegulationMutable refers to
